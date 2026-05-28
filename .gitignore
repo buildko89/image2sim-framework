@@ -1,0 +1,47 @@
+# Local environment
+.env
+.venv/
+
+# Python cache and test cache
+__pycache__/
+.pytest_cache/
+
+# Input artifacts
+input/raw_photos/*
+!input/raw_photos/.gitkeep
+input/selected_photos/*
+!input/selected_photos/.gitkeep
+input/masks/*
+!input/masks/.gitkeep
+input/masks_review/*
+!input/masks_review/.gitkeep
+
+# Generated outputs
+output/raw_3d/*
+!output/raw_3d/.gitkeep
+output/clean_3d/*
+!output/clean_3d/.gitkeep
+output/unity/*
+!output/unity/.gitkeep
+output/reports/*
+!output/reports/.gitkeep
+
+# 3D assets
+*.glb
+*.fbx
+*.obj
+*.blend
+
+# Generated images and intermediate artifacts
+# Generated images and intermediate artifacts
+output/**/*.png
+output/**/*.jpg
+output/**/*.jpeg
+output/**/*.webp
+output/**/*.tif
+output/**/*.tiff
+output/**/*.bmp
+output/**/*.exr
+
+# Keep repository placeholders
+!.gitkeep

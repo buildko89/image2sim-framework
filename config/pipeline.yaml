@@ -1,0 +1,23 @@
+project_name: image2sim-framework
+reference_case: cat_avatar
+input_dir: input/raw_photos
+selected_dir: input/selected_photos
+output_dir: output
+reports_dir: output/reports
+environment:
+  runtime: undecided  # windows-venv | wsl2-venv | docker
+  blender_mode: undecided  # windows-exe | linux-blender | docker
+  path_policy: undecided
+providers:
+  preferred_3d_provider: tripo
+  candidates:
+    - tripo
+    - meshy
+    - local
+blender:
+  path_env: BLENDER_PATH
+  target_engine: unity
+  forward_axis: -Z
+  up_axis: Y
+metadata:
+  schema_version: 0.1
