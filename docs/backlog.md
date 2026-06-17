@@ -7,7 +7,7 @@
 - Status: Done
 - Priority: High
 - Description: Verify Tripo API availability, API key handling, pricing constraints, output formats, and Blender CLI execution policy.
-- Notes: Environment check entry point is `scripts/00_check_environment.py`. Runtime policy remains a decision to record before Blender automation.
+- Notes: Completed scope includes adding `scripts/00_check_environment.py`, safely checking whether API keys are set without exposing values, creating the Blender CLI path check entry point, accepting Windows venv + Windows `blender.exe` + Windows path only for MVP, and accepting the decision that runtime policy must be settled before Blender automation.
 
 ### Task 1: Image Inventory Script
 
@@ -35,14 +35,14 @@
 - Status: Backlog
 - Priority: High
 - Description: Prototype Image-to-3D generation with the selected provider.
-- Notes: Tripo is currently proposed but must be confirmed in Task 0.5.
+- Notes: Tripo is the accepted initial provider. Save raw API responses separately from normalized metadata, for example `output/reports/raw_api_response_tripo_<task_id>.json`, to support debugging and later multi-provider comparisons.
 
 ### Task 4: Blender CLI Cleanup
 
 - Status: Backlog
 - Priority: High
 - Description: Add Blender CLI processing for asset cleanup, normalization, and export.
-- Notes: Consider Unity axes, scale, origin placement, and review reports.
+- Notes: Use Windows `blender.exe` from Windows venv. Unity export policy is `-Z Forward`, `Y Up`, Apply Transform / applied scale, and foot-origin placement.
 
 ### Task 5: Unity Import Check
 
@@ -76,10 +76,17 @@
 
 ### Multi-provider support for Tripo/Meshy/local OSS
 
-- Status: Backlog
+- Status: Deferred
 - Priority: Medium
 - Description: Support multiple 3D generation providers through a provider abstraction.
-- Notes: Add only after the first provider path proves useful.
+- Notes: Do not implement a provider abstraction class in the MVP. Add only after the first provider path proves useful.
+
+### Dockerized execution
+
+- Status: Deferred
+- Priority: Low
+- Description: Package the pipeline runtime in Docker.
+- Notes: Docker is explicitly out of scope for the MVP because Windows venv and Windows Blender are the accepted MVP runtime.
 
 ### Vision AI based image quality scoring
 

@@ -68,7 +68,7 @@ def check_blender(blender_path: str | None) -> dict:
 
     try:
         completed = subprocess.run(
-            [blender_path, "--version"],
+            [blender_path, "-b", "--version"],
             check=False,
             capture_output=True,
             text=True,
@@ -78,21 +78,26 @@ def check_blender(blender_path: str | None) -> dict:
         result["error"] = f"Failed to execute Blender: {exc.__class__.__name__}"
         return result
     except subprocess.TimeoutExpired:
-        result["error"] = "Blender --version timed out after 30 seconds."
+        result["warning"] = "Blender background mode version check timed out after 30 seconds."
         return result
 
     result["executable"] = completed.returncode == 0
-    output = (completed.stdout or completed.stderr or "").splitlines()
-    if output:
-        result["version"] = output[0].strip()
+    output_lines = ((completed.stdout or "") + "\n" + (completed.stderr or "")).splitlines()
+    for line in output_lines:
+        if line.strip().lower().startswith("blender"):
+            result["version"] = line.strip()
+            break
+    if not result["version"] and output_lines:
+        result["version"] = output_lines[0].strip()
     if completed.returncode != 0:
-        result["error"] = f"Blender --version returned exit code {completed.returncode}."
+        result["warning"] = f"Blender background mode version check returned exit code {completed.returncode}."
 
     return result
 
 
 def main() -> int:
-    repo_root = Path.cwd()
+    repo_root = Path(__file__).resolve().parent.parent
+    current_directory = Path.cwd()
     env_path = repo_root / ".env"
     reports_dir = repo_root / "output" / "reports"
     report_path = reports_dir / "environment_check.json"
@@ -125,7 +130,8 @@ def main() -> int:
             "version": platform.version(),
             "machine": platform.machine(),
         },
-        "current_directory": str(repo_root),
+        "current_directory": str(current_directory),
+        "repo_root": str(repo_root),
         "env_file": {
             "path": str(env_path),
             "exists": env_path.exists(),
@@ -142,6 +148,7 @@ def main() -> int:
     print(f"- Python: {report['python']['version']}")
     print(f"- OS: {report['os']['system']} {report['os']['release']} ({report['os']['machine']})")
     print(f"- Current directory: {report['current_directory']}")
+    print(f"- Repository root: {report['repo_root']}")
     print(f"- .env: {'exists' if env_path.exists() else 'not found'}")
     for key in ENV_KEYS:
         print(f"- {key}: {env_vars[key]}")

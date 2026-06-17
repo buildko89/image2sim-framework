@@ -33,7 +33,6 @@ output/reports/*
 *.blend
 
 # Generated images and intermediate artifacts
-# Generated images and intermediate artifacts
 output/**/*.png
 output/**/*.jpg
 output/**/*.jpeg

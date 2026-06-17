@@ -54,7 +54,7 @@ Task 0.2 adds GitHub and documentation operation rules. It still does not implem
 
 ## Runtime Environment
 
-The execution policy for Windows venv, WSL2 venv, or Docker will be decided in Task 0.5.
+The MVP execution policy is Windows venv, Windows `blender.exe`, and Windows paths only. WSL2 and Docker are not used for the MVP pipeline.
 
 ## Task 0.5 Environment Check
 
@@ -68,6 +68,18 @@ Run the check with this process:
 4. Review `output/reports/environment_check.json`.
 5. Record the chosen runtime policy in `docs/decisions.md`.
 
+`scripts/00_check_environment.py` resolves the repository root from the script location, not from the current working directory. This keeps `.env`, `config/`, and `output/reports/` anchored to this repository even when the script is launched from another directory.
+
 ## Blender CLI
 
-The Blender CLI execution policy, including whether to call Windows Blender or Linux Blender inside WSL2, will be decided in Task 0.5.
+Task 4 should call Windows `blender.exe` from the Windows venv. Blender checks should run in background mode with `-b`.
+
+## Task 3 API Response Policy
+
+Task 3 must save raw 3D provider API responses separately from normalized metadata, for example:
+
+```text
+output/reports/raw_api_response_tripo_<task_id>.json
+```
+
+Raw API response logs are used for debugging provider behavior and future multi-provider comparisons.

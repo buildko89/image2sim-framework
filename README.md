@@ -91,6 +91,8 @@ Run the check:
 python scripts/00_check_environment.py
 ```
 
+The script resolves the repository root from its own file location, so `.env` and `output/reports/environment_check.json` are still read and written under this repository even when the command is launched from another directory.
+
 When using the project virtual environment:
 
 ```powershell

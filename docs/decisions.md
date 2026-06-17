@@ -41,7 +41,7 @@ Each decision must use this format:
 
 ### DEC-20260528-003: Preferred initial 3D provider is Tripo
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-05-28
 - Owner: ChatGPT
 - Context: The MVP needs an initial Image-to-3D provider candidate before API verification.
@@ -52,7 +52,7 @@ Each decision must use this format:
 
 ### DEC-20260528-004: Initial game engine target is Unity
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-05-28
 - Owner: ChatGPT
 - Context: The first generated asset needs a target runtime for display and verification.
@@ -63,7 +63,7 @@ Each decision must use this format:
 
 ### DEC-20260528-005: Runtime environment is undecided
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-05-28
 - Owner: ChatGPT
 - Context: The project must decide how Python, Blender CLI, paths, and Unity integration will run together.
@@ -74,7 +74,7 @@ Each decision must use this format:
 
 ### DEC-20260528-006: Runtime and Blender execution policy must be decided before Blender tasks
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-05-28
 - Owner: ChatGPT
 - Context: Blender CLI and Python scripts may run across Windows, WSL2, or Docker environments. Path handling can break when Python runs in WSL2 and Blender runs as a Windows executable.
@@ -83,4 +83,18 @@ Each decision must use this format:
 - Consequences: Task 0.5 must record the chosen environment policy before implementing Blender automation.
 - Related Tasks:
   - Task 0.5
+  - Task 4
+
+### DEC-20260529-007: MVP runtime uses Windows venv and Windows Blender
+
+- Status: Accepted
+- Date: 2026-05-29
+- Owner: User
+- Context: The user works in Windows PowerShell, and Unity is expected to run on Windows. Calling Windows Blender from WSL2 can introduce `/mnt/c/...` vs `C:\...` path conversion issues, while Linux Blender inside WSL2 may fail on missing Linux dependencies.
+- Decision: For the MVP, use Windows venv as the Python runtime, execute the Windows `blender.exe`, and use Windows paths only. WSL2 and Docker are not used for the MVP pipeline.
+- Rationale: The MVP should prioritize the shortest path through the pipeline and avoid cross-environment path and dependency problems.
+- Consequences: `config/pipeline.yaml` records `runtime: windows-venv`, `blender_mode: windows-exe`, and `path_policy: windows-path-only`. Dockerization and WSL2 support remain non-MVP backlog items.
+- Related Tasks:
+  - Task 0.5
+  - Task 1
   - Task 4

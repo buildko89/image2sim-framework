@@ -5,15 +5,20 @@ selected_dir: input/selected_photos
 output_dir: output
 reports_dir: output/reports
 environment:
-  runtime: undecided  # windows-venv | wsl2-venv | docker
-  blender_mode: undecided  # windows-exe | linux-blender | docker
-  path_policy: undecided
+  runtime: windows-venv  # windows-venv | wsl2-venv | docker
+  blender_mode: windows-exe  # windows-exe | linux-blender | docker
+  path_policy: windows-path-only
 providers:
   preferred_3d_provider: tripo
   candidates:
     - tripo
     - meshy
     - local
+api:
+  polling_interval_sec: 10
+  timeout_sec: 600
+  max_retries: 3
+  save_raw_response: true
 blender:
   path_env: BLENDER_PATH
   target_engine: unity
