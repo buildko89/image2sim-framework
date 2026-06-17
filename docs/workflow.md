@@ -83,6 +83,22 @@ Run the inventory process with this flow:
 
 Task 1 does not copy, move, delete, classify, or edit images. It only records basic metadata, warnings, and read errors for supported image files.
 
+## Task 1.5 Image Selection
+
+Task 1.5 selects candidate images for downstream processing through a human-in-the-loop workflow.
+
+Run the selection process with this flow:
+
+1. Put source images under `input/raw_photos/`.
+2. Run `python scripts/01_inventory_images.py` in PowerShell.
+3. Review `output/reports/image_inventory.json`.
+4. Run `python scripts/015_select_images.py`.
+5. For each candidate image, enter `select`, `view_hint`, `quality_score`, and `reason`.
+6. Review `input/selected_photos/`, `output/reports/image_selection.json`, and `output/reports/image_selection.csv`.
+7. Continue to Task 2 for background removal.
+
+Task 1.5 copies selected images into `input/selected_photos/`. It does not move or delete source images, edit pixels, remove backgrounds, call 3D APIs, run Blender, or import into Unity.
+
 ## Blender CLI
 
 Task 4 should call Windows `blender.exe` from the Windows venv. Blender checks should run in background mode with `-b`.

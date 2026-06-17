@@ -18,17 +18,17 @@
 
 ### Task 1.5: Image Selection Flow
 
-- Status: Backlog
+- Status: Done
 - Priority: High
 - Description: Define and implement a process for selecting suitable images from the inventory.
-- Notes: Next task. Selection criteria should support the `cat_avatar` reference case first and use Task 1 inventory output as input.
+- Notes: Implemented as `scripts/015_select_images.py`. It supports manual selection, a simple non-interactive fallback, selected image copies under `input/selected_photos/`, and `output/reports/image_selection.json` / `.csv`.
 
 ### Task 2: Background Removal
 
 - Status: Backlog
 - Priority: High
 - Description: Add background removal and mask review outputs.
-- Notes: `rembg` is intentionally not introduced before this task.
+- Notes: Next task. Use selected images from `input/selected_photos/` as input. `rembg` is intentionally not introduced before this task.
 
 ### Task 3: 3D Generation API Prototype
 
@@ -94,6 +94,20 @@
 - Priority: Medium
 - Description: Score source images for sharpness, coverage, occlusion, pose, and suitability.
 - Notes: Could support Task 1.5 after a manual baseline exists.
+
+### Vision AI based view hint estimation
+
+- Status: Backlog
+- Priority: Medium
+- Description: Automatically estimate `view_hint` values such as front, side, back, top, or diagonal.
+- Notes: Deferred until manual selection produces enough examples and requirements.
+
+### Manual selection UI improvements
+
+- Status: Backlog
+- Priority: Low
+- Description: Add a friendlier review UI for image selection.
+- Notes: CLI selection is sufficient for the MVP. Consider a local HTML or Streamlit UI after Task 2.
 
 ### OpenCV blur detection
 

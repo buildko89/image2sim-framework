@@ -75,6 +75,8 @@ Task 0.5 adds local environment checking and records the MVP runtime policy.
 
 Task 1 adds image inventory reports for source photos. It does not perform image selection.
 
+Task 1.5 adds a human-in-the-loop image selection flow and a simple non-interactive fallback.
+
 ## Task 0.5 Environment Check
 
 Task 0.5 verifies local environment readiness for later 3D generation and Blender CLI tasks. It does not call Tripo, Meshy, rembg, Blender cleanup scripts, or Unity import automation.
@@ -149,6 +151,70 @@ Warning rules:
 
 Task 1.5 uses the inventory to select suitable images. Selection criteria, angle classification, background removal, API calls, Blender processing, and Unity import are outside Task 1.
 
+## Task 1.5 Image Selection
+
+Task 1.5 reads `output/reports/image_inventory.json`, records human selection decisions, and copies selected images to `input/selected_photos/`. Source images are never deleted or moved.
+
+Run the manual selection flow:
+
+```powershell
+python scripts/015_select_images.py
+```
+
+Run with explicit paths:
+
+```powershell
+python scripts/015_select_images.py --inventory output/reports/image_inventory.json --selected-dir input/selected_photos --output output/reports
+```
+
+Run with pipeline config:
+
+```powershell
+python scripts/015_select_images.py --config config/pipeline.yaml
+```
+
+Run the non-interactive fallback:
+
+```powershell
+python scripts/015_select_images.py --non-interactive
+```
+
+The non-interactive mode is a simple MVP fallback for CI or batch smoke checks. It selects valid images with no warnings, also allowing images whose only warning is `missing_exif`. It rejects images with `low_resolution`, `extreme_aspect_ratio`, `small_file_size`, or `has_alpha_channel`. Manual review is recommended for real selection.
+
+The script writes:
+
+```text
+input/selected_photos/
+output/reports/image_selection.json
+output/reports/image_selection.csv
+```
+
+Selected copies include the view hint in the filename, for example `input/selected_photos/side_left_cat001.jpg`. Filename collisions are avoided with numeric suffixes.
+
+Valid `view_hint` values:
+
+- `front`
+- `front_left`
+- `front_right`
+- `side_left`
+- `side_right`
+- `back`
+- `back_left`
+- `back_right`
+- `top`
+- `diagonal`
+- `unknown`
+
+`quality_score` values:
+
+- `1`: do not use
+- `2`: weak
+- `3`: normal
+- `4`: good
+- `5`: very good
+
+Task 1.5 only selects and copies images. Image editing, background removal, Vision AI classification, API calls, Blender processing, and Unity import are outside this task. Task 2 performs background removal on selected images.
+
 ## Development Workflow
 
 This project uses multiple AI roles plus final user approval:
@@ -171,11 +237,11 @@ Documentation is the source of truth for project operation:
 
 ## Upcoming Tasks
 
-- Task 1.5: Image selection
 - Task 2: Background removal
 - Task 3: 3D generation API prototype
+- Task 4: Blender CLI cleanup
 
-The next implementation task should be Task 1.5. Task 1 created the inventory report used as input for manual image selection.
+The next implementation task should be Task 2. Task 1.5 creates the selected image set used as input for background removal.
 
 ## Git Safety
 
