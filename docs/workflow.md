@@ -70,6 +70,19 @@ Run the check with this process:
 
 `scripts/00_check_environment.py` resolves the repository root from the script location, not from the current working directory. This keeps `.env`, `config/`, and `output/reports/` anchored to this repository even when the script is launched from another directory.
 
+## Task 1 Image Inventory
+
+Task 1 creates an inventory of source images before any selection or image processing.
+
+Run the inventory process with this flow:
+
+1. Put source images under `input/raw_photos/`.
+2. Run `python scripts/01_inventory_images.py` in PowerShell.
+3. Review `output/reports/image_inventory.json` and `output/reports/image_inventory.csv`.
+4. Use Task 1.5 to select suitable images from the inventory.
+
+Task 1 does not copy, move, delete, classify, or edit images. It only records basic metadata, warnings, and read errors for supported image files.
+
 ## Blender CLI
 
 Task 4 should call Windows `blender.exe` from the Windows venv. Blender checks should run in background mode with `-b`.

@@ -19,6 +19,16 @@ api:
   timeout_sec: 600
   max_retries: 3
   save_raw_response: true
+image_inventory:
+  supported_extensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .webp
+  low_resolution_threshold: 1024
+  small_file_size_threshold_bytes: 100000
+  min_aspect_ratio: 0.5
+  max_aspect_ratio: 2.0
 blender:
   path_env: BLENDER_PATH
   target_engine: unity

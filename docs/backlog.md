@@ -11,17 +11,17 @@
 
 ### Task 1: Image Inventory Script
 
-- Status: Planned
+- Status: Done
 - Priority: High
 - Description: Create a script that scans `input/raw_photos/` and records image metadata for review.
-- Notes: Next candidate task. Do not perform image selection in this task.
+- Notes: Implemented as `scripts/01_inventory_images.py`. It writes `output/reports/image_inventory.json` and `output/reports/image_inventory.csv`, records metadata and warnings, and does not perform image selection.
 
 ### Task 1.5: Image Selection Flow
 
 - Status: Backlog
 - Priority: High
 - Description: Define and implement a process for selecting suitable images from the inventory.
-- Notes: Selection criteria should support the `cat_avatar` reference case first.
+- Notes: Next task. Selection criteria should support the `cat_avatar` reference case first and use Task 1 inventory output as input.
 
 ### Task 2: Background Removal
 
@@ -94,6 +94,13 @@
 - Priority: Medium
 - Description: Score source images for sharpness, coverage, occlusion, pose, and suitability.
 - Notes: Could support Task 1.5 after a manual baseline exists.
+
+### OpenCV blur detection
+
+- Status: Backlog
+- Priority: Low
+- Description: Add local blur or sharpness detection using OpenCV.
+- Notes: Not part of Task 1. Consider after Task 1.5 defines manual selection criteria and review needs.
 
 ### Texture transfer and shape transfer to base model
 

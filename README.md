@@ -71,7 +71,9 @@ Task 0 is complete: the initial repository structure, configuration template, mi
 
 Task 0.2 adds documentation governance for multi-agent review and Codex implementation.
 
-No external API connectivity is verified in Task 0 or Task 0.2.
+Task 0.5 adds local environment checking and records the MVP runtime policy.
+
+Task 1 adds image inventory reports for source photos. It does not perform image selection.
 
 ## Task 0.5 Environment Check
 
@@ -108,6 +110,45 @@ output/reports/environment_check.json
 
 Use the report to decide and record the runtime policy in `docs/decisions.md` before implementing Blender automation in Task 4.
 
+## Task 1 Image Inventory
+
+Task 1 scans `input/raw_photos/` and writes an inventory report before image selection. It does not select, copy, move, edit, classify, or score images.
+
+Run with default paths:
+
+```powershell
+python scripts/01_inventory_images.py
+```
+
+Run with explicit input and output paths:
+
+```powershell
+python scripts/01_inventory_images.py --input input/raw_photos --output output/reports
+```
+
+Run with pipeline config:
+
+```powershell
+python scripts/01_inventory_images.py --config config/pipeline.yaml
+```
+
+The script writes:
+
+```text
+output/reports/image_inventory.json
+output/reports/image_inventory.csv
+```
+
+Warning rules:
+
+- `low_resolution`: width or height is below 1024 pixels.
+- `extreme_aspect_ratio`: aspect ratio is below 0.5 or above 2.0.
+- `small_file_size`: file size is below 100000 bytes.
+- `has_alpha_channel`: Pillow mode is `RGBA` or `LA`.
+- `missing_exif`: no EXIF metadata is present.
+
+Task 1.5 uses the inventory to select suitable images. Selection criteria, angle classification, background removal, API calls, Blender processing, and Unity import are outside Task 1.
+
 ## Development Workflow
 
 This project uses multiple AI roles plus final user approval:
@@ -130,11 +171,11 @@ Documentation is the source of truth for project operation:
 
 ## Upcoming Tasks
 
-- Task 1: Input image inventory creation
 - Task 1.5: Image selection
 - Task 2: Background removal
+- Task 3: 3D generation API prototype
 
-The next implementation task should be Task 1. Task 0.5 created the environment check entry point, and runtime policy details should be recorded in `docs/decisions.md` before Task 4.
+The next implementation task should be Task 1.5. Task 1 created the inventory report used as input for manual image selection.
 
 ## Git Safety
 
