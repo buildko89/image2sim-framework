@@ -48,12 +48,12 @@ image_selection:
     - unknown
   non_interactive:
     reject_warnings:
-      - low_resolution
       - extreme_aspect_ratio
       - small_file_size
-      - has_alpha_channel
     allow_warnings:
       - missing_exif
+      - has_alpha_channel
+      - low_resolution
 blender:
   path_env: BLENDER_PATH
   target_engine: unity

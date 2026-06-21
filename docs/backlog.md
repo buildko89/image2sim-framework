@@ -102,11 +102,32 @@
 - Description: Automatically estimate `view_hint` values such as front, side, back, top, or diagonal.
 - Notes: Deferred until manual selection produces enough examples and requirements.
 
+### Vision AI based view hint and quality score estimation
+
+- Status: Backlog
+- Priority: Medium
+- Description: Automatically estimate both `view_hint` and `quality_score` for selection candidates.
+- Notes: Keep manual selection as the MVP baseline before adding model-based estimation.
+
+### Improve selection heuristics using resolution area
+
+- Status: Backlog
+- Priority: Medium
+- Description: Improve resolution checks using long-side or total-pixel thresholds instead of only per-axis minimums.
+- Notes: Do not change the Task 1 `low_resolution` rule until real source image behavior is reviewed.
+
+### Add optional CSV absolute path for review convenience
+
+- Status: Backlog
+- Priority: Medium
+- Description: Add an optional `absolute_path` field to selection or inventory CSV outputs for local review convenience.
+- Notes: Keep relative paths as the portable primary reference.
+
 ### Manual selection UI improvements
 
 - Status: Backlog
-- Priority: Low
-- Description: Add a friendlier review UI for image selection.
+- Priority: Medium
+- Description: Add an optional interactive preview UI for manual image selection.
 - Notes: CLI selection is sufficient for the MVP. Consider a local HTML or Streamlit UI after Task 2.
 
 ### OpenCV blur detection

@@ -179,7 +179,7 @@ Run the non-interactive fallback:
 python scripts/015_select_images.py --non-interactive
 ```
 
-The non-interactive mode is a simple MVP fallback for CI or batch smoke checks. It selects valid images with no warnings, also allowing images whose only warning is `missing_exif`. It rejects images with `low_resolution`, `extreme_aspect_ratio`, `small_file_size`, or `has_alpha_channel`. Manual review is recommended for real selection.
+The non-interactive mode is a simple MVP fallback for CI or batch smoke checks. It prioritizes keeping candidates so the pipeline can keep moving. It selects valid images with no warnings, also allowing `missing_exif`, `has_alpha_channel`, and `low_resolution`. It rejects images with `extreme_aspect_ratio` or `small_file_size`. Manual review is recommended for real selection.
 
 The script writes:
 
@@ -189,7 +189,7 @@ output/reports/image_selection.json
 output/reports/image_selection.csv
 ```
 
-Selected copies include the view hint in the filename, for example `input/selected_photos/side_left_cat001.jpg`. Filename collisions are avoided with numeric suffixes.
+Selected copies include the view hint in the filename, for example `input/selected_photos/side_left_cat001.jpg`. Filenames copied into `input/selected_photos/` are converted to ASCII-safe names for later API, Blender, and Unity steps. Source filenames are not changed. Filename collisions are avoided with numeric suffixes.
 
 Valid `view_hint` values:
 
@@ -212,6 +212,8 @@ Valid `view_hint` values:
 - `3`: normal
 - `4`: good
 - `5`: very good
+
+In manual mode, `reason` can be left blank. Blank reasons are saved as `manual selection` for selected images and `manual rejection` for rejected images.
 
 Task 1.5 only selects and copies images. Image editing, background removal, Vision AI classification, API calls, Blender processing, and Unity import are outside this task. Task 2 performs background removal on selected images.
 

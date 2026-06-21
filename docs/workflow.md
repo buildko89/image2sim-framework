@@ -99,6 +99,8 @@ Run the selection process with this flow:
 
 Task 1.5 copies selected images into `input/selected_photos/`. It does not move or delete source images, edit pixels, remove backgrounds, call 3D APIs, run Blender, or import into Unity.
 
+Important selection decisions should use manual mode or human review. Non-interactive mode is only a fallback for pipeline smoke checks and keeps more candidates than it rejects. To reduce path and encoding issues in later API, Blender, and Unity steps, filenames copied into `input/selected_photos/` are converted to ASCII-safe names while source filenames remain unchanged.
+
 ## Blender CLI
 
 Task 4 should call Windows `blender.exe` from the Windows venv. Blender checks should run in background mode with `-b`.

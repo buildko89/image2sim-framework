@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,12 +30,10 @@ VALID_VIEW_HINTS = [
     "unknown",
 ]
 DEFAULT_REJECT_WARNINGS = [
-    "low_resolution",
     "extreme_aspect_ratio",
     "small_file_size",
-    "has_alpha_channel",
 ]
-DEFAULT_ALLOW_WARNINGS = ["missing_exif"]
+DEFAULT_ALLOW_WARNINGS = ["missing_exif", "has_alpha_channel", "low_resolution"]
 
 
 def parse_args() -> argparse.Namespace:
@@ -171,16 +170,20 @@ def prompt_quality_score(required: bool) -> int | None:
         print("Enter an integer from 1 to 5.")
 
 
-def prompt_required_text(prompt: str) -> str:
-    while True:
-        value = input(prompt).strip()
-        if value:
-            return value
-        print("This field is required.")
+def default_reason(selected: bool) -> str:
+    return "manual selection" if selected else "manual rejection"
+
+
+def safe_ascii_stem(stem: str) -> str:
+    normalized = stem.strip().replace(" ", "_")
+    normalized = re.sub(r"[^A-Za-z0-9_-]+", "_", normalized)
+    normalized = re.sub(r"_+", "_", normalized)
+    return normalized.strip("_-")
 
 
 def unique_destination_path(selected_dir: Path, view_hint: str, source_path: Path) -> Path:
-    base_name = f"{view_hint}_{source_path.stem}"
+    safe_stem = safe_ascii_stem(source_path.stem)
+    base_name = f"{view_hint}_{safe_stem}" if safe_stem else f"{view_hint}_image_001"
     extension = source_path.suffix
     candidate = selected_dir / f"{base_name}{extension}"
     counter = 1
@@ -227,7 +230,8 @@ def build_manual_selection(
     selected = prompt_yes_no("select? (y/n): ")
     view_hint = prompt_view_hint(valid_view_hints)
     quality_score = prompt_quality_score(required=selected)
-    reason = prompt_required_text("reason: ") if selected else input("reason: ").strip()
+    reason = input("reason: ").strip()
+    reason_was_blank = not reason
     notes = input("notes: ").strip()
 
     selected_file = None
@@ -240,11 +244,15 @@ def build_manual_selection(
         selected_file, errors = copy_selected_image(repo_root, source_file, selected_dir, view_hint)
         if errors:
             selected = False
+    if reason_was_blank:
+        reason = default_reason(selected)
 
     return {
         "source_file": source_file,
+        "source_filename": Path(source_file).name,
         "selected": selected,
         "selected_file": selected_file,
+        "selected_filename": Path(selected_file).name if selected_file else None,
         "view_hint": view_hint,
         "quality_score": quality_score,
         "reason": reason,
@@ -292,8 +300,10 @@ def non_interactive_decision(
 
     return {
         "source_file": source_file,
+        "source_filename": Path(source_file).name,
         "selected": selected,
         "selected_file": selected_file,
+        "selected_filename": Path(selected_file).name if selected_file else None,
         "view_hint": "unknown",
         "quality_score": quality_score,
         "reason": reason,
