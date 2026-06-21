@@ -25,10 +25,10 @@
 
 ### Task 2: Background Removal
 
-- Status: Backlog
+- Status: Done
 - Priority: High
 - Description: Add background removal and mask review outputs.
-- Notes: Next task. Use selected images from `input/selected_photos/` as input. `rembg` is intentionally not introduced before this task.
+- Notes: Implemented as `scripts/02_remove_backgrounds.py`. It uses selected images from `input/selected_photos/`, runs local U2Net-family ONNX background removal, writes transparent cutouts and alpha masks under `input/masks/`, writes checkerboard review images under `input/masks_review/`, and writes `output/reports/background_removal.json` / `.csv`.
 
 ### Task 3: 3D Generation API Prototype
 

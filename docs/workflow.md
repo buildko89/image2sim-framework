@@ -101,6 +101,22 @@ Task 1.5 copies selected images into `input/selected_photos/`. It does not move 
 
 Important selection decisions should use manual mode or human review. Non-interactive mode is only a fallback for pipeline smoke checks and keeps more candidates than it rejects. To reduce path and encoding issues in later API, Blender, and Unity steps, filenames copied into `input/selected_photos/` are converted to ASCII-safe names while source filenames remain unchanged.
 
+## Task 2 Background Removal
+
+Task 2 removes image backgrounds from the selected image set and creates review artifacts before any 3D API calls.
+
+Run the background removal process with this flow:
+
+1. Complete Task 1.5 so selected images exist under `input/selected_photos/`.
+2. Install dependencies with `pip install -r requirements.txt`.
+3. Run `python scripts/02_remove_backgrounds.py` in PowerShell.
+4. Review transparent cutouts and masks under `input/masks/`.
+5. Review checkerboard composites under `input/masks_review/`.
+6. Review `output/reports/background_removal.json` and `output/reports/background_removal.csv`.
+7. Continue to Task 3 for 3D generation API prototyping.
+
+Task 2 writes transparent cutouts as `*_cutout.png`, alpha masks as `*_mask.png`, and review images as `*_review.jpg`. It supports `u2net` and `u2netp` ONNX models, and the first run may download model files to `output/model_cache/u2net/`. Task 2 does not call 3D APIs, run Blender, or import into Unity.
+
 ## Blender CLI
 
 Task 4 should call Windows `blender.exe` from the Windows venv. Blender checks should run in background mode with `-b`.

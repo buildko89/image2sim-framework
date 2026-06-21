@@ -75,3 +75,19 @@ Each review entry must use this format:
   - Deferred: `rembg`, Quad/Retopo validation, and foot-origin cleanup are deferred to later implementation tasks.
   - Rejected: None.
 - Related Decisions: DEC-20260528-003, DEC-20260528-004, DEC-20260528-005
+
+### REV-20260621-004: Codex Task 2 implementation review
+
+- Reviewer: Codex
+- Date: 2026-06-21
+- Target: Task 2 background removal implementation
+- Summary: Implemented a local background removal step that keeps generated image artifacts outside Git and records reviewable mask metrics.
+- Findings:
+  - [High] Background removal output must be manually reviewed before 3D generation because edge artifacts and missing foreground can damage downstream geometry.
+  - [Medium] ONNX model download and runtime performance depend on the local machine and cache state.
+  - [Low] Foreground coverage warnings are a lightweight smoke check, not a semantic quality score.
+- Actions:
+  - Accepted: Add transparent cutouts, alpha masks, checkerboard review images, and JSON/CSV reports.
+  - Deferred: Automatic semantic mask scoring and alternate background removal providers remain future work.
+  - Rejected: Calling 3D generation APIs during Task 2.
+- Related Decisions: DEC-20260621-008

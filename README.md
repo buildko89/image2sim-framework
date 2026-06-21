@@ -77,6 +77,8 @@ Task 1 adds image inventory reports for source photos. It does not perform image
 
 Task 1.5 adds a human-in-the-loop image selection flow and a simple non-interactive fallback.
 
+Task 2 adds background removal and mask review outputs for selected images.
+
 ## Task 0.5 Environment Check
 
 Task 0.5 verifies local environment readiness for later 3D generation and Blender CLI tasks. It does not call Tripo, Meshy, rembg, Blender cleanup scripts, or Unity import automation.
@@ -217,6 +219,49 @@ In manual mode, `reason` can be left blank. Blank reasons are saved as `manual s
 
 Task 1.5 only selects and copies images. Image editing, background removal, Vision AI classification, API calls, Blender processing, and Unity import are outside this task. Task 2 performs background removal on selected images.
 
+## Task 2 Background Removal
+
+Task 2 reads selected images from `input/selected_photos/`, removes backgrounds, and writes review artifacts. Source images and selected images are not modified.
+
+Run with default paths:
+
+```powershell
+python scripts/02_remove_backgrounds.py
+```
+
+Run with explicit paths:
+
+```powershell
+python scripts/02_remove_backgrounds.py --input input/selected_photos --masks-dir input/masks --review-dir input/masks_review --output output/reports
+```
+
+Run with pipeline config:
+
+```powershell
+python scripts/02_remove_backgrounds.py --config config/pipeline.yaml
+```
+
+Use a specific U2Net-family model:
+
+```powershell
+python scripts/02_remove_backgrounds.py --model u2netp
+```
+
+The script writes:
+
+```text
+input/masks/*_cutout.png
+input/masks/*_mask.png
+input/masks_review/*_review.jpg
+output/model_cache/u2net/
+output/reports/background_removal.json
+output/reports/background_removal.csv
+```
+
+Review images are checkerboard composites for quick visual inspection of edge quality and missing foreground. The report records foreground coverage and warns on very low or very high alpha coverage. The first run may download U2Net model files to `output/model_cache/u2net/`.
+
+Task 2 only removes backgrounds and creates mask review outputs. It supports `u2net` and `u2netp` ONNX models. 3D API calls, Blender processing, and Unity import are outside this task.
+
 ## Development Workflow
 
 This project uses multiple AI roles plus final user approval:
@@ -239,11 +284,10 @@ Documentation is the source of truth for project operation:
 
 ## Upcoming Tasks
 
-- Task 2: Background removal
 - Task 3: 3D generation API prototype
 - Task 4: Blender CLI cleanup
 
-The next implementation task should be Task 2. Task 1.5 creates the selected image set used as input for background removal.
+The next implementation task should be Task 3. Task 2 creates the background-removed image set used as input for 3D generation.
 
 ## Git Safety
 

@@ -54,6 +54,20 @@ image_selection:
       - missing_exif
       - has_alpha_channel
       - low_resolution
+background_removal:
+  selected_dir: input/selected_photos
+  masks_dir: input/masks
+  review_dir: input/masks_review
+  reports_dir: output/reports
+  model_cache_dir: output/model_cache/u2net
+  supported_extensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .webp
+  model_name: u2net
+  min_foreground_coverage: 0.05
+  max_foreground_coverage: 0.95
 blender:
   path_env: BLENDER_PATH
   target_engine: unity

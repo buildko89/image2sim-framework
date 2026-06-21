@@ -98,3 +98,14 @@ Each decision must use this format:
   - Task 0.5
   - Task 1
   - Task 4
+
+### DEC-20260621-008: Task 2 uses local U2Net ONNX background removal
+
+- Status: Accepted
+- Date: 2026-06-21
+- Owner: Codex
+- Context: Task 2 needs a local background removal implementation before 3D generation API prototyping.
+- Decision: Use local U2Net-family ONNX inference for MVP background removal and write transparent cutouts, alpha masks, checkerboard review images, and JSON/CSV reports.
+- Rationale: The direct ONNX path avoids hosted image-processing APIs and avoids importing unrelated background-removal models during startup.
+- Consequences: The first run may download model files to `output/model_cache/u2net/`. Mask quality must be manually reviewed before Task 3 uses the images for 3D generation.
+- Related Tasks: Task 2, Task 3

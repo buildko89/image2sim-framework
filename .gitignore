@@ -25,6 +25,7 @@ output/unity/*
 !output/unity/.gitkeep
 output/reports/*
 !output/reports/.gitkeep
+output/model_cache/*
 
 # 3D assets
 *.glb
