@@ -117,6 +117,22 @@ Run the background removal process with this flow:
 
 Task 2 writes transparent cutouts as `*_cutout.png`, alpha masks as `*_mask.png`, and review images as `*_review.jpg`. It supports `u2net` and `u2netp` ONNX models, and the first run may download model files to `output/model_cache/u2net/`. Task 2 does not call 3D APIs, run Blender, or import into Unity.
 
+## Task 3 Tripo Image-to-3D Prototype
+
+Task 3 submits a selected background-removed image to Tripo and records both raw API responses and normalized metadata.
+
+Run the prototype process with this flow:
+
+1. Complete Task 2 so cutout images exist under `input/masks/`.
+2. Run `python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml` to inspect the dry-run request plan.
+3. Set `TRIPO_API_KEY` in `.env` when a real API call is intended.
+4. Run `python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml --submit --poll`.
+5. Review `output/reports/tripo_image_to_3d.json`.
+6. Review `output/reports/raw_api_response_tripo_<task_id>.json`.
+7. If output URLs are needed locally, rerun or use `--download` before the URLs expire.
+
+Task 3 defaults to dry-run because real Tripo submission can consume credits. It does not run Blender cleanup or import into Unity.
+
 ## Blender CLI
 
 Task 4 should call Windows `blender.exe` from the Windows venv. Blender checks should run in background mode with `-b`.

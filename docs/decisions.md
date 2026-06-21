@@ -109,3 +109,14 @@ Each decision must use this format:
 - Rationale: The direct ONNX path avoids hosted image-processing APIs and avoids importing unrelated background-removal models during startup.
 - Consequences: The first run may download model files to `output/model_cache/u2net/`. Mask quality must be manually reviewed before Task 3 uses the images for 3D generation.
 - Related Tasks: Task 2, Task 3
+
+### DEC-20260621-009: Task 3 Tripo API calls require explicit submit
+
+- Status: Accepted
+- Date: 2026-06-21
+- Owner: Codex
+- Context: Tripo Image-to-3D generation can consume credits and depends on external API state.
+- Decision: The Task 3 prototype defaults to dry-run and only calls Tripo when `--submit` is provided and `TRIPO_API_KEY` is set.
+- Rationale: The project needs request-shape validation and report generation without accidentally spending API credits.
+- Consequences: Dry-run can be used in CI or local smoke checks. Real generation requires an explicit operator action and should be reviewed before continuing to Blender cleanup.
+- Related Tasks: Task 3, Task 4

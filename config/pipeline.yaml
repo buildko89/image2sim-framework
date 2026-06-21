@@ -19,6 +19,20 @@ api:
   timeout_sec: 600
   max_retries: 3
   save_raw_response: true
+  tripo:
+    api_base_url: https://api.tripo3d.ai/v2/openapi
+    input_dir: input/masks
+    raw_3d_dir: output/raw_3d
+    reports_dir: output/reports
+    model_version: v2.5-20250123
+    supported_extensions:
+      - .png
+      - .jpg
+      - .jpeg
+      - .webp
+    texture: true
+    pbr: true
+    download_outputs: false
 image_inventory:
   supported_extensions:
     - .jpg

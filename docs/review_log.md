@@ -91,3 +91,19 @@ Each review entry must use this format:
   - Deferred: Automatic semantic mask scoring and alternate background removal providers remain future work.
   - Rejected: Calling 3D generation APIs during Task 2.
 - Related Decisions: DEC-20260621-008
+
+### REV-20260621-005: Codex Task 3 prototype review
+
+- Reviewer: Codex
+- Date: 2026-06-21
+- Target: Task 3 Tripo Image-to-3D prototype
+- Summary: Added a Tripo prototype script with dry-run by default, explicit submit mode, raw API response capture, polling support, and optional output download.
+- Findings:
+  - [High] Real API submission can consume credits, so it must require an explicit `--submit`.
+  - [Medium] Tripo output URLs expire quickly, so raw responses and optional downloads need to be captured immediately after success.
+  - [Low] The first prototype handles single-image Image-to-Model only; multiview generation remains out of scope until single-image flow is proven.
+- Actions:
+  - Accepted: Add dry-run request planning, upload/create/poll flow, raw response files, and normalized report output.
+  - Deferred: Multi-image Tripo generation, streaming progress, and provider abstraction.
+  - Rejected: Automatically submitting API jobs during smoke checks.
+- Related Decisions: DEC-20260621-009

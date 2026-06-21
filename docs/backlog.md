@@ -32,10 +32,10 @@
 
 ### Task 3: 3D Generation API Prototype
 
-- Status: Backlog
+- Status: In Progress
 - Priority: High
 - Description: Prototype Image-to-3D generation with the selected provider.
-- Notes: Tripo is the accepted initial provider. Save raw API responses separately from normalized metadata, for example `output/reports/raw_api_response_tripo_<task_id>.json`, to support debugging and later multi-provider comparisons.
+- Notes: Tripo is the accepted initial provider. Initial script is `scripts/03_tripo_image_to_3d.py`. It defaults to dry-run and requires `--submit` before calling Tripo. Save raw API responses separately from normalized metadata, for example `output/reports/raw_api_response_tripo_<task_id>.json`, to support debugging and later multi-provider comparisons.
 
 ### Task 4: Blender CLI Cleanup
 

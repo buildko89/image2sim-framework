@@ -262,6 +262,50 @@ Review images are checkerboard composites for quick visual inspection of edge qu
 
 Task 2 only removes backgrounds and creates mask review outputs. It supports `u2net` and `u2netp` ONNX models. 3D API calls, Blender processing, and Unity import are outside this task.
 
+## Task 3 Tripo Image-to-3D Prototype
+
+Task 3 prepares and optionally submits a single background-removed image to Tripo.
+
+Dry-run the request plan:
+
+```powershell
+python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml
+```
+
+Submit a real Tripo task and poll for completion:
+
+```powershell
+python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml --submit --poll
+```
+
+Submit and download available output URLs:
+
+```powershell
+python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml --submit --poll --download
+```
+
+The script reads the first cutout image under `input/masks/` by default. You can pass a specific file:
+
+```powershell
+python scripts/03_tripo_image_to_3d.py --input input/masks/front_cat_cutout.png
+```
+
+Real submission requires `TRIPO_API_KEY` in `.env` or the environment and may consume Tripo credits. Dry-run writes:
+
+```text
+output/reports/tripo_image_to_3d_dry_run.json
+```
+
+Submit mode writes:
+
+```text
+output/reports/tripo_image_to_3d.json
+output/reports/raw_api_response_tripo_<task_id>.json
+output/raw_3d/
+```
+
+Task 3 only prototypes Tripo Image-to-3D generation. Blender cleanup, Unity export, and provider abstraction are outside this task.
+
 ## Development Workflow
 
 This project uses multiple AI roles plus final user approval:
@@ -284,10 +328,10 @@ Documentation is the source of truth for project operation:
 
 ## Upcoming Tasks
 
-- Task 3: 3D generation API prototype
 - Task 4: Blender CLI cleanup
+- Task 5: Unity import check
 
-The next implementation task should be Task 3. Task 2 creates the background-removed image set used as input for 3D generation.
+The next implementation task should be Task 4 after a Tripo output has been generated and reviewed.
 
 ## Git Safety
 

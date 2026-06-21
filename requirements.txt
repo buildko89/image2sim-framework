@@ -4,3 +4,4 @@ Pillow<12
 numpy<3
 onnxruntime<2
 pooch
+requests
