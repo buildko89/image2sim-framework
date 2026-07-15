@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bkym63lnnb2vy"
-path="res://.godot/imported/cat_koha9.glb-9ae6453505504a40fa313aa179c8e532.scn"
+uid="uid://ct32fcakuht18"
+path="res://.godot/imported/cat_koha9.glb-c231378e32c57cda21ef9a5b9fc35de2.scn"
 
 [deps]
 
 source_file="res://cat_koha9.glb"
-dest_files=["res://.godot/imported/cat_koha9.glb-9ae6453505504a40fa313aa179c8e532.scn"]
+dest_files=["res://.godot/imported/cat_koha9.glb-c231378e32c57cda21ef9a5b9fc35de2.scn"]
 
 [params]
 

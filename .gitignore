@@ -4,6 +4,13 @@
 .venv_triposr/
 .venv_hunyuan3d/
 external/
+third_party/
+
+# 作業指示メモ（ローカル専用。公開しない）
+/prompt*.md
+
+# 購入素材の原本 glTF（再配布不可。誤って戻さない）
+godot/**/scene.gltf
 
 # Python cache and test cache
 __pycache__/

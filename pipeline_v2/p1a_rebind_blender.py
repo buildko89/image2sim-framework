@@ -42,7 +42,7 @@ from mathutils.bvhtree import BVHTree
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from b6_koha9_mesh_transplant_blender import (  # noqa: E402
     HEAD_BONES, LEG_CHAINS, NECK_BONES, TAIL_BONES, TARGET_BODY_LENGTH,
-    measure_landmarks, piecewise_linear,
+    measure_landmarks, piecewise_linear, rename_asset_materials,
 )
 
 LEOPARD_MESH = "Leopard_Hybrid"
@@ -212,6 +212,7 @@ def import_and_prepare_mesh(glb_path: str) -> tuple[bpy.types.Object, dict]:
     bpy.ops.object.join()
     mesh = bpy.context.view_layer.objects.active
     mesh.name = mesh.data.name = MESH_NAME
+    rename_asset_materials(mesh)   # 素材由来のマテリアル名を koha9 系へ（b6 と同じ規則）
 
     for action in list(bpy.data.actions):
         if action.name.startswith("Object_"):

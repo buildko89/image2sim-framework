@@ -2,11 +2,10 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c776hqeiv7gcc"
-path.s3tc="res://.godot/imported/p3_koha9face_p3_koha9face_basecolor.png-735edb6dd596fe3dcd49cb7c0974a1c7.s3tc.ctex"
+uid="uid://dohjwusrxxw0j"
+path="res://.godot/imported/p3_koha9face_p3_koha9face_basecolor.png-b7ca7d56f21f13168bc99c347a517b66.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 generator_parameters={
 "md5": "33fbf21c5a7ed52fc410974a30727989"
@@ -15,11 +14,11 @@ generator_parameters={
 [deps]
 
 source_file="res://p3_koha9face_p3_koha9face_basecolor.png"
-dest_files=["res://.godot/imported/p3_koha9face_p3_koha9face_basecolor.png-735edb6dd596fe3dcd49cb7c0974a1c7.s3tc.ctex"]
+dest_files=["res://.godot/imported/p3_koha9face_p3_koha9face_basecolor.png-b7ca7d56f21f13168bc99c347a517b66.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -41,4 +40,4 @@ process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=0
+detect_3d/compress_to=1

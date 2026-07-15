@@ -87,6 +87,26 @@ def parse_args() -> argparse.Namespace:
 
 # ---------------------------------------------------------------- mesh prep
 
+def rename_asset_materials(mesh: bpy.types.Object) -> None:
+    """素材 GLB 由来のマテリアル名を koha9 系へ揃える。
+
+    素材の元の名前には販売アセット名が入っているため公開物に残さない。
+    名前決め打ちではなく面数で判定する: 面数が最多のものが体、残りは尻尾の毛束。
+    """
+    mats = [m for m in mesh.data.materials if m]
+    if not mats:
+        return
+    counts = {i: 0 for i in range(len(mesh.data.materials))}
+    for poly in mesh.data.polygons:
+        counts[poly.material_index] = counts.get(poly.material_index, 0) + 1
+    body_i = max(counts, key=counts.get)
+    for i, m in enumerate(mesh.data.materials):
+        if m is None or m.name.startswith("Koha9"):
+            continue
+        m.name = "Koha9Body" if i == body_i else "Koha9Tail"
+        print(f"[import] material renamed -> {m.name}")
+
+
 def import_and_prepare_mesh(glb_path: str) -> bpy.types.Object:
     """koha9 GLB を取り込み、単一メッシュ・ワールド座標焼き込み・Z=0接地にする。"""
     before = set(bpy.context.scene.objects)
@@ -119,6 +139,7 @@ def import_and_prepare_mesh(glb_path: str) -> bpy.types.Object:
     mesh = bpy.context.view_layer.objects.active
     mesh.name = NEW_MESH_NAME
     mesh.data.name = NEW_MESH_NAME
+    rename_asset_materials(mesh)
 
     # 使われなくなった親エンプティを削除（join で無効化されるためメッシュとは別に収集済み）
     for obj in empties:
