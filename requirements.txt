@@ -5,3 +5,4 @@ numpy<3
 onnxruntime<2
 pooch
 requests
+opencv-python

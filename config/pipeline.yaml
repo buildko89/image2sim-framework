@@ -4,17 +4,41 @@ input_dir: input/raw_photos
 selected_dir: input/selected_photos
 output_dir: output
 reports_dir: output/reports
+generation:
+  mode: local_first
+  paid_api_required: false
+  cloud_api_enabled: false
+  optional_cloud_providers:
+    - tripo
+    - meshy
+  local_candidates:
+    - triposr
+    - instantmesh
+    - hunyuan3d
+  local_first: true
+engines:
+  targets:
+    - godot
+    - unity
+    - unreal
+  first_import_target: godot
 environment:
   runtime: windows-venv  # windows-venv | wsl2-venv | docker
   blender_mode: windows-exe  # windows-exe | linux-blender | docker
   path_policy: windows-path-only
 providers:
-  preferred_3d_provider: tripo
+  preferred_3d_provider: local_first
   candidates:
+    - triposr
+    - instantmesh
+    - hunyuan3d
     - tripo
     - meshy
-    - local
+  optional_only:
+    - tripo
+    - meshy
 api:
+  required_for_mvp: false
   polling_interval_sec: 10
   timeout_sec: 600
   max_retries: 3
@@ -82,9 +106,39 @@ background_removal:
   model_name: u2net
   min_foreground_coverage: 0.05
   max_foreground_coverage: 0.95
+blender_reference_scene:
+  selected_dir: input/selected_photos
+  masks_dir: input/masks
+  reports_dir: output/reports
+  output_blend: output/raw_3d/cat_reference_scene.blend
+  output_glb: output/raw_3d/cat_reference_scene.glb
+  supported_extensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .webp
+blender_cleanup_export:
+  input_asset: output/raw_3d/cat_reference_scene.blend
+  reports_dir: output/reports
+  output_glb: output/clean_3d/cat_clean.glb
+  output_fbx: output/clean_3d/cat_clean.fbx
+  target_height: 1.0
+godot_import_check:
+  input_glb: output/clean_3d/cat_clean.glb
+  output_dir: output/godot
+  reports_dir: output/reports
 blender:
+  required: true
+  role: import_cleanup_export
+  manual_modeling_required: false
+  allow_manual_editing: true
+  use_paid_ai_plugin: false
   path_env: BLENDER_PATH
-  target_engine: unity
+  target_engines:
+    - godot
+    - unity
+    - unreal
+  first_import_check: godot
   forward_axis: -Z
   up_axis: Y
 metadata:

@@ -1,0 +1,131 @@
+samples:
+  white_body:
+    image: 1763363798733.jpg
+    median:
+    - 222
+    - 219
+    - 217
+    lit_p85:
+    - 235
+    - 231
+    - 229
+  white_bright:
+    image: 1763363798733.jpg
+    median:
+    - 241
+    - 238
+    - 233
+    lit_p85:
+    - 255
+    - 252
+    - 245
+  black_mask:
+    image: 1763363798733.jpg
+    median:
+    - 45
+    - 39
+    - 33
+    lit_p85:
+    - 56
+    - 49
+    - 43
+  nose_freckle:
+    image: 1763363798733.jpg
+    median:
+    - 158
+    - 123
+    - 102
+    lit_p85:
+    - 186
+    - 162
+    - 150
+  tail_base_orange:
+    image: 1763363798733.jpg
+    median:
+    - 127
+    - 90
+    - 56
+    lit_p85:
+    - 145
+    - 108
+    - 73
+  tail_tan:
+    image: 1763363798733.jpg
+    median:
+    - 173
+    - 144
+    - 118
+    lit_p85:
+    - 184
+    - 156
+    - 129
+  tail_brown:
+    image: 1763363798733.jpg
+    median:
+    - 76
+    - 61
+    - 50
+    lit_p85:
+    - 101
+    - 84
+    - 71
+  white_back:
+    image: 1755598074234.jpg
+    median:
+    - 228
+    - 228
+    - 223
+    lit_p85:
+    - 234
+    - 235
+    - 231
+  orange_core:
+    image: 1755598074234.jpg
+    median:
+    - 95
+    - 59
+    - 31
+    lit_p85:
+    - 111
+    - 74
+    - 46
+  orange_hip_l:
+    image: 1755598074234.jpg
+    median:
+    - 118
+    - 77
+    - 45
+    lit_p85:
+    - 130
+    - 89
+    - 60
+  orange_hip_r:
+    image: 1755598074234.jpg
+    median:
+    - 118
+    - 77
+    - 43
+    lit_p85:
+    - 126
+    - 84
+    - 51
+  black_rump:
+    image: 1755598074234.jpg
+    median:
+    - 6
+    - 6
+    - 4
+    lit_p85:
+    - 13
+    - 11
+    - 7
+    warning: 影で潰れている。ベースカラーに使わないこと。
+source_images:
+- input/raw_photos/1763363798733.jpg
+- input/raw_photos/1755598074234.jpg
+method: 白壁パッチでWB補正後、各領域の中央値と85パーセンタイル。
+supersedes: 'config/cat_color_palette.yaml (全色 source: koha_render_b3v2 = 素材アセットのレンダー由来)'
+notes:
+- koha のオレンジは明るい橙ではなく深いラスト（錆色）。肩の斑の中心が最も濃い。
+- 黒斑は背面写真では影で (4,4,2) まで潰れる。黒の代表値は正面写真の black_mask を使う。
+- 顔のオレンジ（頬・額）は影で沈むため面積色として使えない。
