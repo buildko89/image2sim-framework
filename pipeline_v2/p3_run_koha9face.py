@@ -33,6 +33,10 @@ OUT_GLB = REPO / "output_v2/base/p3_koha9face.glb"
 WHISKER_RADIUS = "0.0004"
 WHISKER_COLOR = "0.95,0.94,0.92"
 BROW_SCALE = "0.7"
+# P4-尻尾: 「太い」の指摘で径 0.85 倍（実測 0.215×体長 -> 0.183。写真仕様 0.18）(2026-07-15)
+TAIL_RADIUS_SCALE = "0.85"
+# P4-尻尾: 長さ 1.3 倍（鎖 0.186 -> 0.242m = 0.69×体長。ユーザー承認 2026-07-15、見た目判断中）
+TAIL_LENGTH_SCALE = "1.3"
 
 
 def sh(cmd: list[str], label: str, keys: tuple[str, ...] = ()) -> None:
@@ -82,6 +86,18 @@ def main() -> int:
         "--input", str(OUT_BLEND),
         "--output-blend", str(OUT_BLEND), "--output-glb", str(OUT_GLB)],
        "4.8/6 尻尾の高密度化", keys=("[P3e]", "Saved:", "Exported:", "rror"))
+    sh([str(BLENDER), "--background", "--python",
+        str(REPO / "pipeline_v2/p4_tail_slim_blender.py"), "--",
+        "--input", str(OUT_BLEND),
+        "--output-blend", str(OUT_BLEND), "--output-glb", str(OUT_GLB),
+        "--radius-scale", TAIL_RADIUS_SCALE],
+       "4.9/6 尻尾の細身化", keys=("[P4t]", "Saved:", "Exported:", "rror"))
+    sh([str(BLENDER), "--background", "--python",
+        str(REPO / "pipeline_v2/p4_tail_lengthen_blender.py"), "--",
+        "--input", str(OUT_BLEND),
+        "--output-blend", str(OUT_BLEND), "--output-glb", str(OUT_GLB),
+        "--length-scale", TAIL_LENGTH_SCALE],
+       "4.95/6 尻尾の伸長", keys=("[P4l]", "Saved:", "Exported:", "rror"))
 
     print("\n=== 5/6 機械ゲート ===", flush=True)
     rc = subprocess.run([PY, str(REPO / "pipeline_v2/qa_skin_stretch.py"),
