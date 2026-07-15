@@ -1,3 +1,10 @@
+"""Deferred/experimental cloud API prototype; not part of the MVP path.
+
+The MVP now uses free/local/OSS-first semi-automatic 3D generation plus
+Blender import/cleanup/export. This Tripo script is retained only for
+optional paid/cloud provider experiments and must not run by default.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -25,7 +32,7 @@ FINAL_STATUSES = {"success", "failed", "banned", "expired", "cancelled", "unknow
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Prototype Tripo image-to-3D generation.")
+    parser = argparse.ArgumentParser(description="Deprecated/experimental Tripo image-to-3D generation.")
     parser.add_argument("--input", dest="input_path", help="Input image file or directory.")
     parser.add_argument("--raw-3d-dir", dest="raw_3d_dir", help="Directory for downloaded raw 3D assets.")
     parser.add_argument("--output", dest="reports_dir", help="Output reports directory.")
@@ -267,6 +274,8 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
 
 def main() -> int:
     args = parse_args()
+    print("WARNING: This Tripo prototype is deprecated for the MVP and experimental only.")
+    print("The default MVP path is Blender-first and does not require paid 3D generation APIs.")
     repo_root = Path(__file__).resolve().parent.parent
     load_env_file(repo_root)
 
@@ -299,7 +308,7 @@ def main() -> int:
     planned_payload = build_generation_payload(image_path, "DRY_RUN_IMAGE_TOKEN", settings, args.face_limit)
     report: dict[str, Any] = {
         "project": "image2sim-framework",
-        "task": "Task 3 - Tripo Image-to-3D Prototype",
+        "task": "Optional/Deferred - Tripo Image-to-3D Prototype",
         "schema_version": "0.1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "mode": "dry-run" if dry_run else "submit",
@@ -319,7 +328,7 @@ def main() -> int:
     if dry_run:
         report_path = reports_dir / "tripo_image_to_3d_dry_run.json"
         write_json(report_path, report)
-        print("Tripo image-to-3D prototype")
+        print("Deprecated/experimental Tripo image-to-3D prototype")
         print("- Mode: dry-run")
         print(f"- Input image: {repo_relative_path(repo_root, image_path)}")
         print(f"- Planned task endpoint: {settings['api_base_url']}/task")
@@ -389,7 +398,7 @@ def main() -> int:
     report_path = reports_dir / "tripo_image_to_3d.json"
     write_json(report_path, report)
 
-    print("Tripo image-to-3D prototype")
+    print("Deprecated/experimental Tripo image-to-3D prototype")
     print("- Mode: submit")
     print(f"- Input image: {repo_relative_path(repo_root, image_path)}")
     print(f"- Task ID: {report['task_id'] or 'none'}")

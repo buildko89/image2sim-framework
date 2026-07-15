@@ -1,23 +1,23 @@
-# Decision Template
+# 意思決定テンプレート
 
-## Decision ID
+## 意思決定ID
 
-## Title
+## タイトル
 
-## Status
+## ステータス
 
 Proposed | Accepted | Rejected | Superseded
 
-## Date
+## 日付
 
-## Owner
+## オーナー
 
-## Context
+## 背景
 
-## Decision
+## 決定内容
 
-## Rationale
+## 理由
 
-## Consequences
+## 影響
 
-## Related Tasks
+## 関連タスク

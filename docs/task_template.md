@@ -1,25 +1,25 @@
-# Task Template
+# タスクテンプレート
 
-## Task ID
+## タスクID
 
-## Title
+## タイトル
 
-## Purpose
+## 目的
 
-## Scope
+## スコープ
 
-### In Scope
+### 対象範囲
 
-### Out of Scope
+### 対象外
 
-## Inputs
+## 入力
 
-## Outputs
+## 出力
 
-## Implementation Notes
+## 実装メモ
 
-## Acceptance Criteria
+## 完了条件
 
-## Review Points
+## レビュー観点
 
-## Next Tasks
+## 次のタスク

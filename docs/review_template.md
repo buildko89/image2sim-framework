@@ -1,29 +1,29 @@
-# Review Template
+# レビューテンプレート
 
-## Review ID
+## レビューID
 
-## Reviewer
+## レビュー担当
 
-## Target
+## 対象
 
-## Summary
+## 概要
 
-## Findings
+## 指摘事項
 
-### High
+### 高
 
-### Medium
+### 中
 
-### Low
+### 低
 
-## Recommended Actions
+## 推奨対応
 
-### Accept
+### 採用
 
-### Defer
+### 保留
 
-### Reject
+### 不採用
 
-## Questions
+## 確認事項
 
-## Related Decisions
+## 関連する意思決定
