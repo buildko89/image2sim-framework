@@ -1,346 +1,78 @@
 # image2sim-framework
 
-`image2sim-framework` is a semi-automated pipeline project for generating simulation-ready 3D assets from image observation data.
+実在の猫（koha）の写真から、ゲームエンジンで動く リグ+アニメーション付き 3D モデルを作るプロジェクト。
 
-The first reference case is `cat_avatar`: generating a Unity-displayable 3D cat model from cat photos. The current target is cat photos, but the long-term goal is a reusable framework that can turn images into 3D assets for simulation, games, robotics, and digital twin workflows.
+現在の成果物は **`output_v2/base/p3_koha9face.glb`**（三毛猫 koha の可動モデル。8アニメーション内蔵、
+Godot 4.x で再生確認済み）。このリポジトリには、その生成パイプライン一式と経緯ドキュメントが入っている。
 
-## MVP Goal
+| 顔（正面, 1440px キャプチャ） | 全アニメ × 4方向 |
+|---|---|
+| ![face](docs/images/koha9face_head_front.png) | ![overview](docs/images/koha9face_overview.png) |
 
-The MVP verifies a practical path from input images to a 3D asset that can be reviewed and used in Unity.
+## 経緯（v1 → v2）
 
-Task 0 only creates the initial repository structure. It does not yet implement image inventory, background removal, 3D generation API calls, Blender CLI processing, or Unity import automation.
+- **v1**（タグ `v1-tripo` まで）: 画像→3D 生成（TripoSR 等のローカル生成、Tripo API 検証）を軸にした
+  汎用フレームワーク構想。写真からの直接生成は品質が足りず、方針転換した。
+- **v2**（現在, `pipeline_v2/`）: **市販のリグ付き猫ベースモデルを土台に、写真の猫へ「作り替える」**
+  アプローチ。再バインド→体型・顔のメッシュ変形→写真実測の三毛柄をテクスチャに焼き込み→髭・毛シェル
+  生成→アニメーションのリターゲット、までをすべてスクリプトで決定的に再生成できる。
 
-## Setup
+## v2 パイプラインの構成
 
-The examples below assume Windows PowerShell.
+すべて `python pipeline_v2/<script>.py` で実行する（Blender 5.0 を `--background` で呼ぶ）。
 
-Check Python:
+| 段 | ランナー | 内容 |
+|---|---|---|
+| P1a〜P2 | `p2_run.py` | ベースモデルの再バインド（Automatic Weights + Data Transfer）→ 頭・体型の整形 → 尻尾カール（Apply as Rest Pose）→ 8アニメのワールド差分リターゲット |
+| UVベイク | `p3_uv_bake.py` | UV テクセル→3D位置/支配ボーンのマップ（柄を3D座標で定義するための土台） |
+| P3〜P4 | `p3_run_koha9face.py` | 三毛柄の塗り（写真実測パレット）→ 髭生成 → 毛シェル4層 → 尻尾高密度化 → 機械ゲート → 1440px キャプチャ |
 
-```powershell
-python --version
-```
+品質は2本の機械ゲートで回帰検証する:
 
-Create and activate a virtual environment:
+- `qa_skin_stretch.py` — 全アニメの辺の伸びからスキニング破綻を検出（皮膚 0.5% / 毛シェル 1.0%）
+- `qa_belly_bind.py` — 腹のウェイトが脚ボーンに吸われていないか
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
+顔まわりの数値調整の方法は **`FACE_TUNING_GUIDE.md`** にまとめてある。
+メッシュ変形時の塗りアンカー追従は `pipeline_v2/p4_remap_anchors.py`（新旧 UV ベイクの同一テクセル対応）。
 
-Install dependencies:
-
-```powershell
-pip install -r requirements.txt
-```
-
-Create a local environment file from the template:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Then edit `.env` locally and set API keys or tool paths as needed. Do not commit `.env`.
-
-## Repository Layout
+## リポジトリ構成
 
 ```text
-image2sim-framework/
-  config/
-    pipeline.yaml
-  input/
-    raw_photos/
-    selected_photos/
-    masks/
-    masks_review/
-  output/
-    raw_3d/
-    clean_3d/
-    unity/
-    reports/
-  scripts/
-  blender/
-  unity/
-  docs/
+pipeline_v2/   v2 パイプライン本体（現在の主戦場）
+newplan/       v2 の経緯・結果ドキュメント（P0仕様、各段の結果、セッションログ）
+blender/       v1〜v2 初期の Blender スクリプト群
+godot/         Godot 確認用プロジェクト（ViewKoha9.tscn = 実機ビューア）
+docs/          v1 の設計・タスク文書 + 調査メモ
+scripts/       v1 のタスクスクリプト（画像インベントリ・背景除去・Tripo 検証）
+config/        パレット等の設定（cat_color_palette_v3_raw_photos.yaml が現行）
+output_v2/     生成物（p3_koha9face の glb/blend/テクスチャのみコミット。他はローカル再生成）
+FACE_TUNING_GUIDE.md   顔の数値調整ガイド
 ```
 
-Input images, masks, generated 3D files, Unity exports, reports, API keys, and other local artifacts are excluded from Git. Empty working directories are preserved with `.gitkeep`.
+## 含めていないもの（公開リポジトリのため）
 
-## Current Status
+- `input/` — 実物の猫の写真、購入素材（koha9 ベースモデル等）。**再配布不可のため除外**
+- `output_v2/` の大部分 — パイプラインで決定的に再生成できる中間生成物・バックアップ
+- `png/`、Godot が自動展開したテクスチャ — 購入素材由来のため除外
 
-Task 0 is complete: the initial repository structure, configuration template, minimal Python dependencies, and documentation skeleton are present.
+**アセットの利用について**: コミットされている `p3_koha9face.*`（GLB/blend/テクスチャ）は、
+ライセンス購入済みの市販ベースモデルを大幅に改変した派生物です。プレビュー・学習目的での
+閲覧を想定しており、**素材としての再配布・再利用はできません**。
 
-Task 0.2 adds documentation governance for multi-agent review and Codex implementation.
+## 再生成のしかた（ローカル）
 
-Task 0.5 adds local environment checking and records the MVP runtime policy.
-
-Task 1 adds image inventory reports for source photos. It does not perform image selection.
-
-Task 1.5 adds a human-in-the-loop image selection flow and a simple non-interactive fallback.
-
-Task 2 adds background removal and mask review outputs for selected images.
-
-## Task 0.5 Environment Check
-
-Task 0.5 verifies local environment readiness for later 3D generation and Blender CLI tasks. It does not call Tripo, Meshy, rembg, Blender cleanup scripts, or Unity import automation.
-
-Create a local `.env` file:
+前提: Windows / Blender 5.0 / Python 3.x / `input/` に素材と写真がある環境。
 
 ```powershell
-copy .env.example .env
+python pipeline_v2\p2_run.py                                   # 上流（バインド〜リターゲット）
+python pipeline_v2\p3_uv_bake.py --glb output_v2\base\p2_koha.glb
+python pipeline_v2\p3_run_koha9face.py                         # 柄・髭・毛・ゲート・キャプチャ
 ```
 
-Set `BLENDER_PATH` in `.env` if Blender CLI should be checked. Leave API keys empty until they are needed; the environment check only reports `set` or `not set` and never prints key values.
+結果画像: `output_v2/reports/p1_shots/p3k9f_head_*.png`（顔4方向）、
+`output_v2/reports/p1_contact_p3k9f_overview.png`（全アニメ×4方向）。
 
-Run the check:
+## v1 のドキュメント
 
-```powershell
-python scripts/00_check_environment.py
-```
-
-The script resolves the repository root from its own file location, so `.env` and `output/reports/environment_check.json` are still read and written under this repository even when the command is launched from another directory.
-
-When using the project virtual environment:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-python scripts/00_check_environment.py
-```
-
-The check writes:
-
-```text
-output/reports/environment_check.json
-```
-
-Use the report to decide and record the runtime policy in `docs/decisions.md` before implementing Blender automation in Task 4.
-
-## Task 1 Image Inventory
-
-Task 1 scans `input/raw_photos/` and writes an inventory report before image selection. It does not select, copy, move, edit, classify, or score images.
-
-Run with default paths:
-
-```powershell
-python scripts/01_inventory_images.py
-```
-
-Run with explicit input and output paths:
-
-```powershell
-python scripts/01_inventory_images.py --input input/raw_photos --output output/reports
-```
-
-Run with pipeline config:
-
-```powershell
-python scripts/01_inventory_images.py --config config/pipeline.yaml
-```
-
-The script writes:
-
-```text
-output/reports/image_inventory.json
-output/reports/image_inventory.csv
-```
-
-Warning rules:
-
-- `low_resolution`: width or height is below 1024 pixels.
-- `extreme_aspect_ratio`: aspect ratio is below 0.5 or above 2.0.
-- `small_file_size`: file size is below 100000 bytes.
-- `has_alpha_channel`: Pillow mode is `RGBA` or `LA`.
-- `missing_exif`: no EXIF metadata is present.
-
-Task 1.5 uses the inventory to select suitable images. Selection criteria, angle classification, background removal, API calls, Blender processing, and Unity import are outside Task 1.
-
-## Task 1.5 Image Selection
-
-Task 1.5 reads `output/reports/image_inventory.json`, records human selection decisions, and copies selected images to `input/selected_photos/`. Source images are never deleted or moved.
-
-Run the manual selection flow:
-
-```powershell
-python scripts/015_select_images.py
-```
-
-Run with explicit paths:
-
-```powershell
-python scripts/015_select_images.py --inventory output/reports/image_inventory.json --selected-dir input/selected_photos --output output/reports
-```
-
-Run with pipeline config:
-
-```powershell
-python scripts/015_select_images.py --config config/pipeline.yaml
-```
-
-Run the non-interactive fallback:
-
-```powershell
-python scripts/015_select_images.py --non-interactive
-```
-
-The non-interactive mode is a simple MVP fallback for CI or batch smoke checks. It prioritizes keeping candidates so the pipeline can keep moving. It selects valid images with no warnings, also allowing `missing_exif`, `has_alpha_channel`, and `low_resolution`. It rejects images with `extreme_aspect_ratio` or `small_file_size`. Manual review is recommended for real selection.
-
-The script writes:
-
-```text
-input/selected_photos/
-output/reports/image_selection.json
-output/reports/image_selection.csv
-```
-
-Selected copies include the view hint in the filename, for example `input/selected_photos/side_left_cat001.jpg`. Filenames copied into `input/selected_photos/` are converted to ASCII-safe names for later API, Blender, and Unity steps. Source filenames are not changed. Filename collisions are avoided with numeric suffixes.
-
-Valid `view_hint` values:
-
-- `front`
-- `front_left`
-- `front_right`
-- `side_left`
-- `side_right`
-- `back`
-- `back_left`
-- `back_right`
-- `top`
-- `diagonal`
-- `unknown`
-
-`quality_score` values:
-
-- `1`: do not use
-- `2`: weak
-- `3`: normal
-- `4`: good
-- `5`: very good
-
-In manual mode, `reason` can be left blank. Blank reasons are saved as `manual selection` for selected images and `manual rejection` for rejected images.
-
-Task 1.5 only selects and copies images. Image editing, background removal, Vision AI classification, API calls, Blender processing, and Unity import are outside this task. Task 2 performs background removal on selected images.
-
-## Task 2 Background Removal
-
-Task 2 reads selected images from `input/selected_photos/`, removes backgrounds, and writes review artifacts. Source images and selected images are not modified.
-
-Run with default paths:
-
-```powershell
-python scripts/02_remove_backgrounds.py
-```
-
-Run with explicit paths:
-
-```powershell
-python scripts/02_remove_backgrounds.py --input input/selected_photos --masks-dir input/masks --review-dir input/masks_review --output output/reports
-```
-
-Run with pipeline config:
-
-```powershell
-python scripts/02_remove_backgrounds.py --config config/pipeline.yaml
-```
-
-Use a specific U2Net-family model:
-
-```powershell
-python scripts/02_remove_backgrounds.py --model u2netp
-```
-
-The script writes:
-
-```text
-input/masks/*_cutout.png
-input/masks/*_mask.png
-input/masks_review/*_review.jpg
-output/model_cache/u2net/
-output/reports/background_removal.json
-output/reports/background_removal.csv
-```
-
-Review images are checkerboard composites for quick visual inspection of edge quality and missing foreground. The report records foreground coverage and warns on very low or very high alpha coverage. The first run may download U2Net model files to `output/model_cache/u2net/`.
-
-Task 2 only removes backgrounds and creates mask review outputs. It supports `u2net` and `u2netp` ONNX models. 3D API calls, Blender processing, and Unity import are outside this task.
-
-## Task 3 Tripo Image-to-3D Prototype
-
-Task 3 prepares and optionally submits a single background-removed image to Tripo.
-
-Dry-run the request plan:
-
-```powershell
-python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml
-```
-
-Submit a real Tripo task and poll for completion:
-
-```powershell
-python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml --submit --poll
-```
-
-Submit and download available output URLs:
-
-```powershell
-python scripts/03_tripo_image_to_3d.py --config config/pipeline.yaml --submit --poll --download
-```
-
-The script reads the first cutout image under `input/masks/` by default. You can pass a specific file:
-
-```powershell
-python scripts/03_tripo_image_to_3d.py --input input/masks/front_cat_cutout.png
-```
-
-Real submission requires `TRIPO_API_KEY` in `.env` or the environment and may consume Tripo credits. Dry-run writes:
-
-```text
-output/reports/tripo_image_to_3d_dry_run.json
-```
-
-Submit mode writes:
-
-```text
-output/reports/tripo_image_to_3d.json
-output/reports/raw_api_response_tripo_<task_id>.json
-output/raw_3d/
-```
-
-Task 3 only prototypes Tripo Image-to-3D generation. Blender cleanup, Unity export, and provider abstraction are outside this task.
-
-## Development Workflow
-
-This project uses multiple AI roles plus final user approval:
-
-- ChatGPT: PM and architect. Creates task specs, integrates reviews, and organizes accepted/deferred/rejected decisions.
-- Codex: Primary implementation agent. Edits the repository and reports changed files and next tasks.
-- Claude: Secondary design and code reviewer.
-- Gemini: Secondary reviewer for APIs, tools, runtime boundaries, and implementation risks.
-- User: Final decision maker.
-
-Documentation is the source of truth for project operation:
-
-- `docs/workflow.md`: development workflow, task completion criteria, and execution policy notes.
-- `docs/decisions.md`: durable decisions such as runtime environment, API provider, Blender policy, and Unity policy.
-- `docs/review_log.md`: review findings and action classification from ChatGPT, Claude, Gemini, Codex, and the user.
-- `docs/backlog.md`: MVP tasks and future/non-MVP ideas.
-- `docs/task_template.md`: template for future task specifications.
-- `docs/review_template.md`: template for future review records.
-- `docs/decision_template.md`: template for future decision records.
-
-## Upcoming Tasks
-
-- Task 4: Blender CLI cleanup
-- Task 5: Unity import check
-
-The next implementation task should be Task 4 after a Tripo output has been generated and reviewed.
-
-## Git Safety
-
-Do not commit:
-
-- API keys or secrets
-- `.env`
-- raw photos
-- selected photos
-- masks and mask review outputs
-- generated 3D assets such as `.glb`, `.fbx`, `.obj`, `.blend`
-- generated reports and intermediate artifacts
+v1 期のタスク仕様・レビュー運用は `docs/`（workflow.md, decisions.md, backlog.md 等）に残している。
+v1 最終時点のコードはタグ `v1-tripo` を参照。
