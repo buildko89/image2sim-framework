@@ -1,31 +1,35 @@
 # Local environment
 .env
 .venv/
+.venv_triposr/
+.venv_hunyuan3d/
+external/
 
 # Python cache and test cache
 __pycache__/
 .pytest_cache/
 
-# Input artifacts
-input/raw_photos/*
-!input/raw_photos/.gitkeep
-input/selected_photos/*
-!input/selected_photos/.gitkeep
-input/masks/*
-!input/masks/.gitkeep
-input/masks_review/*
-!input/masks_review/.gitkeep
+# Input artifacts — 全除外（公開リポジトリ。実物の写真と購入素材を含むため）
+input/
 
 # Generated outputs
 output/raw_3d/*
 !output/raw_3d/.gitkeep
 output/clean_3d/*
 !output/clean_3d/.gitkeep
+output/rigged/*
+!output/rigged/.gitkeep
+output/godot/*
+!output/godot/.gitkeep
 output/unity/*
 !output/unity/.gitkeep
+output/unreal/*
+!output/unreal/.gitkeep
 output/reports/*
 !output/reports/.gitkeep
 output/model_cache/*
+output/textures/
+output/godot_run_error.txt
 
 # 3D assets
 *.glb
@@ -42,6 +46,24 @@ output/**/*.tif
 output/**/*.tiff
 output/**/*.bmp
 output/**/*.exr
+
+# ---- v2 (Route B: 実物の猫 koha の可動モデル) ----
+# 方針: 実写真・購入素材・再生成可能な生成物は公開しない。
+# 公開するのは現行の作業モデル p3_koha9face の成果物（glb/blend/テクスチャ3枚）だけ。
+png/
+newplan/reference_sheet.png
+*.npz
+output_v2/**
+!output_v2/base/
+!output_v2/base/p3_koha9face.glb
+!output_v2/base/p3_koha9face.blend
+!output_v2/textures/
+!output_v2/textures/p3_koha9face_basecolor.png
+!output_v2/textures/p3_koha9face_basecolor_alpha.png
+!output_v2/textures/p3_koha9face_fur_shell.png
+godot/**/.godot/
+# Godot が GLB インポート時に自動展開したテクスチャ（購入素材の原本コピーを含む・再生成可能）
+godot/**/*.png
 
 # Keep repository placeholders
 !.gitkeep
