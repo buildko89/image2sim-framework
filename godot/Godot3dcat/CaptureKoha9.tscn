@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://b5capturekoha9"]
-
-[ext_resource type="Script" path="res://capture_koha9.gd" id="1"]
-
-[node name="CaptureKoha9" type="Node3D"]
-script = ExtResource("1")

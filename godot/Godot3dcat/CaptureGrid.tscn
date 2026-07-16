@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://b5capturegrid"]
-
-[ext_resource type="Script" path="res://capture_grid.gd" id="1"]
-
-[node name="CaptureGrid" type="Node3D"]
-script = ExtResource("1")

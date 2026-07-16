@@ -9,8 +9,11 @@ third_party/
 # 作業指示メモ（ローカル専用。公開しない）
 /prompt*.md
 
-# 購入素材の原本 glTF（再配布不可。誤って戻さない）
-godot/**/scene.gltf
+# ゲームエンジンの作業フォルダ（ローカル専用。公開しない。2026-07-16 に GitHub から削除）
+# godot/ には購入素材の原本 scene.gltf 由来物が含まれるため誤って戻さないこと
+/godot/
+/unity/
+/unreal/
 
 # Python cache and test cache
 __pycache__/
@@ -68,9 +71,9 @@ output_v2/**
 !output_v2/textures/p3_koha9face_basecolor.png
 !output_v2/textures/p3_koha9face_basecolor_alpha.png
 !output_v2/textures/p3_koha9face_fur_shell.png
-godot/**/.godot/
-# Godot が GLB インポート時に自動展開したテクスチャ（購入素材の原本コピーを含む・再生成可能）
-godot/**/*.png
+# Godot の作業キャッシュと GLB インポート時の自動展開テクスチャ（場所を問わず除外・再生成可能）
+**/.godot/
+output_v2/godot/**/*.png
 
 # Keep repository placeholders
 !.gitkeep
