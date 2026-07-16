@@ -2,8 +2,10 @@
 
 実在の猫（koha）の写真から、ゲームエンジンで動く リグ+アニメーション付き 3D モデルを作るプロジェクト。
 
-現在の成果物は **`output_v2/base/p3_koha9face.glb`**（三毛猫 koha の可動モデル。8アニメーション内蔵、
-Godot 4.x で再生確認済み）。このリポジトリには、その生成パイプライン一式と経緯ドキュメントが入っている。
+現在の成果物は **`output_v2/base/p3_koha9face.glb`**（三毛猫 koha の可動モデル。10アクション内蔵:
+Idle×2 / Walk / Walkback / Run / ネコパンチ×2 / Jump / 香箱座り / お座り）と、
+**Godot 4.x の操作デモ**（`output_v2/godot/Godot3dcat/`。WASD 移動・ジャンプ・パンチ・座りポーズ）。
+このリポジトリには、その生成パイプライン一式と経緯ドキュメントが入っている。
 
 | 顔（正面, 1440px キャプチャ） | 全アニメ × 4方向 |
 |---|---|
@@ -44,15 +46,35 @@ blender/       v1〜v2 初期の Blender スクリプト群
 scripts/       v1 のタスクスクリプト（画像インベントリ・背景除去・Tripo 検証）
 config/        パレット等の設定（cat_color_palette_v3_raw_photos.yaml が現行）
 output_v2/     生成物（p3_koha9face の glb/blend/テクスチャのみコミット。他はローカル再生成）
+output_v2/godot/Godot3dcat/   Godot 4.6 プロジェクト（猫コントローラ+ビューア。下記）
 images/        README 用プレビュー画像
 FACE_TUNING_GUIDE.md   顔の数値調整ガイド
 ```
+
+## Godot で動かす
+
+`output_v2/godot/Godot3dcat/` は Godot 4.6 のプロジェクト。モデル glb はリポジトリ肥大を
+避けるため未収録なので、最初に `output_v2/base/` からコピーする（インポート設定
+`p3_koha9face.glb.import`（ループ指定入り）はコミット済み）。
+
+```powershell
+Copy-Item output_v2\base\p3_koha9face.glb output_v2\godot\Godot3dcat\
+godot --path output_v2/godot/Godot3dcat res://scenes/PlayTest.tscn
+```
+
+| シーン | 内容 |
+|---|---|
+| `scenes/PlayTest.tscn` | 操作デモ。WASD=移動 Shift=走る S=後退 Space=ジャンプ J/K=ネコパンチ C=お座り V=香箱 Q/E=カメラ |
+| `scenes/ViewFace.tscn` | 全10アクションのビューア（1〜9,0 で切替） |
+| `scenes/JumpTest.tscn` | ジャンプの放物線+着地補正の検証（T で補正 ON/OFF 比較） |
+| `scripts/cat_controller.gd` | キャラ本体。入力を持たない「意図 API」設計（プレイヤーでも AI でも駆動可能） |
 
 ## 含めていないもの（公開リポジトリのため）
 
 - `input/` — 実物の猫の写真 **再配布不可のため除外**
 - `output_v2/` の大部分 — パイプラインで決定的に再生成できる中間生成物・バックアップ
-- ゲームエンジンの作業フォルダ（godot / unity / unreal）と v1 期の設計・タスク文書（docs）— ローカル管理
+- v1 期のゲームエンジン作業フォルダ（godot / unity / unreal）と設計・タスク文書（docs）— ローカル管理
+  （現行の Godot プロジェクトは `output_v2/godot/Godot3dcat/` として公開している）
 - `png/`、Godot が自動展開したテクスチャ
 
 **アセットの利用について**: コミットされている `p3_koha9face.*`（GLB/blend/テクスチャ）は、プレビュー・学習目的での閲覧を想定しており、**素材としての再配布・再利用はできません**。

@@ -79,5 +79,17 @@ output_v2/**
 **/.godot/
 output_v2/godot/**/*.png
 
+# ---- 公開: Godot 猫コントローラプロジェクト（2026-07-17 ユーザー指示）----
+# シーン・スクリプト・設定は公開。生成物（モデル glb 本体・自動抽出テクスチャ・キャッシュ）は
+# 除外 — glb は output_v2/base/p3_koha9face.glb をコピーすれば同じもの（README 参照）。
+# p3_koha9face.glb.import はループ設定を持つ手書き構成なので公開する。
+!output_v2/godot/
+!output_v2/godot/Godot3dcat/
+!output_v2/godot/Godot3dcat/**
+output_v2/godot/Godot3dcat/*.glb
+output_v2/godot/Godot3dcat/*.png
+output_v2/godot/Godot3dcat/*.png.import
+output_v2/godot/Godot3dcat/.godot/
+
 # Keep repository placeholders
 !.gitkeep
