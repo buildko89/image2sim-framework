@@ -7,7 +7,7 @@ Godot 4.x で再生確認済み）。このリポジトリには、その生成�
 
 | 顔（正面, 1440px キャプチャ） | 全アニメ × 4方向 |
 |---|---|
-| ![face](docs/images/koha9face_head_front.png) | ![overview](docs/images/koha9face_overview.png) |
+| ![face](images/koha9face_head_front.png) | ![overview](images/koha9face_overview.png) |
 
 ## 経緯（v1 → v2）
 
@@ -41,11 +41,10 @@ Godot 4.x で再生確認済み）。このリポジトリには、その生成�
 pipeline_v2/   v2 パイプライン本体（現在の主戦場）
 newplan/       v2 の経緯・結果ドキュメント（P0仕様、各段の結果、セッションログ）
 blender/       v1〜v2 初期の Blender スクリプト群
-godot/         Godot 確認用プロジェクト（ViewKoha9.tscn = 実機ビューア）
-docs/          v1 の設計・タスク文書 + 調査メモ
 scripts/       v1 のタスクスクリプト（画像インベントリ・背景除去・Tripo 検証）
 config/        パレット等の設定（cat_color_palette_v3_raw_photos.yaml が現行）
 output_v2/     生成物（p3_koha9face の glb/blend/テクスチャのみコミット。他はローカル再生成）
+images/        README 用プレビュー画像
 FACE_TUNING_GUIDE.md   顔の数値調整ガイド
 ```
 
@@ -53,6 +52,7 @@ FACE_TUNING_GUIDE.md   顔の数値調整ガイド
 
 - `input/` — 実物の猫の写真 **再配布不可のため除外**
 - `output_v2/` の大部分 — パイプラインで決定的に再生成できる中間生成物・バックアップ
+- ゲームエンジンの作業フォルダ（godot / unity / unreal）と v1 期の設計・タスク文書（docs）— ローカル管理
 - `png/`、Godot が自動展開したテクスチャ
 
 **アセットの利用について**: コミットされている `p3_koha9face.*`（GLB/blend/テクスチャ）は、プレビュー・学習目的での閲覧を想定しており、**素材としての再配布・再利用はできません**。
@@ -72,5 +72,5 @@ python pipeline_v2\p3_run_koha9face.py                         # 柄・髭・毛
 
 ## v1 のドキュメント
 
-v1 期のタスク仕様・レビュー運用は `docs/`（workflow.md, decisions.md, backlog.md 等）に残している。
+v1 期のタスク仕様・レビュー運用の文書はローカル管理に移した（公開対象外）。
 v1 最終時点のコードはタグ `v1-tripo` を参照。

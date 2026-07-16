@@ -15,6 +15,10 @@ third_party/
 /unity/
 /unreal/
 
+# v1 期の設計・タスク文書（ローカル専用。公開しない。2026-07-16 に GitHub から削除。
+# README 用プレビュー画像は images/ へ移設済み）
+/docs/
+
 # Python cache and test cache
 __pycache__/
 .pytest_cache/
