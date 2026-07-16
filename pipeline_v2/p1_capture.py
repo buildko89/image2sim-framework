@@ -24,7 +24,7 @@ import qa_skin_stretch as q  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
 GODOT = Path(r"D:\Godot_v4.6-stable_mono_win64\Godot_v4.6-stable_mono_win64_console.exe")
-GODOT_PROJ = REPO / "godot/Godot3dcat"
+GODOT_PROJ = REPO / "output_v2/godot/Godot3dcat"
 SHOTS = REPO / "output_v2/reports/p1_shots"
 FONT = "C:/Windows/Fonts/meiryo.ttc"
 VIEWS = ["front", "left", "right", "back"]
@@ -85,7 +85,7 @@ def capture(glb: Path, prefix: str) -> None:
     print(f"[{prefix}] head pivot={np.round(hp,4).tolist()} dist={hr:.4f}")
 
     p = subprocess.run([
-        str(GODOT), "--path", str(GODOT_PROJ), "res://CaptureGrid.tscn", "--",
+        str(GODOT), "--path", str(GODOT_PROJ), "res://scenes/CaptureGrid.tscn", "--",
         f"--model=res://{glb.name}", f"--prefix={prefix}", f"--out={SHOTS.as_posix()}",
         f"--pivot={pivot[0]},{pivot[1]},{pivot[2]}", f"--radius={radius}", f"--extent={extent}",
         f"--fov={FOV}", f"--res={RES}",
