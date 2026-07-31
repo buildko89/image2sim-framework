@@ -105,6 +105,18 @@ output_v2/godot/Godot3dcat/.godot/
 /newplan/route_a_*.md
 /output/drone2_trial/
 
-# ---- パラメトリックドローンの再生成可能な成果物 ----
-/output/drone2_parametric/
+# ---- パラメトリックドローン成果物（公開対象を明示的に限定）----
+/output/drone2_parametric/*
+!/output/drone2_parametric/archive/
+!/output/drone2_parametric/archive/*.blend
+!/output/drone2_parametric/archive/*.glb
+!/output/drone2_parametric/renders/
+!/output/drone2_parametric/renders/*.png
+!/output/drone2_parametric/drone2.blend
+!/output/drone2_parametric/drone2.glb
+!/output/drone2_parametric/hex6_radial/
+!/output/drone2_parametric/hex6_radial/hex6_radial.blend
+!/output/drone2_parametric/hex6_radial/hex6_radial.glb
+!/output/drone2_parametric/hex6_radial/renders/
+!/output/drone2_parametric/hex6_radial/renders/*.png
 /output/template_smoke/
