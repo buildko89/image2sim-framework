@@ -93,3 +93,18 @@ output_v2/godot/Godot3dcat/.godot/
 
 # Keep repository placeholders
 !.gitkeep
+
+# ローカルのBlender MCP設定メモ（個人環境のパスを含むため公開しない）
+/blender.md
+
+# ---- 成果不採用: Route A の評価・試行ファイル ----
+/blender/route_a_eval_*.py
+/scripts/route_a_eval/
+/tests/test_route_a_eval_manifest.py
+/tests/test_triposr_adapter.py
+/newplan/route_a_*.md
+/output/drone2_trial/
+
+# ---- パラメトリックドローンの再生成可能な成果物 ----
+/output/drone2_parametric/
+/output/template_smoke/
