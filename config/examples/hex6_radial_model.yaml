@@ -1,0 +1,48 @@
+template_file: config/drone_templates/multirotor_base.yaml
+subject_id: hex6_template_smoke
+dimensions_provisional: true
+
+measurements:
+  body_height_mm:
+    value: 18.0
+    source: sample
+    tolerance_mm: 0.5
+  body_length_mm:
+    value: 60.0
+    source: sample
+    tolerance_mm: 0.5
+  propeller_diameter_mm:
+    value: 36.0
+    source: sample
+    tolerance_mm: 0.5
+
+layout:
+  mode: radial
+  rotor_count: 6
+  radius_mm: 55.0
+  start_angle_deg: -90.0
+  id_prefix: r
+  motor_axis_z_mm: 5.0
+
+body:
+  shape: rounded_box
+  width_mm: 42.0
+  length_mm: 60.0
+  height_mm: 18.0
+  bevel_mm: 5.0
+
+propeller:
+  diameter_mm: 36.0
+  direction_pattern: [ccw, cw]
+
+guard:
+  enabled: false
+
+landing:
+  enabled: false
+
+output:
+  directory: output/template_smoke/hex6_radial
+  blend: hex6_radial.blend
+  glb: hex6_radial.glb
+  render_resolution: 360
