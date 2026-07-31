@@ -1,0 +1,97 @@
+schema_version: "1.1"
+template_id: quad_x_guarded
+units: mm
+dimensions_provisional: true
+
+coordinate_system:
+  right_axis: +X
+  front_axis: -Y
+  up_axis: +Z
+  root_origin: estimated_center_of_mass
+
+layout:
+  mode: square_diagonal
+  square_motor_layout: true
+  motor_axis_z_mm: 7.0
+
+body:
+  shape: lofted
+  width_mm: 34.0
+  length_mm: 50.0
+  height_mm: 25.0
+  center_z_mm: 0.0
+  longitudinal_segments: 18
+  radial_segments: 32
+  width_profile_power: 0.72
+  height_profile_power: 1.05
+  cross_section_power: 0.78
+
+arm:
+  enabled: true
+  root_width_mm: 10.0
+  tip_width_mm: 7.0
+  thickness_mm: 5.0
+  root_fraction: 0.34
+  center_z_mm: 0.0
+
+motor:
+  housing_diameter_mm: 11.0
+  housing_height_mm: 14.0
+  center_z_mm: 3.0
+  shaft_diameter_mm: 2.0
+  shaft_height_mm: 4.0
+
+propeller:
+  diameter_mm: 50.0
+  hub_diameter_mm: 7.0
+  hub_height_mm: 3.0
+  blade_count: 2
+  blade_root_width_mm: 7.0
+  blade_tip_width_mm: 4.0
+  blade_thickness_mm: 1.2
+  blade_root_radius_mm: 4.0
+  center_z_mm: 12.0
+  direction_pattern: [ccw, cw]
+  directions:
+    fl: ccw
+    fr: cw
+    rl: cw
+    rr: ccw
+  direction_source: placeholder
+
+guard:
+  enabled: true
+  size_mode: fit_overall
+  tube_diameter_mm: 2.4
+  center_z_mm: 8.0
+  inner_gap_deg: 84.0
+  major_segments: 48
+  minor_segments: 8
+  strut_count: 3
+  strut_radius_mm: 0.72
+
+landing:
+  enabled: true
+  leg_diameter_mm: 3.5
+  leg_height_mm: 8.0
+  leg_center_z_mm: -7.5
+  foot_diameter_mm: 5.0
+  foot_height_mm: 4.0
+  foot_center_z_mm: -12.5
+
+physics:
+  center_of_mass_mm: [0.0, 0.0, 0.0]
+  center_of_mass_source: placeholder
+  mass_g: null
+  inertia_kg_m2: null
+  inertia_source: pending
+
+references: {}
+
+output:
+  blend: model.blend
+  glb: model.glb
+  resolved_config: resolved_config.json
+  build_report: build_report.json
+  qa_report: qa_report.json
+  render_resolution: 720
