@@ -7,6 +7,9 @@ Idle×2 / Walk / Walkback / Run / ネコパンチ×2 / Jump / 香箱座り / お
 **Godot 4.x の操作デモ**（`output_v2/godot/Godot3dcat/`。WASD 移動・ジャンプ・パンチ・座りポーズ）。
 このリポジトリには、その生成パイプライン一式と経緯ドキュメントが入っている。
 
+加えて、実測寸法と複数方向の写真を基に、Blender Pythonでドローンを部品単位に
+組み立てる**パラメトリックドローン生成機能**を収録している。ローカル3D生成AIは使用しない。
+
 | 顔（正面, 1440px キャプチャ） | 全アニメ × 4方向 |
 |---|---|
 | ![face](images/koha9face_head_front.png) | ![overview](images/koha9face_overview.png) |
@@ -37,14 +40,140 @@ Idle×2 / Walk / Walkback / Run / ネコパンチ×2 / Jump / 香箱座り / お
 顔まわりの数値調整の方法は **`FACE_TUNING_GUIDE.md`** にまとめてある。
 メッシュ変形時の塗りアンカー追従は `pipeline_v2/p4_remap_anchors.py`（新旧 UV ベイクの同一テクセル対応）。
 
+## パラメトリックドローン生成
+
+### 概要
+
+写真から完成メッシュを直接生成するのではなく、実測寸法をYAMLへ記録し、中央ボディ、アーム、
+モーター、プロペラ、プロペラガード、脚部をBlender上で決定的に生成する。
+
+- 既存の4ロータX型・ガード付きdrone2を再生成可能
+- ローター数、配置、回転方向、各部品の寸法と有無を設定可能
+- 4ロータ互換、放射配置、モーター座標の個別指定に対応
+- `.blend`、GLB、6方向レンダー、寸法QA、日本語レポートを同じ設定から生成
+- 各プロペラは独立ノードを持ち、BlenderやGLB読込先で個別に回転可能
+
+詳しい操作は[パラメトリックドローン生成 詳細利用手順](newplan2/06_パラメトリックドローン生成_詳細利用手順.md)、
+設計方針は[テンプレート方式の設計・利用方法](newplan2/05_テンプレート方式設計と利用方法.md)を参照。
+
+### 必要環境
+
+- Windows
+- Python 3.x
+- Blender 5.2 LTS
+- `requirements.txt`のPythonパッケージ
+
+```powershell
+pip install -r requirements.txt
+```
+
+Blenderを標準パス以外へインストールした場合は、実行時に`--blender`で指定する。
+
+### 既存drone2を生成する
+
+公開リポジトリには実物写真を含めていない。写真比較シートも生成する場合は、次の6枚を
+`input/raw_photos/drone2/`へ配置する。
+
+```text
+上.jpg
+下.jpg
+前.jpg
+後.jpg
+左.jpg
+右.jpg
+```
+
+実測値と部品寸法は[`config/drone2_model.yaml`](config/drone2_model.yaml)に記録されている。
+生成コマンドは次のとおり。
+
+```powershell
+python scripts\drone_model\run_build.py --overwrite
+```
+
+写真を配置せず、モデル生成だけを行う場合：
+
+```powershell
+python scripts\drone_model\run_build.py --overwrite --skip-contact-sheet
+```
+
+主な出力先は`output/drone2_parametric/`である。
+
+| 成果物 | 内容 |
+|---|---|
+| `drone2.blend` | 編集・確認用Blenderファイル |
+| `drone2.glb` | ゲームエンジン・シミュレータ連携用モデル |
+| `renders/*.png` | 上下前後左右の6方向レンダー |
+| `comparison_sheet.png` | 実物写真とレンダーの比較シート |
+| `qa_report.json` | 寸法、ローター数、必須部品名の検査結果 |
+| `BUILD_REPORT.md` | 日本語の生成結果レポート |
+| `resolved_config.json` | テンプレート継承後の最終設定 |
+
+`.blend`、GLB、レンダーなどの生成物はGit管理対象外で、ローカルで再生成する。
+
+### 別のドローンを生成する
+
+機体固有のYAMLから、近いテンプレートを継承する。
+
+```yaml
+template_file: config/drone_templates/multirotor_base.yaml
+subject_id: new_drone
+
+layout:
+  mode: radial
+  rotor_count: 6
+  radius_mm: 55.0
+
+body:
+  width_mm: 42.0
+  length_mm: 60.0
+  height_mm: 18.0
+```
+
+利用できる配置方式：
+
+| `layout.mode` | 用途 |
+|---|---|
+| `square_diagonal` | 対角モーター中心間距離から4ロータX型を作る |
+| `radial` | 任意数のローターを中心から同じ半径へ等間隔配置する |
+| `explicit` | 各モーターのX・Y座標を個別指定する |
+
+6ロータの設定例を実行する場合：
+
+```powershell
+python scripts\drone_model\run_build.py `
+  --config config\examples\hex6_radial_model.yaml `
+  --overwrite `
+  --skip-contact-sheet
+```
+
+テンプレートは[`config/drone_templates/`](config/drone_templates/)にある。新しい機体では、
+写真からモーター中心位置と外形を確認し、全幅、全長、ボディ寸法、プロペラ径を実測して
+機体固有YAMLへ入力する。既存の部品で表現できないダクト、ジンバル、折り畳み機構などは、
+`blender/drone_model/build_drone.py`へ専用の部品生成関数を追加する。
+
+### 検証
+
+テンプレート継承と配置計算のテスト：
+
+```powershell
+python -m unittest tests.test_drone_model_templates -v
+```
+
+Blender生成コードの構文確認：
+
+```powershell
+python -m compileall scripts\drone_model blender\drone_model
+```
+
 ## リポジトリ構成
 
 ```text
 pipeline_v2/   v2 パイプライン本体（現在の主戦場）
 newplan/       v2 の経緯・結果ドキュメント（P0仕様、各段の結果、セッションログ）
-blender/       v1〜v2 初期の Blender スクリプト群
-scripts/       v1 のタスクスクリプト（画像インベントリ・背景除去・Tripo 検証）
-config/        パレット等の設定（cat_color_palette_v3_raw_photos.yaml が現行）
+newplan2/      パラメトリックドローンの設計・採寸・テンプレート利用方法
+blender/       猫モデルおよびドローン部品生成用のBlenderスクリプト群
+scripts/       画像処理、検証、ドローン生成ランナー
+config/        猫用パレット、ドローン機体設定、ドローンテンプレート
 output_v2/     生成物（p3_koha9face の glb/blend/テクスチャのみコミット。他はローカル再生成）
 output_v2/godot/Godot3dcat/   Godot 4.6 プロジェクト（猫コントローラ+ビューア。下記）
 images/        README 用プレビュー画像
