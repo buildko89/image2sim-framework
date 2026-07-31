@@ -108,7 +108,9 @@ python scripts\drone_model\run_build.py --overwrite --skip-contact-sheet
 | `BUILD_REPORT.md` | 日本語の生成結果レポート |
 | `resolved_config.json` | テンプレート継承後の最終設定 |
 
-`.blend`、GLB、レンダーなどの生成物はGit管理対象外で、ローカルで再生成する。
+参照用として、`output/drone2_parametric/`の現行drone2、過去形状の`archive`、6方向レンダー、
+および`hex6_radial/`の6ロータ成果物はGitへ収録している。ログ、JSONレポート、比較シート、
+Blenderの自動バックアップは引き続きGit管理対象外で、ローカルで再生成する。
 
 ### 別のドローンを生成する
 
