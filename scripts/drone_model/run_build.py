@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import io
 import json
 import math
 import subprocess
@@ -29,7 +30,7 @@ VIEWS = (
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="drone2のパラメトリックモデルを生成します。")
+    parser = argparse.ArgumentParser(description="パラメトリックドローンモデルを生成します。")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--blender", default=str(DEFAULT_BLENDER))
     parser.add_argument("--overwrite", action="store_true")
@@ -144,21 +145,32 @@ def validate_and_resolve(config: dict[str, Any]) -> dict[str, Any]:
     propeller = float(propeller_cfg.get("diameter_mm") or measurement_value(config, "propeller_diameter_mm"))
     guard = config.setdefault("guard", {"enabled": False})
     guard_enabled = bool(guard.get("enabled", True))
-    guard_outer = guard_inner = clearance = None
+    guard_outer = guard_outer_x = guard_outer_y = guard_inner = clearance = None
     if guard_enabled:
         size_mode = str(guard.get("size_mode", "fit_overall"))
-        if size_mode == "fit_overall":
+        if size_mode in {"fit_overall", "fit_overall_xy"}:
             width = measurement_value(config, "overall_width_mm")
             length = measurement_value(config, "overall_length_mm")
             xs = [value[0] for value in positions.values()]
             ys = [value[1] for value in positions.values()]
             span_x, span_y = max(xs) - min(xs), max(ys) - min(ys)
-            guard_outer = min(float(width) - span_x, float(length) - span_y)
+            fitted_x = float(width) - span_x
+            fitted_y = float(length) - span_y
+            if size_mode == "fit_overall_xy":
+                guard_outer_x, guard_outer_y = fitted_x, fitted_y
+                guard_outer = min(fitted_x, fitted_y)
+            else:
+                guard_outer = min(fitted_x, fitted_y)
+                guard_outer_x = guard_outer_y = guard_outer
         elif size_mode == "explicit":
             configured = guard.get("outer_diameter_mm")
             guard_outer = float(configured["value"] if isinstance(configured, dict) else configured)
+            guard_outer_x = float(guard.get("outer_width_mm", guard_outer))
+            guard_outer_y = float(guard.get("outer_length_mm", guard_outer))
         else:
             raise ValueError(f"未対応のguard.size_modeです: {size_mode}")
+        if min(float(guard_outer_x), float(guard_outer_y)) <= 0:
+            raise ValueError("ガード外径は正数である必要があります。")
         tube = float(guard["tube_diameter_mm"])
         guard_inner = guard_outer - 2.0 * tube
         clearance = (guard_inner - propeller) / 2.0
@@ -173,6 +185,8 @@ def validate_and_resolve(config: dict[str, Any]) -> dict[str, Any]:
         "motor_center_spacing_x_mm": spacing_x,
         "motor_center_spacing_y_mm": spacing_y,
         "guard_outer_diameter_mm": guard_outer,
+        "guard_outer_width_mm": guard_outer_x,
+        "guard_outer_length_mm": guard_outer_y,
         "guard_inner_diameter_mm": guard_inner,
         "propeller_radial_clearance_mm": clearance,
         "motor_positions_mm": positions,
@@ -222,6 +236,24 @@ def fit_panel(image: Image.Image, size: tuple[int, int]) -> Image.Image:
     return panel
 
 
+def load_reference_image(path: Path) -> Image.Image:
+    """Pillow非対応のHEICはImageMagickへフォールバックして読み込む。"""
+    try:
+        with Image.open(path) as source:
+            return source.copy()
+    except Exception as pillow_error:
+        completed = subprocess.run(
+            ["magick", str(path), "-auto-orient", "png:-"],
+            capture_output=True,
+            timeout=90,
+        )
+        if completed.returncode != 0:
+            stderr = completed.stderr.decode("utf-8", errors="replace")[-1000:]
+            raise RuntimeError(f"参照画像を開けません: {path}: {pillow_error}; {stderr}") from pillow_error
+        with Image.open(io.BytesIO(completed.stdout)) as converted:
+            return converted.copy()
+
+
 def build_contact_sheet(config: dict[str, Any], output_dir: Path) -> Path:
     cell = (420, 315)
     label_width = 90
@@ -241,8 +273,8 @@ def build_contact_sheet(config: dict[str, Any], output_dir: Path) -> Path:
             raise ValueError(f"比較シートに必要な参照画像がありません: references.{view}")
         source_path = resolve_repo_path(references[view])
         render_path = output_dir / "renders" / f"{view}.png"
-        with Image.open(source_path) as source:
-            sheet.paste(fit_panel(source, cell), (label_width, y))
+        source = load_reference_image(source_path)
+        sheet.paste(fit_panel(source, cell), (label_width, y))
         with Image.open(render_path) as rendered:
             sheet.paste(fit_panel(rendered, cell), (label_width + cell[0], y))
 
@@ -269,9 +301,23 @@ def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, 
             "pass": not build_report.get("duplicate_suffix_names"),
         },
     }
+    expected_under = sorted(config.get("motor", {}).get("under_frame_rotors", []))
+    if expected_under:
+        actual_under = sorted(
+            rotor_id
+            for rotor_id, item in build_report["motor_axes"].items()
+            if item.get("mount_side") == "under_frame"
+        )
+        checks["under_frame_motors"] = {
+            "expected": expected_under,
+            "actual": actual_under,
+            "pass": actual_under == expected_under,
+        }
     dimensional_checks = (
         ("overall_width", "overall_width_mm", actual["x"]),
         ("overall_length", "overall_length_mm", actual["y"]),
+        ("overall_height", "overall_height_mm", actual["z"]),
+        ("body_width", "body_width_mm", actual_body["x"]),
         ("body_height", "body_height_mm", actual_body["z"]),
         ("body_length", "body_length_mm", actual_body["y"]),
     )
@@ -286,6 +332,208 @@ def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, 
                 "tolerance_mm": tolerance,
                 "pass": abs(actual_value - expected) <= tolerance,
             }
+    first_motor = next(iter(build_report.get("motor_axes", {}).values()), None)
+    first_guard_mount = next(iter(build_report.get("guard_mounts", {}).values()), None)
+    front_camera = build_report.get("camera_modules", {}).get("front")
+    detailed_dimensions = (
+        (
+            "motor_housing_diameter",
+            "motor_housing_diameter_mm",
+            first_motor["motor_dimensions_mm"][0] if first_motor else None,
+        ),
+        (
+            "guard_mount_tube_diameter",
+            "guard_mount_tube_diameter_mm",
+            first_guard_mount["dimensions_mm"][0] if first_guard_mount else None,
+        ),
+        (
+            "front_camera_diameter",
+            "front_camera_diameter_mm",
+            max(front_camera["dimensions_mm"][0], front_camera["dimensions_mm"][2]) if front_camera else None,
+        ),
+    )
+    for check_name, measurement_name, actual_value in detailed_dimensions:
+        expected = measurement_value(config, measurement_name, required=False)
+        if expected is not None:
+            tolerance = float(config["measurements"][measurement_name].get("tolerance_mm", 0.5))
+            checks[check_name] = {
+                "expected_mm": expected,
+                "actual_mm": actual_value,
+                "error_mm": None if actual_value is None else actual_value - expected,
+                "tolerance_mm": tolerance,
+                "pass": actual_value is not None and abs(actual_value - expected) <= tolerance,
+            }
+    arm_measurements = (
+        ("front_arm_outer_length", "front_arm_outer_length_mm", ("fl", "fr"), "outer"),
+        ("front_arm_inner_length", "front_arm_inner_length_mm", ("fl", "fr"), "inner"),
+        ("rear_arm_outer_length", "rear_arm_outer_length_mm", ("rl", "rr"), "outer"),
+        ("rear_arm_inner_length", "rear_arm_inner_length_mm", ("rl", "rr"), "inner"),
+    )
+    for check_name, measurement_name, rotor_ids, role in arm_measurements:
+        expected = measurement_value(config, measurement_name, required=False)
+        if expected is None:
+            continue
+        actual_values = {
+            rotor_id: build_report.get("arm_members", {}).get(rotor_id, {}).get(role, {}).get("measured_length_mm")
+            for rotor_id in rotor_ids
+        }
+        tolerance = float(config["measurements"][measurement_name].get("tolerance_mm", 1.0))
+        checks[check_name] = {
+            "expected_mm": expected,
+            "actual_mm": actual_values,
+            "tolerance_mm": tolerance,
+            "pass": all(
+                value is not None and abs(float(value) - expected) <= tolerance
+                for value in actual_values.values()
+            ),
+        }
+    expected_vertical_roles = sorted(str(value) for value in config.get("arm", {}).get("vertical_member_roles", []))
+    if expected_vertical_roles:
+        actual_vertical_roles = {
+            rotor_id: {
+                role: sorted(
+                    build_report.get("arm_members", {}).get(rotor_id, {}).get(role, {}).get("vertical_roles", [])
+                )
+                for role in ("outer", "inner")
+            }
+            for rotor_id in config["derived"]["rotor_ids"]
+        }
+        checks["arm_vertical_members"] = {
+            "expected": expected_vertical_roles,
+            "actual": actual_vertical_roles,
+            "pass": all(
+                roles == expected_vertical_roles
+                for rotor in actual_vertical_roles.values()
+                for roles in rotor.values()
+            ),
+        }
+    camera_protrusion = measurement_value(config, "front_camera_protrusion_mm", required=False)
+    if camera_protrusion is not None:
+        actual_protrusion = (
+            build_report.get("camera_modules", {}).get("front", {}).get("body_protrusion_mm")
+        )
+        tolerance = float(config["measurements"]["front_camera_protrusion_mm"].get("tolerance_mm", 0.5))
+        checks["front_camera_protrusion"] = {
+            "expected_mm": camera_protrusion,
+            "actual_mm": actual_protrusion,
+            "error_mm": None if actual_protrusion is None else actual_protrusion - camera_protrusion,
+            "tolerance_mm": tolerance,
+            "pass": actual_protrusion is not None and abs(actual_protrusion - camera_protrusion) <= tolerance,
+        }
+    guard_tube = measurement_value(config, "guard_tube_diameter_mm", required=False)
+    if guard_tube is not None:
+        actual_tubes = {
+            rotor_id: item.get("tube_diameter_mm")
+            for rotor_id, item in build_report.get("guard_modules", {}).items()
+        }
+        tolerance = float(config["measurements"]["guard_tube_diameter_mm"].get("tolerance_mm", 0.3))
+        checks["guard_tube_diameter"] = {
+            "expected_mm": guard_tube,
+            "actual_mm": actual_tubes,
+            "tolerance_mm": tolerance,
+            "pass": bool(actual_tubes)
+            and all(
+                value is not None and abs(float(value) - guard_tube) <= tolerance
+                for value in actual_tubes.values()
+            ),
+        }
+    expected_sweep = config.get("guard", {}).get("sweep_deg")
+    if expected_sweep is not None:
+        actual_sweeps = {
+            rotor_id: item.get("sweep_deg")
+            for rotor_id, item in build_report.get("guard_modules", {}).items()
+        }
+        checks["guard_sweep"] = {
+            "expected_deg": float(expected_sweep),
+            "actual_deg": actual_sweeps,
+            "pass": bool(actual_sweeps)
+            and all(
+                value is not None and abs(float(value) - float(expected_sweep)) <= 0.01
+                for value in actual_sweeps.values()
+            ),
+        }
+    expected_guard_height = measurement_value(config, "guard_height_above_motor_pod_mm", required=False)
+    if expected_guard_height is not None:
+        actual_guard_heights = {
+            rotor_id: item.get("height_above_motor_pod_mm")
+            for rotor_id, item in build_report.get("guard_modules", {}).items()
+        }
+        tolerance = float(config["measurements"]["guard_height_above_motor_pod_mm"].get("tolerance_mm", 1.0))
+        checks["guard_height_above_motor_pod"] = {
+            "expected_mm": expected_guard_height,
+            "actual_mm": actual_guard_heights,
+            "tolerance_mm": tolerance,
+            "pass": bool(actual_guard_heights)
+            and all(
+                value is not None and abs(float(value) - expected_guard_height) <= tolerance
+                for value in actual_guard_heights.values()
+            ),
+        }
+    expected_guard_projection = measurement_value(config, "guard_mount_to_arc_mm", required=False)
+    if expected_guard_projection is not None:
+        actual_guard_projections = {
+            rotor_id: item.get("strut_horizontal_projection_mm", [])
+            for rotor_id, item in build_report.get("guard_modules", {}).items()
+        }
+        tolerance = float(config["measurements"]["guard_mount_to_arc_mm"].get("tolerance_mm", 2.0))
+        checks["guard_mount_to_arc_horizontal"] = {
+            "expected_mm": expected_guard_projection,
+            "actual_mm": actual_guard_projections,
+            "tolerance_mm": tolerance,
+            "pass": bool(actual_guard_projections)
+            and all(
+                values
+                and all(abs(float(value) - expected_guard_projection) <= tolerance for value in values)
+                for values in actual_guard_projections.values()
+            ),
+        }
+    motor_locations = [axis["location_mm"] for axis in build_report["motor_axes"].values()]
+    if motor_locations:
+        expected_diagonal = measurement_value(config, "motor_center_diagonal_mm", required=False)
+        if expected_diagonal is not None:
+            actual_diagonal = max(
+                math.hypot(a[0] - b[0], a[1] - b[1])
+                for index, a in enumerate(motor_locations)
+                for b in motor_locations[index + 1 :]
+            )
+            tolerance = float(config["measurements"]["motor_center_diagonal_mm"].get("tolerance_mm", 1.0))
+            checks["motor_center_diagonal"] = {
+                "expected_mm": expected_diagonal,
+                "actual_mm": actual_diagonal,
+                "error_mm": actual_diagonal - expected_diagonal,
+                "tolerance_mm": tolerance,
+                "pass": abs(actual_diagonal - expected_diagonal) <= tolerance,
+            }
+        motor_span_x = max(item[0] for item in motor_locations) - min(item[0] for item in motor_locations)
+        motor_span_y = max(item[1] for item in motor_locations) - min(item[1] for item in motor_locations)
+        for check_name, measurement_name, actual_value in (
+            ("motor_center_span_x", "motor_center_span_x_mm", motor_span_x),
+            ("motor_center_span_y", "motor_center_span_y_mm", motor_span_y),
+        ):
+            expected = measurement_value(config, measurement_name, required=False)
+            if expected is not None:
+                tolerance = float(config["measurements"][measurement_name].get("tolerance_mm", 1.0))
+                checks[check_name] = {
+                    "expected_mm": expected,
+                    "actual_mm": actual_value,
+                    "error_mm": actual_value - expected,
+                    "tolerance_mm": tolerance,
+                    "pass": abs(actual_value - expected) <= tolerance,
+                }
+    expected_mast_height = measurement_value(config, "gps_mast_height_mm", required=False)
+    if expected_mast_height is not None:
+        mast_heights = {
+            mast_id: item["height_mm"]
+            for mast_id, item in build_report.get("sensor_masts", {}).items()
+        }
+        tolerance = float(config["measurements"]["gps_mast_height_mm"].get("tolerance_mm", 1.0))
+        checks["gps_mast_height"] = {
+            "expected_mm": expected_mast_height,
+            "actual_mm": mast_heights,
+            "tolerance_mm": tolerance,
+            "pass": bool(mast_heights)
+            and all(abs(value - expected_mast_height) <= tolerance for value in mast_heights.values()),
+        }
     passed = all(item["pass"] for item in checks.values())
     return {
         "schema_version": "1.0",
@@ -293,10 +541,10 @@ def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, 
         "status": "PASS" if passed else "FAIL",
         "dimensions_provisional": bool(config.get("dimensions_provisional", True)),
         "checks": checks,
-        "notes": [
-            "中央ボディ幅、モーター、ガード断面、機体全体の最大高は写真推定または仮置きです。",
-            "質量、重心、慣性、実機ローター回転方向は未確定です。",
-        ],
+        "notes": list(config.get("qa_notes", [
+            "写真から判別できない小部品形状は代表形状でモデル化しています。",
+            "質量、重心、慣性、実機ローター回転方向は実測・確認後に更新してください。",
+        ])),
     }
 
 
@@ -330,6 +578,9 @@ def write_markdown_report(
     ]
     labels = {
         "overall_width_mm": "機体全幅", "overall_length_mm": "機体全長",
+        "overall_height_mm": "機体全高",
+        "motor_center_span_x_mm": "左右モーター中心スパン",
+        "motor_center_span_y_mm": "前後モーター中心スパン",
         "motor_center_diagonal_mm": "対角モーター中心間", "propeller_diameter_mm": "プロペラ直径",
         "body_height_mm": "中央ボディ高さ", "body_length_mm": "中央ボディ前後長",
     }
@@ -346,6 +597,11 @@ def write_markdown_report(
             f"- ガード内径：{derived['guard_inner_diameter_mm']:.3f} mm",
             f"- プロペラ先端の半径方向隙間：{derived['propeller_radial_clearance_mm']:.3f} mm",
         ])
+    motor_locations = list(derived["motor_positions_mm"].values())
+    if motor_locations:
+        span_x = max(item[0] for item in motor_locations) - min(item[0] for item in motor_locations)
+        span_y = max(item[1] for item in motor_locations) - min(item[1] for item in motor_locations)
+        lines.append(f"- モーター中心スパン：X={span_x:.3f} mm、Y={span_y:.3f} mm")
     lines.extend([
         "", "## 生成結果", "",
         f"- バウンディング寸法：X={dimensions['x']:.3f}、Y={dimensions['y']:.3f}、Z={dimensions['z']:.3f} mm",

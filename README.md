@@ -45,9 +45,10 @@ Idle×2 / Walk / Walkback / Run / ネコパンチ×2 / Jump / 香箱座り / お
 ### 概要
 
 写真から完成メッシュを直接生成するのではなく、実測寸法をYAMLへ記録し、中央ボディ、アーム、
-モーター、プロペラ、プロペラガード、脚部をBlender上で決定的に生成する。
+押出フレーム、主翼、モーター、ESC、プロペラ、プロペラガード、脚部をBlender上で決定的に生成する。
 
 - 既存の4ロータX型・ガード付きdrone2を再生成可能
+- 8ロータ・アルミ押出フレーム・主翼付きdrone3を再生成可能
 - ローター数、配置、回転方向、各部品の寸法と有無を設定可能
 - 4ロータ互換、放射配置、モーター座標の個別指定に対応
 - `.blend`、GLB、6方向レンダー、寸法QA、日本語レポートを同じ設定から生成
@@ -107,6 +108,20 @@ python scripts\drone_model\run_build.py --overwrite --skip-contact-sheet
 | `qa_report.json` | 寸法、ローター数、必須部品名の検査結果 |
 | `BUILD_REPORT.md` | 日本語の生成結果レポート |
 | `resolved_config.json` | テンプレート継承後の最終設定 |
+
+### 大型フレーム機drone3を生成する
+
+drone3は、Excel部品表、寸法注記画像、PDF図面、HEIC写真を基にした8ロータ機である。
+部品表の正規化と既知質量下限の集計後、Blenderモデルを生成する。
+
+```powershell
+python scripts\drone_model\analyze_drone3_bom.py
+python scripts\drone_model\run_build.py --config config\drone3_model.yaml --overwrite
+```
+
+設定は[`config/drone3_model.yaml`](config/drone3_model.yaml)、出力は
+`output/drone3_parametric/`へ保存される。通常の成果物に加え、`PARTS_SUMMARY.md`と
+`parts_inventory.json`へ部品表の整理結果を出力する。
 
 参照用として、`output/drone2_parametric/`の現行drone2、過去形状の`archive`、6方向レンダー、
 および`hex6_radial/`の6ロータ成果物はGitへ収録している。ログ、JSONレポート、比較シート、
