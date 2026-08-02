@@ -125,3 +125,5 @@ output_v2/godot/Godot3dcat/.godot/
 !/output/drone2_parametric/hex6_radial/renders/
 !/output/drone2_parametric/hex6_radial/renders/*.png
 /output/template_smoke/
+
+drone3.md

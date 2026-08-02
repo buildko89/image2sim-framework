@@ -69,10 +69,10 @@ pip install -r requirements.txt
 
 Blenderを標準パス以外へインストールした場合は、実行時に`--blender`で指定する。
 
-### 既存drone2を生成する
+### droneを生成する
 
 公開リポジトリには実物写真を含めていない。写真比較シートも生成する場合は、次の6枚を
-`input/raw_photos/drone2/`へ配置する。
+`input/raw_photos/drone/`へ配置する。
 
 ```text
 上.jpg
@@ -83,7 +83,8 @@ Blenderを標準パス以外へインストールした場合は、実行時に`
 右.jpg
 ```
 
-実測値と部品寸法は[`config/drone2_model.yaml`](config/drone2_model.yaml)に記録されている。
+実測値と部品寸法は[`config/drone2_model.yaml`](config/drone2_model.yaml)が参考になる。
+
 生成コマンドは次のとおり。
 
 ```powershell
@@ -107,20 +108,6 @@ python scripts\drone_model\run_build.py --overwrite --skip-contact-sheet
 | `qa_report.json` | 寸法、ローター数、必須部品名の検査結果 |
 | `BUILD_REPORT.md` | 日本語の生成結果レポート |
 | `resolved_config.json` | テンプレート継承後の最終設定 |
-
-### 大型フレーム機drone3を生成する
-
-drone3は、Excel部品表、寸法注記画像、PDF図面、HEIC写真を基にした8ロータ機である。
-部品表の正規化と既知質量下限の集計後、Blenderモデルを生成する。
-
-```powershell
-python scripts\drone_model\analyze_drone3_bom.py
-python scripts\drone_model\run_build.py --config config\drone3_model.yaml --overwrite
-```
-
-設定は[`config/drone3_model.yaml`](config/drone3_model.yaml)、出力は
-`output/drone3_parametric/`へ保存される。通常の成果物に加え、`PARTS_SUMMARY.md`と
-`parts_inventory.json`へ部品表の整理結果を出力する。
 
 参照用として、`output/drone2_parametric/`の現行drone2、過去形状の`archive`、6方向レンダー、
 および`hex6_radial/`の6ロータ成果物はGitへ収録している。ログ、JSONレポート、比較シート、
