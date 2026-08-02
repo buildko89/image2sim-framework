@@ -1,6 +1,8 @@
 # Local environment
 .env
+.vscode/
 .venv/
+.venv_*/
 .venv_triposr/
 .venv_hunyuan3d/
 external/
@@ -93,6 +95,9 @@ output_v2/godot/Godot3dcat/.godot/
 
 # Keep repository placeholders
 !.gitkeep
+
+# Claude Code のローカル作業メモ（公開しない。2026-07-18 に .claude/memory/ を出力）
+/.claude/
 
 # ローカルのBlender MCP設定メモ（個人環境のパスを含むため公開しない）
 /blender.md

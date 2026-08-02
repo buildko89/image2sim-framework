@@ -16,6 +16,89 @@ generation:
     - instantmesh
     - hunyuan3d
   local_first: true
+route_a_evaluation:
+  schema_version: "1.0"
+  tools:
+    blender_path: C:/Program Files/Blender Foundation/Blender 5.2/blender.exe
+    godot_path: D:/Godot_v4.6-stable_mono_win64/Godot_v4.6-stable_mono_win64_console.exe
+  blender_evaluation:
+    target_size: 1.0
+    render_resolution: 1440
+    front_axis: -Y
+  input_manifest:
+    subject_id: koha
+    background_report: output/reports/background_removal.json
+    output: output/reports/route_a_evaluation/input_manifest.json
+    views:
+      cat_side:
+        view: side_left
+        role: primary_generation
+        source_file: input/selected_photos/reference_side_standing_pattern_1713434749448.jpg
+        eligible_for_generation: true
+      cat_front:
+        view: front
+        role: holdout
+        source_file: input/selected_photos/reference_front_face_1763363798733.jpg
+        eligible_for_generation: false
+      cat_back:
+        view: back
+        role: holdout
+        source_file: input/selected_photos/reference_back_top_tail_1755598074234.jpg
+        eligible_for_generation: false
+      cat_top:
+        view: top_back
+        role: holdout
+        source_file: input/selected_photos/reference_back_top_motion_1762988855408_frame_000630.jpg
+        eligible_for_generation: false
+      cat_other_side:
+        view: side_right
+        role: holdout
+        source_file: input/selected_photos/reference_side_right_body_1698975320501.jpg
+        eligible_for_generation: false
+  drone_input_manifest:
+    subject_id: drone_proto
+    background_report: output/reports/drone_background/background_removal.json
+    output: output/reports/route_a_evaluation/drone_input_manifest.json
+    views:
+      drone_oblique_top:
+        view: oblique_top
+        role: primary_generation
+        source_file: input/raw_photos/drone/drone4.png
+        eligible_for_generation: true
+      drone_top:
+        view: top_front
+        role: secondary_generation
+        source_file: input/raw_photos/drone/drone1.png
+        eligible_for_generation: true
+      drone_oblique_side:
+        view: oblique_side
+        role: holdout
+        source_file: input/raw_photos/drone/drone2.png
+        eligible_for_generation: false
+      drone_front:
+        view: front
+        role: holdout
+        source_file: input/raw_photos/drone/drone3.png
+        eligible_for_generation: false
+      drone_back_side:
+        view: back_side
+        role: holdout
+        source_file: input/raw_photos/drone/drone5.png
+        eligible_for_generation: false
+  release_candidates:
+    - triposr
+  comparison_only:
+    - partcrafter
+    - instantmesh
+    - hunyuan3d
+    - spar3d
+  deferred_gpu_candidates:
+    - pixal3d
+    - trellis2
+  classification_policy:
+    unknown_license: comparison_only
+    restricted_lineage_in_release: reject
+    missing_lineage_in_release: reject
 engines:
   targets:
     - godot
