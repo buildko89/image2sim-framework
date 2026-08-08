@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-08-05T08:12:02.269208+00:00",
+  "config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\emo_jp_laser_model.yaml",
+  "config_sha256": "d84c3f8a07c65a6297cc88df2bff81ab1ae275a695bc6ed24165eb506bfc8f36",
+  "resolved_config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\emo_jp_laser_parametric\\resolved_config.json",
+  "blend": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\emo_jp_laser_parametric\\emo_jp_laser.blend",
+  "glb": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\emo_jp_laser_parametric\\emo_jp_laser.glb",
+  "glb_sha256": "d33cb6f29401e6ca202c25116225d9d259bee874125a6bf891f5a76a52fbc5a5",
+  "qa": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\emo_jp_laser_parametric\\qa_report.json",
+  "qa_status": "PASS"
+}

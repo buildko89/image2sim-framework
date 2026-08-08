@@ -1,0 +1,192 @@
+template_file: config/drone_templates/quad_x_guarded.yaml
+schema_version: "1.1"
+subject_id: emo_jp_lantern_formation_drone
+units: mm
+dimensions_provisional: false
+
+coordinate_system:
+  right_axis: +X
+  front_axis: -Y
+  up_axis: +Z
+  root_origin: estimated_center_of_mass
+
+measurements:
+  overall_length_mm:
+    value: 350.0
+    source: official_spec
+    tolerance_mm: 10.0
+  overall_width_mm:
+    value: 318.0
+    source: official_spec
+    tolerance_mm: 10.0
+  overall_height_mm:
+    value: 395.0
+    source: spec_with_attachment
+    tolerance_mm: 30.0
+    note: LEDランタン（球体カバー）装着時の全高（約400mm前後）
+  motor_center_diagonal_mm:
+    value: 232.0
+    source: official_spec
+    tolerance_mm: 2.0
+  propeller_diameter_mm:
+    value: 139.7
+    source: official_spec
+    tolerance_mm: 2.0
+  motor_housing_diameter_mm:
+    value: 23.0
+    source: official_spec
+    tolerance_mm: 1.0
+  guard_mount_tube_diameter_mm:
+    value: 27.0
+    source: derived_design
+    tolerance_mm: 1.0
+  body_width_mm:
+    value: 125.0
+    source: estimated_spec
+    tolerance_mm: 5.0
+  body_length_mm:
+    value: 90.0
+    source: estimated_spec
+    tolerance_mm: 5.0
+  body_height_mm:
+    value: 60.0
+    source: estimated_spec
+    tolerance_mm: 5.0
+
+layout:
+  mode: square_diagonal
+  square_motor_layout: true
+  motor_center_x_mm:
+    value: 82.02434
+    source: derived
+    formula: motor_center_diagonal_mm / (2 * sqrt(2))
+  motor_center_y_mm:
+    value: 82.02434
+    source: derived
+    formula: motor_center_diagonal_mm / (2 * sqrt(2))
+  motor_axis_z_mm: 10.0
+
+body:
+  shape: rounded_box
+  width_mm: 125.0
+  length_mm: 90.0
+  height_mm: 60.0
+  bevel_mm: 8.0
+  center_z_mm: 0.0
+  material: dark
+
+arm:
+  enabled: true
+  root_width_mm: 12.0
+  tip_width_mm: 12.0
+  thickness_mm: 12.0
+  root_fraction: 0.30
+  center_z_mm: 0.0
+  material: carbon
+
+motor:
+  housing_diameter_mm: 23.0
+  housing_height_mm: 28.0
+  center_z_mm: -4.0
+  shaft_diameter_mm: 3.0
+  shaft_height_mm: 5.0
+
+propeller:
+  diameter_mm: 139.7
+  hub_diameter_mm: 12.0
+  hub_height_mm: 5.0
+  blade_count: 2
+  blade_root_width_mm: 12.0
+  blade_tip_width_mm: 8.0
+  blade_thickness_mm: 2.0
+  blade_root_radius_mm: 8.0
+  center_z_mm: 12.5
+  opacity: 0.75
+  directions:
+    fl: ccw
+    fr: cw
+    rl: cw
+    rr: ccw
+
+guard:
+  enabled: true
+  size_mode: fit_overall_xy
+  shape: outward_semicircle
+  tube_diameter_mm: 3.5
+  mount_tube_diameter_mm: 27.0
+  mount_tube_height_mm: 10.0
+  mount_tube_center_z_mm: 2.5
+  center_z_mm: 10.0
+  strut_style: bent
+  strut_center_z_mm: 2.5
+  strut_start_z_mm: 7.0
+  strut_knee_radius_mm: 48.0
+  strut_knee_z_mm: 7.0
+  strut_end_z_mm: 10.0
+  inner_gap_deg: 180.0
+  sweep_deg: 180.0
+  major_segments: 48
+  minor_segments: 8
+  strut_count: 3
+  strut_angle_offsets_deg: [-90.0, 0.0, 90.0]
+  strut_radius_mm: 1.2
+
+landing:
+  enabled: true
+  leg_diameter_mm: 8.0
+  leg_height_mm: 30.0
+  leg_center_z_mm: -33.0
+  foot_diameter_mm: 12.0
+  foot_height_mm: 5.0
+  foot_center_z_mm: -50.5
+  foot_material: black
+
+equipment:
+  cylinders:
+    - id: rtk_antenna
+      radius_mm: 15.0
+      height_mm: 35.0
+      location_mm: [0.0, 0.0, 47.5]
+      material: dark
+      part_type: rtk_positioning_antenna
+      vertices: 32
+    - id: lantern_mount_rod
+      radius_mm: 8.0
+      height_mm: 60.0
+      location_mm: [0.0, 0.0, -80.0]
+      material: carbon
+      part_type: lantern_suspension_rod
+      vertices: 24
+  spheres:
+    - id: led_lantern_globe
+      radius_mm: 130.0
+      location_mm: [0.0, 0.0, -195.0]
+      material: led_emissive
+      part_type: led_lantern_globe
+      segments: 48
+      ring_count: 24
+  boxes:
+    - id: led_shade
+      dimensions_mm: [123.0, 87.0, 37.0]
+      location_mm: [0.0, 0.0, -48.5]
+      bevel_mm: 4.0
+      material: led_emissive
+      part_type: led_light_shade
+
+physics:
+  center_of_mass_mm: [0.0, 0.0, -80.0]
+  center_of_mass_source: estimated
+  mass_g: 650.0
+
+references:
+  spec_markdown: newplan3/High Great「EMO-JP」.md
+  spec_image: newplan3/ドローンショー機体.png
+
+output:
+  directory: output/emo_jp_lantern_parametric
+  blend: emo_jp_lantern.blend
+  glb: emo_jp_lantern.glb
+  resolved_config: resolved_config.json
+  build_report: build_report.json
+  qa_report: qa_report.json
+  render_resolution: 1080

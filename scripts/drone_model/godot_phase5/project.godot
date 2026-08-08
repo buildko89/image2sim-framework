@@ -1,0 +1,20 @@
+; Generated Phase 5 smoke-test project template.
+; Assets are staged by scripts/drone_model/run_godot_phase5.py.
+
+config_version=5
+
+[application]
+
+config/name="Drone hierarchy Phase 5 smoke test"
+config/features=PackedStringArray("4.7")
+
+[display]
+
+window/size/viewport_width=640
+window/size/viewport_height=360
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+

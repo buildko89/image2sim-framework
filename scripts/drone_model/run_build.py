@@ -33,6 +33,10 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="パラメトリックドローンモデルを生成します。")
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--blender", default=str(DEFAULT_BLENDER))
+    parser.add_argument(
+        "--output-directory",
+        help="設定のoutput.directoryを上書きします（回帰確認用の一時出力先など）。",
+    )
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--skip-contact-sheet", action="store_true")
     return parser.parse_args()
@@ -89,6 +93,11 @@ def measurement_value(config: dict[str, Any], name: str, required: bool = True) 
     if float(value) <= 0:
         raise ValueError(f"必須実測値は正数である必要があります: {name}")
     return float(value)
+
+
+def per_rotor_value(section: dict[str, Any], key: str, rotor_id: str) -> float:
+    override_key = f"{key[:-3]}_by_rotor_mm" if key.endswith("_mm") else f"{key}_by_rotor_mm"
+    return float(section.get(override_key, {}).get(rotor_id, section[key]))
 
 
 def validate_and_resolve(config: dict[str, Any]) -> dict[str, Any]:
@@ -284,9 +293,85 @@ def build_contact_sheet(config: dict[str, Any], output_dir: Path) -> Path:
 
 
 def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, Any]:
+    world_position_tolerance_mm = 1e-4
     actual = build_report["dimensions_mm"]
     actual_body = build_report["part_dimensions_mm"]["body_core"]
+    hierarchy = build_report.get("collection_hierarchy", {})
+    collection_nodes: dict[str, dict[str, Any]] = {}
+
+    def collect_nodes(nodes: dict[str, Any]) -> None:
+        for name, node in nodes.items():
+            collection_nodes[name] = node
+            collect_nodes(node.get("children", {}))
+
+    collect_nodes(hierarchy)
+    expected_top_collections = {"MODEL_VISUAL", "ANCHORS", "COLLISION", "CAMERAS", "REF_PHOTOS"}
+    expected_rotor_collections = {
+        f"VIS_ROTOR_{rotor_id}"
+        for rotor_id in config["derived"]["rotor_ids"]
+    }
+    object_parents = build_report.get("object_parents", {})
+    rotor_assemblies = build_report.get("rotor_assemblies", {})
+    expected_fixed_children = {}
+    expected_spinning_children = {}
+    for rotor_id in config["derived"]["rotor_ids"]:
+        fixed = {f"motor_{rotor_id}", f"motor_{rotor_id}_shaft"}
+        if config.get("motor_mount", {}).get("enabled"):
+            fixed.add(f"motor_mount_{rotor_id}")
+        if config.get("esc", {}).get("enabled"):
+            fixed.add(f"esc_{rotor_id}")
+        expected_fixed_children[rotor_id] = sorted(fixed)
+        expected_spinning_children[rotor_id] = sorted({
+            f"rotor_{rotor_id}_blades",
+            f"rotor_{rotor_id}_hub",
+        })
+    groove_parent_errors = {
+        name: parent
+        for name, parent in object_parents.items()
+        if "__groove_" in name and parent != name.split("__groove_", 1)[0]
+    }
+    expected_center_of_mass = [
+        float(value)
+        for value in config.get("physics", {}).get("center_of_mass_mm", [0.0, 0.0, 0.0])
+    ]
+    expected_axis_locations = {
+        rotor_id: [
+            float(config["derived"]["motor_positions_mm"][rotor_id][0]),
+            float(config["derived"]["motor_positions_mm"][rotor_id][1]),
+            per_rotor_value(config["propeller"], "center_z_mm", rotor_id),
+        ]
+        for rotor_id in config["derived"]["rotor_ids"]
+    }
+    expected_motor_locations = {
+        rotor_id: [
+            float(config["derived"]["motor_positions_mm"][rotor_id][0]),
+            float(config["derived"]["motor_positions_mm"][rotor_id][1]),
+            per_rotor_value(config["motor"], "center_z_mm", rotor_id),
+        ]
+        for rotor_id in config["derived"]["rotor_ids"]
+    }
+    coordinate_records = [
+        *build_report.get("motor_axes", {}).values(),
+        build_report.get("center_of_mass", {}),
+        *build_report.get("rotor_assemblies", {}).values(),
+        *build_report.get("collision_proxies", {}).values(),
+        *build_report.get("sensor_masts", {}).values(),
+        *build_report.get("guard_mounts", {}).values(),
+        *build_report.get("camera_modules", {}).values(),
+    ]
     checks: dict[str, dict[str, Any]] = {
+        "build_report_schema": {
+            "expected": "1.3",
+            "actual": build_report.get("schema_version"),
+            "pass": build_report.get("schema_version") == "1.3",
+        },
+        "world_coordinate_metadata": {
+            "reported_transform_space": build_report.get("coordinate_system", {}).get("reported_transform_space"),
+            "record_count": len(coordinate_records),
+            "pass": build_report.get("coordinate_system", {}).get("reported_transform_space") == "world"
+            and bool(coordinate_records)
+            and all(item.get("coordinate_space") == "world" for item in coordinate_records),
+        },
         "motor_count": {
             "expected": int(config["derived"]["rotor_count"]),
             "actual": len(build_report["motor_axes"]),
@@ -300,7 +385,174 @@ def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, 
             "names": build_report.get("duplicate_suffix_names", []),
             "pass": not build_report.get("duplicate_suffix_names"),
         },
+        "duplicate_suffix_collection_names": {
+            "names": build_report.get("duplicate_suffix_collection_names", []),
+            "pass": not build_report.get("duplicate_suffix_collection_names"),
+        },
+        "top_level_collections": {
+            "expected": sorted(expected_top_collections),
+            "actual": sorted(hierarchy),
+            "pass": set(hierarchy) == expected_top_collections,
+        },
+        "rotor_collections": {
+            "expected": sorted(expected_rotor_collections),
+            "actual": sorted(expected_rotor_collections & set(collection_nodes)),
+            "pass": expected_rotor_collections <= set(collection_nodes)
+            and all(collection_nodes[name].get("direct_objects", 0) > 0 for name in expected_rotor_collections),
+        },
+        "collection_recursive_counts": {
+            "expected": build_report.get("collections", {}),
+            "actual": {
+                name: hierarchy.get(name, {}).get("all_objects")
+                for name in expected_top_collections
+            },
+            "pass": all(
+                hierarchy.get(name, {}).get("all_objects") == count
+                for name, count in build_report.get("collections", {}).items()
+            ),
+        },
+        "groove_parents": {
+            "errors": groove_parent_errors,
+            "pass": not groove_parent_errors,
+        },
+        "rotor_fixed_children": {
+            "expected": expected_fixed_children,
+            "actual": {
+                rotor_id: item.get("fixed_children", [])
+                for rotor_id, item in rotor_assemblies.items()
+            },
+            "pass": set(rotor_assemblies) == set(expected_fixed_children)
+            and all(
+                rotor_assemblies[rotor_id].get("fixed_children", []) == children
+                for rotor_id, children in expected_fixed_children.items()
+            ),
+        },
+        "rotor_spinning_children": {
+            "expected": expected_spinning_children,
+            "actual": {
+                rotor_id: item.get("spinning_children", [])
+                for rotor_id, item in rotor_assemblies.items()
+            },
+            "pass": set(rotor_assemblies) == set(expected_spinning_children)
+            and all(
+                rotor_assemblies[rotor_id].get("spinning_children", []) == children
+                for rotor_id, children in expected_spinning_children.items()
+            ),
+        },
+        "rotor_spin_origins": {
+            "maximum_error_mm": max(
+                (float(item.get("origin_error_mm", math.inf)) for item in rotor_assemblies.values()),
+                default=math.inf,
+            ),
+            "pass": len(rotor_assemblies) == int(config["derived"]["rotor_count"])
+            and all(float(item.get("origin_error_mm", math.inf)) <= 1e-6 for item in rotor_assemblies.values()),
+        },
+        "world_thrust_axes": {
+            "actual": {
+                rotor_id: item.get("world_thrust_axis")
+                for rotor_id, item in build_report.get("motor_axes", {}).items()
+            },
+            "pass": all(
+                item.get("world_thrust_axis") is not None
+                and all(
+                    abs(float(actual) - expected) <= 1e-9
+                    for actual, expected in zip(item["world_thrust_axis"], (0.0, 0.0, 1.0))
+                )
+                for item in build_report.get("motor_axes", {}).values()
+            ),
+        },
+        "motor_axis_world_positions": {
+            "expected_mm": expected_axis_locations,
+            "actual_mm": {
+                rotor_id: item.get("location_mm")
+                for rotor_id, item in build_report.get("motor_axes", {}).items()
+            },
+            "pass": set(build_report.get("motor_axes", {})) == set(expected_axis_locations)
+            and all(
+                len(build_report["motor_axes"][rotor_id].get("location_mm", [])) == 3
+                and all(
+                    abs(float(actual) - expected) <= world_position_tolerance_mm
+                    for actual, expected in zip(
+                        build_report["motor_axes"][rotor_id]["location_mm"],
+                        expected_location,
+                    )
+                )
+                for rotor_id, expected_location in expected_axis_locations.items()
+            ),
+        },
+        "motor_world_positions": {
+            "expected_mm": expected_motor_locations,
+            "actual_mm": {
+                rotor_id: item.get("motor_location_mm")
+                for rotor_id, item in build_report.get("motor_axes", {}).items()
+            },
+            "pass": set(build_report.get("motor_axes", {})) == set(expected_motor_locations)
+            and all(
+                len(build_report["motor_axes"][rotor_id].get("motor_location_mm", [])) == 3
+                and all(
+                    abs(float(actual) - expected) <= world_position_tolerance_mm
+                    for actual, expected in zip(
+                        build_report["motor_axes"][rotor_id]["motor_location_mm"],
+                        expected_location,
+                    )
+                )
+                for rotor_id, expected_location in expected_motor_locations.items()
+            ),
+        },
+        "anchor_matrix_world_consistency": {
+            "pass": all(
+                len(item.get("matrix_world", [])) == 4
+                and len(item.get("location_mm", [])) == 3
+                and all(
+                    abs(float(item["matrix_world"][axis][3]) * 1000.0 - float(item["location_mm"][axis]))
+                    <= world_position_tolerance_mm
+                    for axis in range(3)
+                )
+                for item in [
+                    *build_report.get("motor_axes", {}).values(),
+                    build_report.get("center_of_mass", {}),
+                ]
+            ),
+        },
+        "center_of_mass_world_position": {
+            "expected_mm": expected_center_of_mass,
+            "actual_mm": build_report.get("center_of_mass", {}).get("location_mm"),
+            "pass": build_report.get("center_of_mass", {}).get("location_mm") is not None
+            and all(
+                abs(float(actual) - expected) <= world_position_tolerance_mm
+                for actual, expected in zip(
+                    build_report["center_of_mass"]["location_mm"],
+                    expected_center_of_mass,
+                )
+            ),
+        },
+        "collision_proxy_world_records": {
+            "expected_count": int(build_report.get("collections", {}).get("COLLISION", 0)),
+            "actual_count": len(build_report.get("collision_proxies", {})),
+            "pass": len(build_report.get("collision_proxies", {}))
+            == int(build_report.get("collections", {}).get("COLLISION", -1))
+            and all(
+                item.get("coordinate_space") == "world"
+                and len(item.get("matrix_world", [])) == 4
+                for item in build_report.get("collision_proxies", {}).values()
+            ),
+        },
     }
+    if config.get("wing", {}).get("enabled"):
+        expected_wing_children = {"main_wing"} | {
+            f"wing_bracket_{item['id']}"
+            for item in config.get("wing", {}).get("brackets", [])
+        }
+        checks["wing_parents"] = {
+            "expected_parent": "wing_root",
+            "children": sorted(expected_wing_children),
+            "actual": {
+                name: object_parents.get(name)
+                for name in sorted(expected_wing_children)
+            },
+            "pass": object_parents.get("wing_root") == "drone_root"
+            and all(object_parents.get(name) == "wing_root" for name in expected_wing_children),
+        }
     expected_under = sorted(config.get("motor", {}).get("under_frame_rotors", []))
     if expected_under:
         actual_under = sorted(
@@ -629,6 +881,8 @@ def main() -> int:
         raise FileNotFoundError(f"Blenderがありません: {blender_path}")
 
     config = validate_and_resolve(load_model_config(config_path))
+    if args.output_directory:
+        config["output"]["directory"] = str(resolve_repo_path(args.output_directory))
     output_cfg = config["output"]
     output_dir = resolve_repo_path(output_cfg["directory"])
     output_dir.mkdir(parents=True, exist_ok=True)

@@ -213,7 +213,7 @@ godot --path output_v2/godot/Godot3dcat res://scenes/PlayTest.tscn
 
 ## 再生成のしかた（ローカル）
 
-前提: Windows / Blender 5.0 / Python 3.x / `input/` に素材と写真がある環境。
+前提: Windows / Blender 5.2 / Python 3.x / `input/` に素材と写真がある環境。
 
 ```powershell
 python pipeline_v2\p2_run.py                                   # 上流（バインド〜リターゲット）
