@@ -1,0 +1,387 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-08-05T08:11:48.693039+00:00",
+  "status": "PASS",
+  "dimensions_provisional": false,
+  "checks": {
+    "build_report_schema": {
+      "expected": "1.3",
+      "actual": "1.3",
+      "pass": true
+    },
+    "world_coordinate_metadata": {
+      "reported_transform_space": "world",
+      "record_count": 18,
+      "pass": true
+    },
+    "motor_count": {
+      "expected": 4,
+      "actual": 4,
+      "pass": true
+    },
+    "required_names": {
+      "missing": [],
+      "pass": true
+    },
+    "duplicate_suffix_names": {
+      "names": [],
+      "pass": true
+    },
+    "duplicate_suffix_collection_names": {
+      "names": [],
+      "pass": true
+    },
+    "top_level_collections": {
+      "expected": [
+        "ANCHORS",
+        "CAMERAS",
+        "COLLISION",
+        "MODEL_VISUAL",
+        "REF_PHOTOS"
+      ],
+      "actual": [
+        "ANCHORS",
+        "CAMERAS",
+        "COLLISION",
+        "MODEL_VISUAL",
+        "REF_PHOTOS"
+      ],
+      "pass": true
+    },
+    "rotor_collections": {
+      "expected": [
+        "VIS_ROTOR_fl",
+        "VIS_ROTOR_fr",
+        "VIS_ROTOR_rl",
+        "VIS_ROTOR_rr"
+      ],
+      "actual": [
+        "VIS_ROTOR_fl",
+        "VIS_ROTOR_fr",
+        "VIS_ROTOR_rl",
+        "VIS_ROTOR_rr"
+      ],
+      "pass": true
+    },
+    "collection_recursive_counts": {
+      "expected": {
+        "MODEL_VISUAL": 60,
+        "ANCHORS": 5,
+        "COLLISION": 5,
+        "CAMERAS": 0,
+        "REF_PHOTOS": 0
+      },
+      "actual": {
+        "ANCHORS": 5,
+        "MODEL_VISUAL": 60,
+        "CAMERAS": 0,
+        "REF_PHOTOS": 0,
+        "COLLISION": 5
+      },
+      "pass": true
+    },
+    "groove_parents": {
+      "errors": {},
+      "pass": true
+    },
+    "rotor_fixed_children": {
+      "expected": {
+        "fl": [
+          "motor_fl",
+          "motor_fl_shaft"
+        ],
+        "fr": [
+          "motor_fr",
+          "motor_fr_shaft"
+        ],
+        "rl": [
+          "motor_rl",
+          "motor_rl_shaft"
+        ],
+        "rr": [
+          "motor_rr",
+          "motor_rr_shaft"
+        ]
+      },
+      "actual": {
+        "fl": [
+          "motor_fl",
+          "motor_fl_shaft"
+        ],
+        "fr": [
+          "motor_fr",
+          "motor_fr_shaft"
+        ],
+        "rl": [
+          "motor_rl",
+          "motor_rl_shaft"
+        ],
+        "rr": [
+          "motor_rr",
+          "motor_rr_shaft"
+        ]
+      },
+      "pass": true
+    },
+    "rotor_spinning_children": {
+      "expected": {
+        "fl": [
+          "rotor_fl_blades",
+          "rotor_fl_hub"
+        ],
+        "fr": [
+          "rotor_fr_blades",
+          "rotor_fr_hub"
+        ],
+        "rl": [
+          "rotor_rl_blades",
+          "rotor_rl_hub"
+        ],
+        "rr": [
+          "rotor_rr_blades",
+          "rotor_rr_hub"
+        ]
+      },
+      "actual": {
+        "fl": [
+          "rotor_fl_blades",
+          "rotor_fl_hub"
+        ],
+        "fr": [
+          "rotor_fr_blades",
+          "rotor_fr_hub"
+        ],
+        "rl": [
+          "rotor_rl_blades",
+          "rotor_rl_hub"
+        ],
+        "rr": [
+          "rotor_rr_blades",
+          "rotor_rr_hub"
+        ]
+      },
+      "pass": true
+    },
+    "rotor_spin_origins": {
+      "maximum_error_mm": 0.0,
+      "pass": true
+    },
+    "world_thrust_axes": {
+      "actual": {
+        "fl": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "fr": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "rl": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "rr": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "pass": true
+    },
+    "motor_axis_world_positions": {
+      "expected_mm": {
+        "fl": [
+          -82.02438661763951,
+          -82.02438661763951,
+          12.5
+        ],
+        "fr": [
+          82.02438661763951,
+          -82.02438661763951,
+          12.5
+        ],
+        "rl": [
+          -82.02438661763951,
+          82.02438661763951,
+          12.5
+        ],
+        "rr": [
+          82.02438661763951,
+          82.02438661763951,
+          12.5
+        ]
+      },
+      "actual_mm": {
+        "fl": [
+          -82.024388,
+          -82.024388,
+          12.5
+        ],
+        "fr": [
+          82.024388,
+          -82.024388,
+          12.5
+        ],
+        "rl": [
+          -82.024388,
+          82.024388,
+          12.5
+        ],
+        "rr": [
+          82.024388,
+          82.024388,
+          12.5
+        ]
+      },
+      "pass": true
+    },
+    "motor_world_positions": {
+      "expected_mm": {
+        "fl": [
+          -82.02438661763951,
+          -82.02438661763951,
+          -4.0
+        ],
+        "fr": [
+          82.02438661763951,
+          -82.02438661763951,
+          -4.0
+        ],
+        "rl": [
+          -82.02438661763951,
+          82.02438661763951,
+          -4.0
+        ],
+        "rr": [
+          82.02438661763951,
+          82.02438661763951,
+          -4.0
+        ]
+      },
+      "actual_mm": {
+        "fl": [
+          -82.024388,
+          -82.024388,
+          -4.0
+        ],
+        "fr": [
+          82.024388,
+          -82.024388,
+          -4.0
+        ],
+        "rl": [
+          -82.024388,
+          82.024388,
+          -4.0
+        ],
+        "rr": [
+          82.024388,
+          82.024388,
+          -4.0
+        ]
+      },
+      "pass": true
+    },
+    "anchor_matrix_world_consistency": {
+      "pass": true
+    },
+    "center_of_mass_world_position": {
+      "expected_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "actual_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass": true
+    },
+    "collision_proxy_world_records": {
+      "expected_count": 5,
+      "actual_count": 5,
+      "pass": true
+    },
+    "overall_width": {
+      "expected_mm": 318.0,
+      "actual_mm": 318.000019,
+      "error_mm": 1.900000000887303e-05,
+      "tolerance_mm": 5.0,
+      "pass": true
+    },
+    "overall_length": {
+      "expected_mm": 350.0,
+      "actual_mm": 350.000024,
+      "error_mm": 2.3999999996249244e-05,
+      "tolerance_mm": 5.0,
+      "pass": true
+    },
+    "overall_height": {
+      "expected_mm": 136.0,
+      "actual_mm": 131.999999,
+      "error_mm": -4.0000009999999975,
+      "tolerance_mm": 5.0,
+      "pass": true
+    },
+    "body_width": {
+      "expected_mm": 125.0,
+      "actual_mm": 125.0,
+      "error_mm": 0.0,
+      "tolerance_mm": 5.0,
+      "pass": true
+    },
+    "body_height": {
+      "expected_mm": 60.0,
+      "actual_mm": 59.999999,
+      "error_mm": -9.999999974752427e-07,
+      "tolerance_mm": 5.0,
+      "pass": true
+    },
+    "body_length": {
+      "expected_mm": 90.0,
+      "actual_mm": 90.000004,
+      "error_mm": 4.0000000041118255e-06,
+      "tolerance_mm": 5.0,
+      "pass": true
+    },
+    "motor_housing_diameter": {
+      "expected_mm": 23.0,
+      "actual_mm": 23.000002,
+      "error_mm": 1.999999998503199e-06,
+      "tolerance_mm": 1.0,
+      "pass": true
+    },
+    "guard_mount_tube_diameter": {
+      "expected_mm": 27.0,
+      "actual_mm": 26.999995,
+      "error_mm": -5.000000001587068e-06,
+      "tolerance_mm": 1.0,
+      "pass": true
+    },
+    "guard_sweep": {
+      "expected_deg": 180.0,
+      "actual_deg": {
+        "fl": 180.0,
+        "fr": 180.0,
+        "rl": 180.0,
+        "rr": 180.0
+      },
+      "pass": true
+    },
+    "motor_center_diagonal": {
+      "expected_mm": 232.0,
+      "actual_mm": 232.0000039099059,
+      "error_mm": 3.9099058994906954e-06,
+      "tolerance_mm": 2.0,
+      "pass": true
+    }
+  },
+  "notes": [
+    "写真から判別できない小部品形状は代表形状でモデル化しています。",
+    "質量、重心、慣性、実機ローター回転方向は実測・確認後に更新してください。"
+  ]
+}

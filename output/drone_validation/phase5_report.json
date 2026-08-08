@@ -1,0 +1,444 @@
+{
+  "godot_version": {
+    "build": "official",
+    "hash": "a13da4feb8d8aefc283c3763d33a2f170a18d541",
+    "hex": 263937,
+    "major": 4,
+    "minor": 7,
+    "patch": 1,
+    "status": "stable",
+    "string": "4.7.1-stable (official)",
+    "timestamp": 0
+  },
+  "models": {
+    "drone2": {
+      "checks": {
+        "anchors_and_extras": {
+          "errors": [],
+          "pass": true,
+          "rotor_count": 4
+        },
+        "collision_shapes": {
+          "actual": 5,
+          "errors": [],
+          "expected": 5,
+          "pass": true,
+          "rigid_body_count": 1,
+          "shape_names": [
+            "collision_arm_fl_shape",
+            "collision_arm_fr_shape",
+            "collision_arm_rl_shape",
+            "collision_arm_rr_shape",
+            "collision_body_shape"
+          ],
+          "visible_proxies": []
+        },
+        "drone_root": {
+          "pass": true
+        },
+        "gltf_extras_mapping": {
+          "applied_nodes": 40,
+          "applied_properties": 114,
+          "missing_nodes": [],
+          "native_imported_properties": 0,
+          "note": "Godot keeps glTF extras for import extensions; the runtime adapter maps them to Node metadata.",
+          "pass": true
+        },
+        "import": {
+          "pass": true,
+          "scene_path": "res://assets/drone2.glb"
+        },
+        "materials": {
+          "actual": [
+            "ガードブラック",
+            "プロペラ",
+            "機体ダークグレー",
+            "脚部レッド"
+          ],
+          "expected": [
+            "ガードブラック",
+            "プロペラ",
+            "機体ダークグレー",
+            "脚部レッド"
+          ],
+          "pass": true
+        },
+        "meshes": {
+          "actual_count": 50,
+          "expected_count": 50,
+          "missing": [],
+          "pass": true,
+          "unexpected": []
+        },
+        "nodes_and_transforms": {
+          "expected_count": 64,
+          "missing": [],
+          "parent_errors": [],
+          "pass": true,
+          "transform_errors": []
+        },
+        "rotor_spin": {
+          "errors": [],
+          "pass": true
+        },
+        "thrust_smoke": {
+          "angular_velocity": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "applied_rotors": 4,
+          "forward_velocity": 0.0399333313107491,
+          "linear_velocity": [
+            0.0,
+            0.0399333313107491,
+            0.0
+          ],
+          "pass": true,
+          "resultant_impulse": [
+            0.0,
+            0.0399999991059303,
+            0.0
+          ],
+          "resultant_torque": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "status": "PASS"
+    },
+    "drone3": {
+      "checks": {
+        "anchors_and_extras": {
+          "errors": [],
+          "pass": true,
+          "rotor_count": 8
+        },
+        "collision_shapes": {
+          "actual": 17,
+          "errors": [],
+          "expected": 17,
+          "pass": true,
+          "rigid_body_count": 1,
+          "shape_names": [
+            "collision_body_shape",
+            "collision_frame_center_lower_front_shape",
+            "collision_frame_center_lower_rear_shape",
+            "collision_frame_center_upper_front_shape",
+            "collision_frame_center_upper_rear_shape",
+            "collision_frame_fc_rail_left_shape",
+            "collision_frame_fc_rail_right_shape",
+            "collision_frame_front_cross_shape",
+            "collision_frame_left_longitudinal_shape",
+            "collision_frame_leg_left_front_shape",
+            "collision_frame_leg_left_rear_shape",
+            "collision_frame_leg_right_front_shape",
+            "collision_frame_leg_right_rear_shape",
+            "collision_frame_rear_cross_shape",
+            "collision_frame_right_longitudinal_shape",
+            "collision_frame_skid_left_shape",
+            "collision_frame_skid_right_shape"
+          ],
+          "visible_proxies": []
+        },
+        "drone_root": {
+          "pass": true
+        },
+        "gltf_extras_mapping": {
+          "applied_nodes": 182,
+          "applied_properties": 311,
+          "missing_nodes": [],
+          "native_imported_properties": 0,
+          "note": "Godot keeps glTF extras for import extensions; the runtime adapter maps them to Node metadata.",
+          "pass": true
+        },
+        "import": {
+          "pass": true,
+          "scene_path": "res://assets/drone3.glb"
+        },
+        "materials": {
+          "actual": [
+            "アルミ押出材",
+            "ガードブラック",
+            "バッテリー",
+            "プロペラ",
+            "主翼ホワイト",
+            "機体ダークグレー",
+            "電装ケース"
+          ],
+          "expected": [
+            "アルミ押出材",
+            "ガードブラック",
+            "バッテリー",
+            "プロペラ",
+            "主翼ホワイト",
+            "機体ダークグレー",
+            "電装ケース"
+          ],
+          "pass": true
+        },
+        "meshes": {
+          "actual_count": 179,
+          "expected_count": 179,
+          "missing": [],
+          "pass": true,
+          "unexpected": []
+        },
+        "nodes_and_transforms": {
+          "expected_count": 206,
+          "missing": [],
+          "parent_errors": [],
+          "pass": true,
+          "transform_errors": []
+        },
+        "rotor_spin": {
+          "errors": [],
+          "pass": true
+        },
+        "thrust_smoke": {
+          "angular_velocity": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "applied_rotors": 8,
+          "forward_velocity": 0.0798666551709175,
+          "linear_velocity": [
+            0.0,
+            0.0798666551709175,
+            0.0
+          ],
+          "pass": true,
+          "resultant_impulse": [
+            0.0,
+            0.0799999907612801,
+            0.0
+          ],
+          "resultant_torque": [
+            -1.86264514923096e-09,
+            0.0,
+            -9.31322574615479e-10
+          ]
+        }
+      },
+      "status": "PASS"
+    },
+    "hex6": {
+      "checks": {
+        "anchors_and_extras": {
+          "errors": [],
+          "pass": true,
+          "rotor_count": 6
+        },
+        "collision_shapes": {
+          "actual": 7,
+          "errors": [],
+          "expected": 7,
+          "pass": true,
+          "rigid_body_count": 1,
+          "shape_names": [
+            "collision_arm_r1_shape",
+            "collision_arm_r2_shape",
+            "collision_arm_r3_shape",
+            "collision_arm_r4_shape",
+            "collision_arm_r5_shape",
+            "collision_arm_r6_shape",
+            "collision_body_shape"
+          ],
+          "visible_proxies": []
+        },
+        "drone_root": {
+          "pass": true
+        },
+        "gltf_extras_mapping": {
+          "applied_nodes": 34,
+          "applied_properties": 85,
+          "missing_nodes": [],
+          "native_imported_properties": 0,
+          "note": "Godot keeps glTF extras for import extensions; the runtime adapter maps them to Node metadata.",
+          "pass": true
+        },
+        "import": {
+          "pass": true,
+          "scene_path": "res://assets/hex6_radial.glb"
+        },
+        "materials": {
+          "actual": [
+            "ガードブラック",
+            "プロペラ",
+            "機体ダークグレー"
+          ],
+          "expected": [
+            "ガードブラック",
+            "プロペラ",
+            "機体ダークグレー"
+          ],
+          "pass": true
+        },
+        "meshes": {
+          "actual_count": 38,
+          "expected_count": 38,
+          "missing": [],
+          "pass": true,
+          "unexpected": []
+        },
+        "nodes_and_transforms": {
+          "expected_count": 58,
+          "missing": [],
+          "parent_errors": [],
+          "pass": true,
+          "transform_errors": []
+        },
+        "rotor_spin": {
+          "errors": [],
+          "pass": true
+        },
+        "thrust_smoke": {
+          "angular_velocity": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "applied_rotors": 6,
+          "forward_velocity": 0.0598999932408333,
+          "linear_velocity": [
+            0.0,
+            0.0598999932408333,
+            0.0
+          ],
+          "pass": true,
+          "resultant_impulse": [
+            0.0,
+            0.0599999949336052,
+            0.0
+          ],
+          "resultant_torque": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "status": "PASS"
+    },
+    "hula": {
+      "checks": {
+        "anchors_and_extras": {
+          "errors": [],
+          "pass": true,
+          "rotor_count": 4
+        },
+        "collision_shapes": {
+          "actual": 5,
+          "errors": [],
+          "expected": 5,
+          "pass": true,
+          "rigid_body_count": 1,
+          "shape_names": [
+            "collision_arm_fl_shape",
+            "collision_arm_fr_shape",
+            "collision_arm_rl_shape",
+            "collision_arm_rr_shape",
+            "collision_body_shape"
+          ],
+          "visible_proxies": []
+        },
+        "drone_root": {
+          "pass": true
+        },
+        "gltf_extras_mapping": {
+          "applied_nodes": 81,
+          "applied_properties": 246,
+          "missing_nodes": [],
+          "native_imported_properties": 0,
+          "note": "Godot keeps glTF extras for import extensions; the runtime adapter maps them to Node metadata.",
+          "pass": true
+        },
+        "import": {
+          "pass": true,
+          "scene_path": "res://assets/hula.glb"
+        },
+        "materials": {
+          "actual": [
+            "ガードブラック",
+            "レンズガラス",
+            "機体シェルホワイト",
+            "機体ダークグレー",
+            "透明プロペラ",
+            "電装ケース"
+          ],
+          "expected": [
+            "ガードブラック",
+            "レンズガラス",
+            "機体シェルホワイト",
+            "機体ダークグレー",
+            "透明プロペラ",
+            "電装ケース"
+          ],
+          "pass": true
+        },
+        "meshes": {
+          "actual_count": 85,
+          "expected_count": 85,
+          "missing": [],
+          "pass": true,
+          "unexpected": []
+        },
+        "nodes_and_transforms": {
+          "expected_count": 101,
+          "missing": [],
+          "parent_errors": [],
+          "pass": true,
+          "transform_errors": []
+        },
+        "rotor_spin": {
+          "errors": [],
+          "pass": true
+        },
+        "thrust_smoke": {
+          "angular_velocity": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "applied_rotors": 4,
+          "forward_velocity": 0.0399333313107491,
+          "linear_velocity": [
+            0.0,
+            0.0399333313107491,
+            0.0
+          ],
+          "pass": true,
+          "resultant_impulse": [
+            0.0,
+            0.0399999991059303,
+            0.0
+          ],
+          "resultant_torque": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "status": "PASS"
+    }
+  },
+  "schema_version": "1.0",
+  "status": "PASS",
+  "created_at": "2026-08-04T08:26:34.193850+00:00",
+  "godot_executable": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\phase5_review\\runtime\\godot-4.7.1\\Godot_v4.7.1-stable_win64_console.exe",
+  "godot_version_output": "4.7.1.stable.official.a13da4feb",
+  "input_root": "output",
+  "nodepath_scan": {
+    "roots": [
+      "godot",
+      "output_v2/godot"
+    ],
+    "matches": []
+  },
+  "import_exit_code": 0,
+  "test_exit_code": 0
+}

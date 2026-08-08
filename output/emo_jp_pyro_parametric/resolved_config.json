@@ -1,0 +1,335 @@
+{
+  "schema_version": "1.1",
+  "template_id": "quad_x_guarded",
+  "units": "mm",
+  "dimensions_provisional": false,
+  "coordinate_system": {
+    "right_axis": "+X",
+    "front_axis": "-Y",
+    "up_axis": "+Z",
+    "root_origin": "estimated_center_of_mass"
+  },
+  "layout": {
+    "mode": "square_diagonal",
+    "square_motor_layout": true,
+    "motor_axis_z_mm": 10.0,
+    "motor_center_x_mm": {
+      "value": 82.02434,
+      "source": "derived",
+      "formula": "motor_center_diagonal_mm / (2 * sqrt(2))"
+    },
+    "motor_center_y_mm": {
+      "value": 82.02434,
+      "source": "derived",
+      "formula": "motor_center_diagonal_mm / (2 * sqrt(2))"
+    }
+  },
+  "body": {
+    "shape": "rounded_box",
+    "width_mm": 125.0,
+    "length_mm": 90.0,
+    "height_mm": 60.0,
+    "center_z_mm": 0.0,
+    "longitudinal_segments": 18,
+    "radial_segments": 32,
+    "width_profile_power": 0.72,
+    "height_profile_power": 1.05,
+    "cross_section_power": 0.78,
+    "bevel_mm": 8.0,
+    "material": "dark"
+  },
+  "arm": {
+    "enabled": true,
+    "root_width_mm": 12.0,
+    "tip_width_mm": 12.0,
+    "thickness_mm": 12.0,
+    "root_fraction": 0.3,
+    "center_z_mm": 0.0,
+    "material": "carbon"
+  },
+  "motor": {
+    "housing_diameter_mm": 23.0,
+    "housing_height_mm": 28.0,
+    "center_z_mm": -4.0,
+    "shaft_diameter_mm": 3.0,
+    "shaft_height_mm": 5.0
+  },
+  "propeller": {
+    "diameter_mm": 139.7,
+    "hub_diameter_mm": 12.0,
+    "hub_height_mm": 5.0,
+    "blade_count": 2,
+    "blade_root_width_mm": 12.0,
+    "blade_tip_width_mm": 8.0,
+    "blade_thickness_mm": 2.0,
+    "blade_root_radius_mm": 8.0,
+    "center_z_mm": 12.5,
+    "direction_pattern": [
+      "ccw",
+      "cw"
+    ],
+    "directions": {
+      "fl": "ccw",
+      "fr": "cw",
+      "rl": "cw",
+      "rr": "ccw"
+    },
+    "direction_source": "placeholder",
+    "opacity": 0.75
+  },
+  "guard": {
+    "enabled": true,
+    "size_mode": "fit_overall_xy",
+    "tube_diameter_mm": 3.5,
+    "center_z_mm": 10.0,
+    "inner_gap_deg": 180.0,
+    "major_segments": 48,
+    "minor_segments": 8,
+    "strut_count": 3,
+    "strut_radius_mm": 1.2,
+    "shape": "outward_semicircle",
+    "mount_tube_diameter_mm": 27.0,
+    "mount_tube_height_mm": 10.0,
+    "mount_tube_center_z_mm": 2.5,
+    "strut_style": "bent",
+    "strut_center_z_mm": 2.5,
+    "strut_start_z_mm": 7.0,
+    "strut_knee_radius_mm": 48.0,
+    "strut_knee_z_mm": 7.0,
+    "strut_end_z_mm": 10.0,
+    "sweep_deg": 180.0,
+    "strut_angle_offsets_deg": [
+      -90.0,
+      0.0,
+      90.0
+    ]
+  },
+  "landing": {
+    "enabled": true,
+    "leg_diameter_mm": 8.0,
+    "leg_height_mm": 30.0,
+    "leg_center_z_mm": -33.0,
+    "foot_diameter_mm": 12.0,
+    "foot_height_mm": 5.0,
+    "foot_center_z_mm": -50.5,
+    "foot_material": "black"
+  },
+  "physics": {
+    "center_of_mass_mm": [
+      0.0,
+      0.0,
+      -20.0
+    ],
+    "center_of_mass_source": "estimated",
+    "mass_g": 520.0,
+    "inertia_kg_m2": null,
+    "inertia_source": "pending"
+  },
+  "references": {
+    "spec_markdown": "newplan3/High Great「EMO-JP」.md",
+    "spec_image": "newplan3/ドローンショー機体.png"
+  },
+  "output": {
+    "blend": "emo_jp_pyro.blend",
+    "glb": "emo_jp_pyro.glb",
+    "resolved_config": "resolved_config.json",
+    "build_report": "build_report.json",
+    "qa_report": "qa_report.json",
+    "render_resolution": 1080,
+    "directory": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\emo_jp_pyro_parametric"
+  },
+  "template_file": "config/drone_templates/quad_x_guarded.yaml",
+  "subject_id": "emo_jp_pyro_formation_drone",
+  "measurements": {
+    "overall_length_mm": {
+      "value": 350.0,
+      "source": "official_spec",
+      "tolerance_mm": 15.0,
+      "note": "機体前後長（350mm）"
+    },
+    "overall_width_mm": {
+      "value": 318.0,
+      "source": "official_spec",
+      "tolerance_mm": 15.0,
+      "note": "機体左右幅（318mm）"
+    },
+    "overall_height_mm": {
+      "value": 265.0,
+      "source": "spec_with_attachment",
+      "tolerance_mm": 20.0,
+      "note": "花火（パイロ）筒モジュール装着時の全高（約250〜280mm）"
+    },
+    "motor_center_diagonal_mm": {
+      "value": 232.0,
+      "source": "official_spec",
+      "tolerance_mm": 2.0
+    },
+    "propeller_diameter_mm": {
+      "value": 139.7,
+      "source": "official_spec",
+      "tolerance_mm": 2.0
+    },
+    "motor_housing_diameter_mm": {
+      "value": 23.0,
+      "source": "official_spec",
+      "tolerance_mm": 1.0
+    },
+    "guard_mount_tube_diameter_mm": {
+      "value": 27.0,
+      "source": "derived_design",
+      "tolerance_mm": 1.0
+    },
+    "body_width_mm": {
+      "value": 125.0,
+      "source": "estimated_spec",
+      "tolerance_mm": 5.0
+    },
+    "body_length_mm": {
+      "value": 90.0,
+      "source": "estimated_spec",
+      "tolerance_mm": 5.0
+    },
+    "body_height_mm": {
+      "value": 60.0,
+      "source": "estimated_spec",
+      "tolerance_mm": 5.0
+    }
+  },
+  "equipment": {
+    "cylinders": [
+      {
+        "id": "rtk_antenna",
+        "radius_mm": 15.0,
+        "height_mm": 35.0,
+        "location_mm": [
+          0.0,
+          0.0,
+          47.5
+        ],
+        "material": "dark",
+        "part_type": "rtk_positioning_antenna",
+        "vertices": 32
+      },
+      {
+        "id": "pyro_tube_left",
+        "radius_mm": 17.5,
+        "height_mm": 180.0,
+        "location_mm": [
+          -25.0,
+          -20.0,
+          -110.0
+        ],
+        "rotation_deg": [
+          30.0,
+          -15.0,
+          0.0
+        ],
+        "material": "pyro",
+        "part_type": "pyro_fireworks_tube",
+        "vertices": 24
+      },
+      {
+        "id": "pyro_tube_right",
+        "radius_mm": 17.5,
+        "height_mm": 180.0,
+        "location_mm": [
+          25.0,
+          -20.0,
+          -110.0
+        ],
+        "rotation_deg": [
+          30.0,
+          15.0,
+          0.0
+        ],
+        "material": "pyro",
+        "part_type": "pyro_fireworks_tube",
+        "vertices": 24
+      }
+    ],
+    "boxes": [
+      {
+        "id": "led_shade",
+        "dimensions_mm": [
+          123.0,
+          87.0,
+          37.0
+        ],
+        "location_mm": [
+          0.0,
+          0.0,
+          -48.5
+        ],
+        "bevel_mm": 4.0,
+        "material": "led_emissive",
+        "part_type": "led_light_shade"
+      },
+      {
+        "id": "pyro_mount_bracket",
+        "dimensions_mm": [
+          75.0,
+          60.0,
+          15.0
+        ],
+        "location_mm": [
+          0.0,
+          -10.0,
+          -70.0
+        ],
+        "bevel_mm": 2.0,
+        "material": "aluminum",
+        "part_type": "pyro_mount_bracket"
+      }
+    ]
+  },
+  "template_metadata": {
+    "template_file": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\drone_templates\\quad_x_guarded.yaml",
+    "template_id": "quad_x_guarded",
+    "subject_config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\emo_jp_pyro_model.yaml"
+  },
+  "derived": {
+    "layout_mode": "square_diagonal",
+    "rotor_ids": [
+      "fl",
+      "fr",
+      "rl",
+      "rr"
+    ],
+    "rotor_count": 4,
+    "rotor_directions": {
+      "fl": "ccw",
+      "fr": "cw",
+      "rl": "cw",
+      "rr": "ccw"
+    },
+    "motor_center_spacing_x_mm": 164.04877323527901,
+    "motor_center_spacing_y_mm": 164.04877323527901,
+    "guard_outer_diameter_mm": 153.95122676472099,
+    "guard_outer_width_mm": 153.95122676472099,
+    "guard_outer_length_mm": 185.95122676472099,
+    "guard_inner_diameter_mm": 146.95122676472099,
+    "propeller_radial_clearance_mm": 3.6256133823604983,
+    "motor_positions_mm": {
+      "fl": [
+        -82.02438661763951,
+        -82.02438661763951,
+        10.0
+      ],
+      "fr": [
+        82.02438661763951,
+        -82.02438661763951,
+        10.0
+      ],
+      "rl": [
+        -82.02438661763951,
+        82.02438661763951,
+        10.0
+      ],
+      "rr": [
+        82.02438661763951,
+        82.02438661763951,
+        10.0
+      ]
+    }
+  }
+}

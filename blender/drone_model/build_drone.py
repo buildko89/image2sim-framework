@@ -4,6 +4,7 @@ import argparse
 import json
 import math
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -43,7 +44,12 @@ def required_object_names(config: dict[str, Any]) -> set[str]:
     guard_enabled = bool(config.get("guard", {}).get("enabled", True))
     landing_enabled = bool(config.get("landing", {}).get("enabled", True))
     for rotor_id in config["derived"]["rotor_ids"]:
-        names.update({f"motor_{rotor_id}", f"rotor_{rotor_id}", f"motor_{rotor_id}_axis"})
+        names.update({
+            f"motor_{rotor_id}",
+            f"rotor_{rotor_id}",
+            f"rotor_{rotor_id}_spin",
+            f"motor_{rotor_id}_axis",
+        })
         if arm_enabled:
             names.add(f"arm_{rotor_id}")
         if guard_enabled:
@@ -55,8 +61,9 @@ def required_object_names(config: dict[str, Any]) -> set[str]:
     structure = config.get("structure", {})
     if structure.get("enabled"):
         names.update(f"frame_{member['id']}" for member in structure.get("members", []))
+        names.update(f"frame_bracket_{bracket['id']}" for bracket in structure.get("brackets", []))
     if config.get("wing", {}).get("enabled"):
-        names.add("main_wing")
+        names.update({"wing_root", "main_wing"})
     for item in config.get("equipment", {}).get("cameras", []):
         names.add(f"camera_{item['id']}_gimbal")
     for item in config.get("equipment", {}).get("round_sensors", []):
@@ -79,10 +86,174 @@ def setup_scene() -> None:
     scene.world.color = (0.055, 0.055, 0.065)
 
 
-def make_collection(name: str) -> bpy.types.Collection:
+def make_collection(
+    name: str,
+    parent: bpy.types.Collection | None = None,
+) -> bpy.types.Collection:
+    if bpy.data.collections.get(name) is not None:
+        raise ValueError(f"Collection名が重複しています: {name}")
     collection = bpy.data.collections.new(name)
-    bpy.context.scene.collection.children.link(collection)
+    if parent is None:
+        bpy.context.scene.collection.children.link(collection)
+    else:
+        parent.children.link(collection)
     return collection
+
+
+@dataclass(frozen=True)
+class SceneCollections:
+    visual: bpy.types.Collection
+    anchors: bpy.types.Collection
+    collision: bpy.types.Collection
+    cameras: bpy.types.Collection
+    references: bpy.types.Collection
+    body: bpy.types.Collection
+    frame: bpy.types.Collection | None
+    arms: bpy.types.Collection | None
+    wing: bpy.types.Collection | None
+    landing: bpy.types.Collection | None
+    guards: bpy.types.Collection | None
+    equipment: bpy.types.Collection | None
+    power: bpy.types.Collection | None
+    flight_electronics: bpy.types.Collection | None
+    sensors: bpy.types.Collection | None
+    propulsion: bpy.types.Collection
+    rotors: dict[str, bpy.types.Collection]
+    center_of_mass: bpy.types.Collection
+    motor_axes: bpy.types.Collection
+    collision_body: bpy.types.Collection
+    collision_structure: bpy.types.Collection | None
+    collision_landing: bpy.types.Collection | None
+
+
+def equipment_category(item: dict[str, Any]) -> str | None:
+    """設定済みの識別子とpart_typeから汎用的な電装分類を返す。"""
+    description = f"{item.get('id', '')} {item.get('part_type', '')}".lower()
+    if any(token in description for token in ("battery", "power", "pdb")):
+        return "power"
+    if any(token in description for token in ("camera", "gps", "lidar", "sensor", "infrared", "optical")):
+        return "sensors"
+    if any(token in description for token in ("flight", "controller", "telemetry", "computer", "receiver")):
+        return "flight_electronics"
+    return None
+
+
+def create_scene_collections(config: dict[str, Any]) -> SceneCollections:
+    """有効な機能だけを展開した、全モデル共通のCollection階層を作る。"""
+    visual = make_collection("MODEL_VISUAL")
+    anchors = make_collection("ANCHORS")
+    collision = make_collection("COLLISION")
+    cameras = make_collection("CAMERAS")
+    references = make_collection("REF_PHOTOS")
+
+    body = make_collection("VIS_BODY", visual)
+    structure_enabled = bool(config.get("structure", {}).get("enabled"))
+    arm_enabled = bool(config.get("arm", {}).get("enabled", True))
+    wing_enabled = bool(config.get("wing", {}).get("enabled"))
+    landing_enabled = bool(config.get("landing", {}).get("enabled", True))
+    guard_enabled = bool(config.get("guard", {}).get("enabled", True))
+    has_structure = any((structure_enabled, arm_enabled, wing_enabled, landing_enabled, guard_enabled))
+    structure = make_collection("VIS_STRUCTURE", visual) if has_structure else None
+    frame = make_collection("VIS_FRAME", structure) if structure_enabled and structure is not None else None
+    arms = make_collection("VIS_ARMS", structure) if arm_enabled and structure is not None else None
+    wing = make_collection("VIS_WING", structure) if wing_enabled and structure is not None else None
+    landing = make_collection("VIS_LANDING_GEAR", structure) if landing_enabled and structure is not None else None
+    guards = make_collection("VIS_GUARDS", structure) if guard_enabled and structure is not None else None
+
+    equipment_config = config.get("equipment", {})
+    equipment_items = list(equipment_config.get("boxes", []))
+    has_sensor_modules = any(
+        equipment_config.get(key)
+        for key in ("masts", "cameras", "round_sensors")
+    )
+    has_equipment = bool(equipment_items or has_sensor_modules)
+    equipment = make_collection("VIS_EQUIPMENT", visual) if has_equipment else None
+    categories = {equipment_category(item) for item in equipment_items}
+    power = make_collection("VIS_POWER", equipment) if equipment is not None and "power" in categories else None
+    flight_electronics = (
+        make_collection("VIS_FLIGHT_ELECTRONICS", equipment)
+        if equipment is not None and "flight_electronics" in categories
+        else None
+    )
+    sensors = (
+        make_collection("VIS_SENSORS", equipment)
+        if equipment is not None and ("sensors" in categories or has_sensor_modules)
+        else None
+    )
+
+    propulsion = make_collection("VIS_PROPULSION", visual)
+    rotors = {
+        str(rotor_id): make_collection(f"VIS_ROTOR_{rotor_id}", propulsion)
+        for rotor_id in config["derived"]["rotor_ids"]
+    }
+    center_of_mass = make_collection("ANCHOR_CENTER_OF_MASS", anchors)
+    motor_axes = make_collection("ANCHOR_MOTOR_AXES", anchors)
+    collision_body = make_collection("COLLISION_BODY", collision)
+    collision_structure = (
+        make_collection("COLLISION_STRUCTURE", collision)
+        if structure_enabled or arm_enabled
+        else None
+    )
+    collision_landing = (
+        make_collection("COLLISION_LANDING_GEAR", collision)
+        if landing_enabled
+        else None
+    )
+    return SceneCollections(
+        visual=visual,
+        anchors=anchors,
+        collision=collision,
+        cameras=cameras,
+        references=references,
+        body=body,
+        frame=frame,
+        arms=arms,
+        wing=wing,
+        landing=landing,
+        guards=guards,
+        equipment=equipment,
+        power=power,
+        flight_electronics=flight_electronics,
+        sensors=sensors,
+        propulsion=propulsion,
+        rotors=rotors,
+        center_of_mass=center_of_mass,
+        motor_axes=motor_axes,
+        collision_body=collision_body,
+        collision_structure=collision_structure,
+        collision_landing=collision_landing,
+    )
+
+
+def require_collection(collection: bpy.types.Collection | None, feature: str) -> bpy.types.Collection:
+    if collection is None:
+        raise ValueError(f"有効な{feature}用Collectionがありません。")
+    return collection
+
+
+def equipment_collection(
+    item: dict[str, Any],
+    collections: SceneCollections,
+) -> bpy.types.Collection:
+    category = equipment_category(item)
+    if category == "power":
+        return require_collection(collections.power, "power")
+    if category == "flight_electronics":
+        return require_collection(collections.flight_electronics, "flight_electronics")
+    if category == "sensors":
+        return require_collection(collections.sensors, "sensors")
+    return require_collection(collections.equipment, "equipment")
+
+
+def collection_hierarchy(collection: bpy.types.Collection) -> dict[str, Any]:
+    return {
+        "direct_objects": len(collection.objects),
+        "all_objects": len(collection.all_objects),
+        "children": {
+            child.name: collection_hierarchy(child)
+            for child in sorted(collection.children, key=lambda item: item.name)
+        },
+    }
 
 
 def move_to_collection(obj: bpy.types.Object, collection: bpy.types.Collection) -> None:
@@ -91,7 +262,14 @@ def move_to_collection(obj: bpy.types.Object, collection: bpy.types.Collection) 
     collection.objects.link(obj)
 
 
-def make_material(name: str, color: tuple[float, float, float, float], metallic: float = 0.0, roughness: float = 0.5) -> bpy.types.Material:
+def make_material(
+    name: str,
+    color: tuple[float, float, float, float],
+    metallic: float = 0.0,
+    roughness: float = 0.5,
+    emission_color: tuple[float, float, float, float] | None = None,
+    emission_strength: float = 0.0,
+) -> bpy.types.Material:
     material = bpy.data.materials.new(name)
     material.diffuse_color = color
     material.use_nodes = True
@@ -101,6 +279,13 @@ def make_material(name: str, color: tuple[float, float, float, float], metallic:
         bsdf.inputs["Metallic"].default_value = metallic
         bsdf.inputs["Roughness"].default_value = roughness
         bsdf.inputs["Alpha"].default_value = color[3]
+        if emission_color is not None:
+            if "Emission Color" in bsdf.inputs:
+                bsdf.inputs["Emission Color"].default_value = emission_color
+            elif "Emission" in bsdf.inputs:
+                bsdf.inputs["Emission"].default_value = emission_color
+        if emission_strength > 0 and "Emission Strength" in bsdf.inputs:
+            bsdf.inputs["Emission Strength"].default_value = emission_strength
     if color[3] < 1.0:
         if hasattr(material, "surface_render_method"):
             material.surface_render_method = "DITHERED"
@@ -116,6 +301,16 @@ def assign_material(obj: bpy.types.Object, material: bpy.types.Material) -> None
 
 def parent_to(obj: bpy.types.Object, parent: bpy.types.Object) -> None:
     obj.parent = parent
+
+
+def parent_to_keep_world(obj: bpy.types.Object, parent: bpy.types.Object) -> None:
+    """parent変更の前後でObjectのワールド変換を維持する。"""
+    bpy.context.view_layer.update()
+    matrix_world = obj.matrix_world.copy()
+    obj.parent = parent
+    bpy.context.view_layer.update()
+    obj.matrix_world = matrix_world
+    bpy.context.view_layer.update()
 
 
 def create_empty(name: str, location: Iterable[float], collection: bpy.types.Collection, parent: bpy.types.Object | None = None, size: float = 0.005) -> bpy.types.Object:
@@ -270,16 +465,31 @@ def create_bulged_body(
             z = center_z + radius_z * signed_power(math.sin(angle), cross_power)
             verts.append((x, y, z))
 
+    # Add front and rear center dome vertices for smooth convex capping
+    front_center_idx = len(verts)
+    verts.append((0.0, -half_length, center_z))
+    rear_center_idx = len(verts)
+    verts.append((0.0, half_length, center_z))
+
     faces: list[tuple[int, ...]] = []
+    # Side quad rings
     for i in range(longitudinal_segments):
         current = i * radial_segments
         following = (i + 1) * radial_segments
         for j in range(radial_segments):
             next_j = (j + 1) % radial_segments
             faces.append((current + j, following + j, following + next_j, current + next_j))
-    faces.append(tuple(reversed(range(radial_segments))))
+
+    # Front cap triangle fan
+    for j in range(radial_segments):
+        next_j = (j + 1) % radial_segments
+        faces.append((front_center_idx, next_j, j))
+
+    # Rear cap triangle fan
     last_ring = longitudinal_segments * radial_segments
-    faces.append(tuple(last_ring + j for j in range(radial_segments)))
+    for j in range(radial_segments):
+        next_j = (j + 1) % radial_segments
+        faces.append((rear_center_idx, last_ring + j, last_ring + next_j))
 
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(verts, [], faces)
@@ -307,8 +517,31 @@ def create_cylinder(
     material: bpy.types.Material | None,
     parent: bpy.types.Object,
     vertices: int = 32,
+    rotation_deg: tuple[float, float, float] | None = None,
 ) -> bpy.types.Object:
     bpy.ops.mesh.primitive_cylinder_add(vertices=vertices, radius=radius, depth=depth, location=location)
+    obj = bpy.context.object
+    obj.name = name
+    if rotation_deg is not None:
+        obj.rotation_euler = tuple(math.radians(v) for v in rotation_deg)
+    move_to_collection(obj, collection)
+    if material is not None:
+        assign_material(obj, material)
+    parent_to(obj, parent)
+    return obj
+
+
+def create_sphere(
+    name: str,
+    radius: float,
+    location: tuple[float, float, float],
+    collection: bpy.types.Collection,
+    material: bpy.types.Material | None,
+    parent: bpy.types.Object,
+    segments: int = 32,
+    ring_count: int = 16,
+) -> bpy.types.Object:
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=segments, ring_count=ring_count, radius=radius, location=location)
     obj = bpy.context.object
     obj.name = name
     move_to_collection(obj, collection)
@@ -336,6 +569,60 @@ def create_cylinder_between(
     obj.rotation_quaternion = direction.to_track_quat("Z", "Y")
     obj.rotation_mode = "XYZ"
     return obj
+
+
+def create_bent_strut(
+    name: str,
+    start: Vector,
+    knee: Vector,
+    end: Vector,
+    radius: float,
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+    bevel_resolution: int = 4,
+) -> bpy.types.Object:
+    curve_data = bpy.data.curves.new(name=f"{name}_curve", type='CURVE')
+    curve_data.dimensions = '3D'
+    curve_data.bevel_depth = radius
+    curve_data.bevel_resolution = bevel_resolution
+    curve_data.use_fill_caps = True
+
+    spline = curve_data.splines.new('BEZIER')
+    spline.bezier_points.add(2)  # Total 3 points
+
+    spline.bezier_points[0].co = start
+    spline.bezier_points[0].handle_left_type = 'VECTOR'
+    spline.bezier_points[0].handle_right_type = 'VECTOR'
+
+    spline.bezier_points[1].co = knee
+    spline.bezier_points[1].handle_left_type = 'AUTO'
+    spline.bezier_points[1].handle_right_type = 'AUTO'
+
+    spline.bezier_points[2].co = end
+    spline.bezier_points[2].handle_left_type = 'VECTOR'
+    spline.bezier_points[2].handle_right_type = 'VECTOR'
+
+    curve_obj = bpy.data.objects.new(f"{name}_temp_curve", curve_data)
+    collection.objects.link(curve_obj)
+
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    mesh_data = bpy.data.meshes.new_from_object(curve_obj.evaluated_get(depsgraph))
+    mesh_data.name = f"{name}_curve"
+
+    mesh_obj = bpy.data.objects.new(name, mesh_data)
+    collection.objects.link(mesh_obj)
+    if material is not None:
+        assign_material(mesh_obj, material)
+
+    parent_to(mesh_obj, parent)
+
+    collection.objects.unlink(curve_obj)
+    bpy.data.objects.remove(curve_obj, do_unlink=True)
+    bpy.data.curves.remove(curve_data)
+
+    return mesh_obj
+
 
 
 def create_tapered_arm(
@@ -638,7 +925,116 @@ def create_aluminum_extrusion(
                     parent,
                 )
                 groove["part_type"] = "extrusion_groove"
+                parent_to_keep_world(groove, obj)
     return obj
+
+
+def create_triangle_bracket(
+    name: str,
+    location: tuple[float, float, float],
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+) -> bpy.types.Object:
+    """MiSUMi HBLDSW6-SST トライアングルブラケット（直角三角形ガセット板＋補強フランジ）。"""
+    w = mm(60.0)
+    h = mm(60.0)
+    t = mm(12.0)
+    thick = mm(4.0)
+    verts = [
+        (-w / 2.0, -h / 2.0, -t / 2.0), (w / 2.0, -h / 2.0, -t / 2.0), (-w / 2.0, h / 2.0, -t / 2.0),
+        (-w / 2.0, -h / 2.0, t / 2.0), (w / 2.0, -h / 2.0, t / 2.0), (-w / 2.0, h / 2.0, t / 2.0),
+        (-w / 2.0 + thick, -h / 2.0 + thick, -t / 2.0 + thick),
+        (-w / 2.0 + thick, -h / 2.0 + thick, t / 2.0 - thick),
+    ]
+    faces = [
+        (0, 1, 2), (5, 4, 3), (0, 3, 4, 1), (1, 4, 5, 2), (2, 5, 3, 0),
+    ]
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = location
+    collection.objects.link(obj)
+    assign_material(obj, material)
+    parent_to(obj, parent)
+    obj["part_type"] = "triangle_bracket"
+    obj["model"] = "HBLDSW6-SST"
+    return obj
+
+
+def create_angle_bracket(
+    name: str,
+    location: tuple[float, float, float],
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+) -> bpy.types.Object:
+    """MiSUMi HBKUS6-SST 極厚型直角L字ブラケット。"""
+    w = mm(58.0)
+    h = mm(58.0)
+    d = mm(28.0)
+    t = mm(6.0)
+    verts = [
+        (-w / 2.0, -d / 2.0, -h / 2.0), (w / 2.0, -d / 2.0, -h / 2.0),
+        (w / 2.0, -d / 2.0, -h / 2.0 + t), (-w / 2.0 + t, -d / 2.0, -h / 2.0 + t),
+        (-w / 2.0 + t, -d / 2.0, h / 2.0), (-w / 2.0, -d / 2.0, h / 2.0),
+        (-w / 2.0, d / 2.0, -h / 2.0), (w / 2.0, d / 2.0, -h / 2.0),
+        (w / 2.0, d / 2.0, -h / 2.0 + t), (-w / 2.0 + t, d / 2.0, -h / 2.0 + t),
+        (-w / 2.0 + t, d / 2.0, h / 2.0), (-w / 2.0, d / 2.0, h / 2.0),
+    ]
+    faces = [
+        (0, 1, 2, 3), (0, 3, 4, 5),
+        (9, 8, 7, 6), (11, 10, 9, 6),
+        (0, 6, 7, 1), (1, 7, 8, 2), (2, 8, 9, 3),
+        (3, 9, 10, 4), (4, 10, 11, 5), (5, 11, 6, 0),
+    ]
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = location
+    collection.objects.link(obj)
+    assign_material(obj, material)
+    parent_to(obj, parent)
+    obj["part_type"] = "angle_bracket"
+    obj["model"] = "HBKUS6-SST"
+    return obj
+
+
+def create_t_bracket(
+    name: str,
+    location: tuple[float, float, float],
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+) -> bpy.types.Object:
+    """MiSUMi CHBLTS6-SST T字ブラケット。"""
+    w = mm(90.0)
+    h = mm(60.0)
+    d = mm(28.0)
+    t = mm(6.0)
+    obj = create_rounded_box(name, (w, d, t), location, mm(2.0), collection, material, parent)
+    obj["part_type"] = "t_bracket"
+    obj["model"] = "CHBLTS6-SST"
+    return obj
+
+
+def create_skid_clamp(
+    name: str,
+    location: tuple[float, float, float],
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+) -> bpy.types.Object:
+    """脚-スキッド間締結クランプブロック。"""
+    w = mm(60.0)
+    d = mm(45.0)
+    h = mm(40.0)
+    clamp = create_rounded_box(name, (w, d, h), location, mm(3.0), collection, material, parent)
+    clamp["part_type"] = "skid_clamp"
+    clamp["model"] = "in_house_skid_clamp"
+    return clamp
 
 
 def create_airfoil_wing(
@@ -653,6 +1049,7 @@ def create_airfoil_wing(
     root_chord = mm(config["root_chord_mm"])
     tip_chord = mm(config.get("tip_chord_mm", config["root_chord_mm"]))
     thickness = mm(config["thickness_mm"])
+    center_x = mm(config.get("center_x_mm", 0.0))
     center_y = mm(config.get("center_y_mm", 0.0))
     center_z = mm(config.get("center_z_mm", 0.0))
     chord_segments = max(8, int(config.get("chord_segments", 18)))
@@ -665,9 +1062,9 @@ def create_airfoil_wing(
         for surface in (1.0, -1.0):
             for index in range(chord_segments + 1):
                 fraction = index / chord_segments
-                y = center_y - chord / 2.0 + chord * fraction
+                y = -chord / 2.0 + chord * fraction
                 profile = math.sin(math.pi * fraction) ** 0.72
-                z = center_z + surface * thickness * profile / 2.0
+                z = surface * thickness * profile / 2.0
                 verts.append((x, y, z))
 
     ring = 2 * (chord_segments + 1)
@@ -702,6 +1099,7 @@ def create_airfoil_wing(
     for polygon in mesh.polygons:
         polygon.use_smooth = True
     obj = bpy.data.objects.new(name, mesh)
+    obj.location = (center_x, center_y, center_z)
     collection.objects.link(obj)
     assign_material(obj, material)
     parent_to(obj, parent)
@@ -888,6 +1286,76 @@ def create_hemisphere_housing(
     return obj
 
 
+def create_half_cylinder_housing(
+    name: str,
+    width: float,
+    depth: float,
+    height: float,
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+    segments: int = 24,
+) -> bpy.types.Object:
+    """X軸方向に長さを持ち、側面視（Y-Z面）が半円（D型）のカメラハウジングメッシュ。"""
+    half_width = width / 2.0
+    radius = height / 2.0
+    flat_depth = max(0.0, depth - radius)
+    verts: list[tuple[float, float, float]] = []
+
+    # Arc vertices along -Y facing direction
+    for i in range(segments + 1):
+        angle = -math.pi / 2.0 + math.pi * (i / segments)
+        y = -flat_depth - radius * math.cos(angle)
+        z = radius * math.sin(angle)
+        verts.append((-half_width, y, z))
+        verts.append((half_width, y, z))
+
+    # Back flat face vertices at Y = 0
+    verts.append((-half_width, 0.0, -radius))
+    verts.append((half_width, 0.0, -radius))
+    verts.append((-half_width, 0.0, radius))
+    verts.append((half_width, 0.0, radius))
+
+    faces: list[tuple[int, ...]] = []
+    # Front curved quad faces
+    for i in range(segments):
+        v0 = i * 2
+        v1 = i * 2 + 1
+        v2 = (i + 1) * 2 + 1
+        v3 = (i + 1) * 2
+        faces.append((v0, v3, v2, v1))
+
+    # Flat top/bottom connecting quads
+    faces.append((0, 1, len(verts) - 3, len(verts) - 4))
+    faces.append((segments * 2, len(verts) - 2, len(verts) - 1, segments * 2 + 1))
+
+    # Side cap left (X = -half_width)
+    left_cap = [i * 2 for i in range(segments + 1)]
+    left_cap.extend([len(verts) - 2, len(verts) - 4])
+    faces.append(tuple(left_cap))
+
+    # Side cap right (X = +half_width)
+    right_cap = [i * 2 + 1 for i in range(segments + 1)]
+    right_cap.extend([len(verts) - 3, len(verts) - 1])
+    faces.append(tuple(reversed(right_cap)))
+
+    # Back flat face quad
+    faces.append((len(verts) - 4, len(verts) - 3, len(verts) - 1, len(verts) - 2))
+
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.validate(verbose=False)
+    mesh.update()
+    for polygon in mesh.polygons:
+        polygon.use_smooth = True
+
+    obj = bpy.data.objects.new(name, mesh)
+    collection.objects.link(obj)
+    assign_material(obj, material)
+    parent_to(obj, parent)
+    return obj
+
+
 def create_camera_module(
     item: dict[str, Any],
     collection: bpy.types.Collection,
@@ -906,7 +1374,138 @@ def create_camera_module(
     pivot["tilt_range_deg"] = float(item.get("tilt_range_deg", 0.0))
     pivot["rotation_axis"] = str(item.get("rotation_axis", "+X"))
     shape = str(item.get("shape", "rounded_box"))
-    if shape == "hemisphere":
+    if shape in ("half_cylinder_dual_lens", "dual_lens_capsule", "capsule"):
+        housing_width = mm(item.get("housing_width_mm", 16.0))
+        housing_height = mm(item.get("housing_height_mm", 25.0))
+        housing_depth = mm(item.get("housing_depth_mm", 20.0))
+
+        # Create half-cylinder (D-shape profile) camera housing
+        housing = create_half_cylinder_housing(
+            f"camera_{camera_id}_housing",
+            housing_width,
+            housing_depth,
+            housing_height,
+            collection,
+            housing_material,
+            pivot,
+        )
+        housing["part_type"] = "camera_housing"
+
+        # Concentric half-cylinder side pivot hubs (matching camera_shape.png red semicircle)
+        hub_radius = mm(item.get("pivot_hub_radius_mm", 7.0))
+        hub_thickness = mm(item.get("pivot_hub_thickness_mm", 1.8))
+        if hub_radius > 0.0:
+            for side_name, sign in (("left", -1.0), ("right", 1.0)):
+                hub = create_half_cylinder_housing(
+                    f"camera_{camera_id}_gimbal_hub_{side_name}",
+                    hub_thickness,
+                    hub_radius * 1.6,
+                    hub_radius * 2.0,
+                    collection,
+                    housing_material,
+                    pivot,
+                )
+                hub.location.x = sign * (housing_width / 2.0 + hub_thickness / 2.0)
+                hub["part_type"] = "camera_gimbal_hub"
+
+        pin_diameter = mm(item.get("pivot_pin_diameter_mm", 4.5))
+        pin_length = mm(item.get("pivot_pin_length_mm", 3.0))
+        if pin_diameter > 0.0 and pin_length > 0.0:
+            for side_name, sign in (("left", -1.0), ("right", 1.0)):
+                inner = Vector((sign * (housing_width / 2.0 - mm(0.8)), -housing_depth / 2.0, 0.0))
+                outer = Vector((sign * (housing_width / 2.0 + pin_length + hub_thickness), -housing_depth / 2.0, 0.0))
+                pin = create_cylinder_between(
+                    f"camera_{camera_id}_pivot_{side_name}",
+                    inner,
+                    outer,
+                    pin_diameter / 2.0,
+                    collection,
+                    housing_material,
+                    pivot,
+                    vertices=20,
+                )
+                pin["part_type"] = "camera_gimbal_pivot"
+
+        # Main upper camera lens (10mm)
+        radius = housing_height / 2.0
+        flat_depth = max(0.0, housing_depth - radius)
+
+        main_lens_dia = mm(item.get("main_lens_diameter_mm", 10.0))
+        main_glass_dia = mm(item.get("main_glass_diameter_mm", 7.0))
+        main_lens_depth = mm(item.get("main_lens_depth_mm", 3.0))
+        main_z = mm(item.get("main_lens_center_z_mm", 4.0))
+
+        main_cos = math.sqrt(max(0.0, 1.0 - (main_z / radius) ** 2))
+        main_surface_y = -flat_depth - radius * main_cos
+        main_start_y = float(item.get("main_lens_start_y_mm", (main_surface_y * 1000.0 + 0.64))) / 1000.0
+
+        lens_start = Vector((0.0, main_start_y, main_z))
+        lens_end = lens_start + aim * main_lens_depth
+
+        barrel = create_cylinder_between(
+            f"camera_{camera_id}_main_lens_barrel",
+            lens_start,
+            lens_end,
+            main_lens_dia / 2.0,
+            collection,
+            housing_material,
+            pivot,
+            vertices=32,
+        )
+        barrel["part_type"] = "camera_lens_barrel"
+
+        glass_end = lens_end + aim * mm(0.7)
+        glass = create_cylinder_between(
+            f"camera_{camera_id}_main_lens",
+            lens_end,
+            glass_end,
+            main_glass_dia / 2.0,
+            collection,
+            lens_material,
+            pivot,
+            vertices=32,
+        )
+        glass["part_type"] = "camera_lens"
+
+        # Auxiliary lower sensor lens (5mm)
+        aux_lens_dia = mm(item.get("aux_lens_diameter_mm", 5.0))
+        aux_glass_dia = mm(item.get("aux_glass_diameter_mm", 3.5))
+        aux_lens_depth = mm(item.get("aux_lens_depth_mm", 2.0))
+        aux_z = mm(item.get("aux_lens_center_z_mm", -6.0))
+
+        aux_cos = math.sqrt(max(0.0, 1.0 - (aux_z / radius) ** 2))
+        aux_surface_y = -flat_depth - radius * aux_cos
+        aux_start_y = float(item.get("aux_lens_start_y_mm", (aux_surface_y * 1000.0 + 0.21))) / 1000.0
+
+        aux_start = Vector((0.0, aux_start_y, aux_z))
+        aux_end = aux_start + aim * aux_lens_depth
+
+        aux_barrel = create_cylinder_between(
+            f"camera_{camera_id}_aux_lens_barrel",
+            aux_start,
+            aux_end,
+            aux_lens_dia / 2.0,
+            collection,
+            housing_material,
+            pivot,
+            vertices=24,
+        )
+        aux_barrel["part_type"] = "camera_lens_barrel"
+
+        aux_glass_end = aux_end + aim * mm(0.5)
+        aux_glass = create_cylinder_between(
+            f"camera_{camera_id}_aux_lens",
+            aux_end,
+            aux_glass_end,
+            aux_glass_dia / 2.0,
+            collection,
+            lens_material,
+            pivot,
+            vertices=24,
+        )
+        aux_glass["part_type"] = "camera_lens"
+        return pivot
+    elif shape == "hemisphere":
         housing_diameter = mm(item["diameter_mm"])
         housing_depth = mm(item.get("hemisphere_depth_mm", float(item["diameter_mm"]) / 2.0))
         housing = create_hemisphere_housing(
@@ -991,6 +1590,21 @@ def create_round_sensor(
     depth = mm(item.get("depth_mm", 3.0))
     start = location - aim * depth / 2.0
     end = location + aim * depth / 2.0
+
+    # Outer bezel collar ring for flush mounting
+    bezel_radius = (mm(item.get("diameter_mm", 6.0)) + mm(1.6)) / 2.0
+    bezel = create_cylinder_between(
+        f"sensor_{sensor_id}_bezel",
+        start - aim * mm(0.5),
+        end,
+        bezel_radius,
+        collection,
+        housing_material,
+        parent,
+        vertices=24,
+    )
+    bezel["part_type"] = f"{item.get('part_type', 'sensor')}_bezel"
+
     barrel = create_cylinder_between(
         f"sensor_{sensor_id}_barrel",
         start,
@@ -1048,6 +1662,31 @@ def world_bounds(objects: Iterable[bpy.types.Object]) -> tuple[Vector, Vector]:
     minimum = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
     maximum = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
     return minimum, maximum
+
+
+def world_location_mm(obj: bpy.types.Object, digits: int = 6) -> list[float]:
+    return [round(value * 1000.0, digits) for value in obj.matrix_world.translation]
+
+
+def world_dimensions_mm(obj: bpy.types.Object, digits: int = 6) -> list[float]:
+    minimum, maximum = world_bounds([obj])
+    return [round(value * 1000.0, digits) for value in (maximum - minimum)]
+
+
+def world_direction(
+    obj: bpy.types.Object,
+    local_direction: Vector,
+    digits: int = 9,
+) -> list[float]:
+    direction = (obj.matrix_world.to_3x3() @ local_direction).normalized()
+    return [round(value, digits) for value in direction]
+
+
+def world_matrix_values(obj: bpy.types.Object, digits: int = 9) -> list[list[float]]:
+    return [
+        [round(float(value), digits) for value in row]
+        for row in obj.matrix_world
+    ]
 
 
 def look_at(camera: bpy.types.Object, target: Vector) -> None:
@@ -1132,11 +1771,12 @@ def add_scene_metadata(root: bpy.types.Object, config: dict[str, Any]) -> None:
 
 def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     setup_scene()
-    visual = make_collection("MODEL_VISUAL")
-    anchors = make_collection("ANCHORS")
-    collision = make_collection("COLLISION")
-    cameras = make_collection("CAMERAS")
-    references = make_collection("REF_PHOTOS")
+    collections = create_scene_collections(config)
+    visual = collections.visual
+    anchors = collections.anchors
+    collision = collections.collision
+    cameras = collections.cameras
+    references = collections.references
     for name, path in config.get("references", {}).items():
         references[f"source_{name}"] = str(path)
 
@@ -1157,16 +1797,31 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     yellow = make_material("識別イエロー", (0.92, 0.50, 0.035, 1.0), metallic=0.05, roughness=0.35)
     shell_white = make_material("機体シェルホワイト", (0.80, 0.84, 0.87, 1.0), metallic=0.04, roughness=0.32)
     lens_glass = make_material("レンズガラス", (0.008, 0.018, 0.030, 1.0), metallic=0.12, roughness=0.08)
+    led_emissive = make_material("LED発光シェード", (0.92, 0.96, 1.0, 0.90), metallic=0.0, roughness=0.1, emission_color=(1.0, 1.0, 1.0, 1.0), emission_strength=4.0)
+    led_cyan = make_material("LEDシアン発光", (0.1, 0.85, 1.0, 0.90), metallic=0.0, roughness=0.1, emission_color=(0.1, 0.9, 1.0, 1.0), emission_strength=5.0)
+    led_red = make_material("LEDレッド発光", (1.0, 0.1, 0.1, 0.90), metallic=0.0, roughness=0.1, emission_color=(1.0, 0.1, 0.1, 1.0), emission_strength=5.0)
+    led_green = make_material("LEDグリーン発光", (0.1, 1.0, 0.2, 0.90), metallic=0.0, roughness=0.1, emission_color=(0.1, 1.0, 0.2, 1.0), emission_strength=5.0)
+    carbon_tube = make_material("カーボンパイプ", (0.02, 0.02, 0.025, 1.0), metallic=0.3, roughness=0.25)
+    pyro_body = make_material("花火パイロ筒", (0.15, 0.15, 0.18, 1.0), metallic=0.7, roughness=0.3)
+    translucent_white = make_material("半透明拡散カバー", (0.9, 0.92, 0.95, 0.75), metallic=0.0, roughness=0.2)
     material_lookup = {
         "dark": dark, "black": black, "aluminum": aluminum, "wing": wing_material,
         "electronics": electronics_material, "battery": battery_material, "red": red, "yellow": yellow,
-        "white": shell_white, "lens": lens_glass,
+        "white": shell_white, "lens": lens_glass, "led_emissive": led_emissive,
+        "led_cyan": led_cyan, "led_red": led_red, "led_green": led_green,
+        "carbon": carbon_tube, "pyro": pyro_body, "translucent": translucent_white,
     }
 
     root = create_empty("drone_root", (0.0, 0.0, 0.0), visual, None, size=0.01)
     add_scene_metadata(root, config)
     physics = config.get("physics", {})
-    com = create_empty("center_of_mass", tuple(mm(v) for v in physics.get("center_of_mass_mm", [0.0, 0.0, 0.0])), anchors, root, size=0.008)
+    com = create_empty(
+        "center_of_mass",
+        tuple(mm(v) for v in physics.get("center_of_mass_mm", [0.0, 0.0, 0.0])),
+        collections.center_of_mass,
+        root,
+        size=0.008,
+    )
     com["anchor_type"] = "center_of_mass"
     com["source"] = str(physics.get("center_of_mass_source", "placeholder"))
 
@@ -1174,16 +1829,16 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     body_shape = str(body.get("shape", "lofted"))
     body_material = material_lookup.get(str(body.get("material", "dark")), dark)
     if body_shape == "lofted":
-        body_obj = create_lofted_body("body_core", body, visual, body_material, root)
+        body_obj = create_lofted_body("body_core", body, collections.body, body_material, root)
     elif body_shape == "bulged_box":
-        body_obj = create_bulged_body("body_core", body, visual, body_material, root)
+        body_obj = create_bulged_body("body_core", body, collections.body, body_material, root)
     elif body_shape == "rounded_box":
         body_obj = create_rounded_box(
             "body_core",
             (mm(body["width_mm"]), mm(body["length_mm"]), mm(body["height_mm"])),
             (0.0, 0.0, mm(body.get("center_z_mm", 0.0))),
             mm(body.get("bevel_mm", 2.0)),
-            visual,
+            collections.body,
             body_material,
             root,
         )
@@ -1194,12 +1849,13 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     frame_objects: list[bpy.types.Object] = []
     structure = config.get("structure", {})
     if structure.get("enabled"):
+        frame_collection = require_collection(collections.frame, "frame")
         for member in structure.get("members", []):
             frame_obj = create_aluminum_extrusion(
                 f"frame_{member['id']}",
                 tuple(mm(value) for value in member["dimensions_mm"]),
                 tuple(mm(value) for value in member["location_mm"]),
-                visual,
+                frame_collection,
                 aluminum,
                 dark,
                 root,
@@ -1207,59 +1863,188 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             )
             frame_obj["profile"] = str(member.get("profile", "custom"))
             frame_obj["source"] = str(member.get("source", "configured"))
+            if "rotation_deg" in member:
+                frame_obj.rotation_euler = tuple(math.radians(v) for v in member["rotation_deg"])
             frame_objects.append(frame_obj)
+        for bracket in structure.get("brackets", []):
+            bracket_type = str(bracket.get("type", "triangle"))
+            b_location = tuple(mm(value) for value in bracket["location_mm"])
+            b_name = f"frame_bracket_{bracket['id']}"
+            if bracket_type == "triangle":
+                bracket_obj = create_triangle_bracket(b_name, b_location, frame_collection, aluminum, root)
+            elif bracket_type == "angle":
+                bracket_obj = create_angle_bracket(b_name, b_location, frame_collection, aluminum, root)
+            elif bracket_type == "t_bracket":
+                bracket_obj = create_t_bracket(b_name, b_location, frame_collection, aluminum, root)
+            elif bracket_type == "skid_clamp":
+                bracket_obj = create_skid_clamp(b_name, b_location, frame_collection, aluminum, root)
+            else:
+                bracket_obj = create_rounded_box(
+                    b_name, (mm(40.0), mm(40.0), mm(10.0)), b_location, mm(2.0),
+                    frame_collection, aluminum, root
+                )
+            bracket_obj["model"] = str(bracket.get("model", ""))
+            bracket_obj["part_type"] = "frame_joiner_bracket"
+            if "rotation_deg" in bracket:
+                bracket_obj.rotation_euler = tuple(math.radians(v) for v in bracket["rotation_deg"])
 
     wing = config.get("wing", {})
     if wing.get("enabled"):
-        create_airfoil_wing("main_wing", wing, visual, wing_material, root)
+        wing_collection = require_collection(collections.wing, "wing")
+        wing_root = create_empty("wing_root", (0.0, 0.0, 0.0), wing_collection, root, size=0.04)
+        wing_root["part_type"] = "wing_assembly"
+        wing_obj = create_airfoil_wing("main_wing", wing, wing_collection, wing_material, root)
+        parent_to_keep_world(wing_obj, wing_root)
         for bracket in wing.get("brackets", []):
+            b_dim = tuple(mm(value) for value in bracket["dimensions_mm"])
+            b_loc = tuple(mm(value) for value in bracket["location_mm"])
             bracket_obj = create_rounded_box(
-                f"wing_bracket_{bracket['id']}",
-                tuple(mm(value) for value in bracket["dimensions_mm"]),
-                tuple(mm(value) for value in bracket["location_mm"]),
-                mm(bracket.get("bevel_mm", 2.0)),
-                visual,
-                aluminum,
-                root,
+                f"wing_bracket_{bracket['id']}", b_dim, b_loc,
+                mm(bracket.get("bevel_mm", 2.0)), wing_collection, aluminum, root,
             )
             bracket_obj["part_type"] = "wing_bracket"
+            if "rotation_deg" in bracket:
+                bracket_obj.rotation_euler = tuple(math.radians(v) for v in bracket["rotation_deg"])
+            # Add wing attachment flange saddles
+            f_dim = (b_dim[0], mm(30.0), mm(20.0))
+            for f_idx, f_offset in enumerate((-b_dim[1] * 0.4, b_dim[1] * 0.4), start=1):
+                flange = create_rounded_box(
+                    f"wing_bracket_{bracket['id']}_saddle_{f_idx}", f_dim,
+                    (b_loc[0], b_loc[1] + f_offset, b_loc[2] - mm(10.0)), mm(1.5),
+                    wing_collection, aluminum, root
+                )
+                flange["part_type"] = "wing_bracket_saddle"
+                if "rotation_deg" in bracket:
+                    flange.rotation_euler = tuple(math.radians(v) for v in bracket["rotation_deg"])
+                parent_to_keep_world(flange, wing_root)
+            parent_to_keep_world(bracket_obj, wing_root)
 
     for item in config.get("equipment", {}).get("boxes", []):
+        item_id = str(item["id"])
+        box_dim = tuple(mm(value) for value in item["dimensions_mm"])
+        box_loc = tuple(mm(value) for value in item["location_mm"])
         equipment_obj = create_rounded_box(
-            f"equipment_{item['id']}",
-            tuple(mm(value) for value in item["dimensions_mm"]),
-            tuple(mm(value) for value in item["location_mm"]),
-            mm(item.get("bevel_mm", 3.0)),
-            visual,
+            f"equipment_{item_id}", box_dim, box_loc,
+            mm(item.get("bevel_mm", 3.0)), equipment_collection(item, collections),
             material_lookup.get(str(item.get("material", "electronics")), electronics_material),
             root,
         )
         equipment_obj["part_type"] = str(item.get("part_type", "equipment"))
         if item.get("model"):
             equipment_obj["model"] = str(item["model"])
+        if "rotation_deg" in item:
+            equipment_obj.rotation_euler = tuple(math.radians(v) for v in item["rotation_deg"])
+
+        if item_id == "battery":
+            tray_dim = (box_dim[0] + mm(12.0), box_dim[1] + mm(12.0), mm(6.0))
+            tray_loc = (box_loc[0], box_loc[1], box_loc[2] - box_dim[2] / 2.0 - mm(3.0))
+            tray = create_rounded_box(
+                "equipment_battery_tray", tray_dim, tray_loc, mm(1.5),
+                equipment_collection(item, collections), aluminum, root
+            )
+            tray["part_type"] = "battery_tray"
+            if "rotation_deg" in item:
+                tray.rotation_euler = tuple(math.radians(v) for v in item["rotation_deg"])
+            strap_dim = (box_dim[0] + mm(4.0), mm(25.0), box_dim[2] + mm(4.0))
+            for s_idx, s_offset in enumerate((-box_dim[1] * 0.25, box_dim[1] * 0.25), start=1):
+                strap = create_rounded_box(
+                    f"equipment_battery_strap_{s_idx}", strap_dim,
+                    (box_loc[0], box_loc[1] + s_offset, box_loc[2]), mm(1.0),
+                    equipment_collection(item, collections), black, root
+                )
+                strap["part_type"] = "battery_strap"
+                if "rotation_deg" in item:
+                    strap.rotation_euler = tuple(math.radians(v) for v in item["rotation_deg"])
+        elif item_id == "flight_computer":
+            case_dim = (box_dim[0] + mm(8.0), box_dim[1] + mm(8.0), box_dim[2] + mm(6.0))
+            case_box = create_rounded_box(
+                "equipment_fc_housing", case_dim, box_loc, mm(4.0),
+                equipment_collection(item, collections), electronics_material, root
+            )
+            case_box["part_type"] = "fc_housing_case"
+            if "rotation_deg" in item:
+                case_box.rotation_euler = tuple(math.radians(v) for v in item["rotation_deg"])
 
     for item in config.get("equipment", {}).get("masts", []):
+        sensor_collection = require_collection(collections.sensors, "sensors")
         mast_x, mast_y, mast_base_z = (mm(value) for value in item["base_mm"])
         mast_height = mm(item["height_mm"])
+        base_height = mm(item.get("base_height_mm", 18.0))
+        base_mount = create_rounded_box(
+            f"equipment_{item['id']}_base_mount", (mm(36.0), mm(36.0), base_height),
+            (mast_x, mast_y, mast_base_z), mm(2.0),
+            sensor_collection, aluminum, root
+        )
+        base_mount["part_type"] = "gps_base_mount"
         mast = create_cylinder(
             f"equipment_{item['id']}_mast", mm(item.get("diameter_mm", 12.0)) / 2.0,
             mast_height, (mast_x, mast_y, mast_base_z + mast_height / 2.0),
-            visual, black, root, vertices=16,
+            sensor_collection, black, root, vertices=16,
         )
         mast["part_type"] = "sensor_mast"
         head_height = mm(item.get("head_height_mm", 18.0))
         head = create_cylinder(
             f"equipment_{item['id']}_head", mm(item.get("head_diameter_mm", 70.0)) / 2.0,
             head_height, (mast_x, mast_y, mast_base_z + mast_height + head_height / 2.0),
-            visual, electronics_material, root, vertices=24,
+            sensor_collection, electronics_material, root, vertices=24,
         )
         head["part_type"] = str(item.get("part_type", "sensor"))
 
     for item in config.get("equipment", {}).get("cameras", []):
-        create_camera_module(item, visual, electronics_material, lens_glass, root)
+        create_camera_module(
+            item,
+            require_collection(collections.sensors, "sensors"),
+            electronics_material,
+            lens_glass,
+            root,
+        )
 
     for item in config.get("equipment", {}).get("round_sensors", []):
-        create_round_sensor(item, visual, electronics_material, lens_glass, root)
+        create_round_sensor(
+            item,
+            require_collection(collections.sensors, "sensors"),
+            electronics_material,
+            lens_glass,
+            root,
+        )
+
+    for item in config.get("equipment", {}).get("cylinders", []):
+        item_id = str(item["id"])
+        radius = mm(item["radius_mm"])
+        height = mm(item["height_mm"])
+        location = tuple(mm(v) for v in item["location_mm"])
+        mat_key = str(item.get("material", "electronics"))
+        mat = material_lookup.get(mat_key, electronics_material)
+        cylinder_obj = create_cylinder(
+            f"equipment_{item_id}",
+            radius,
+            height,
+            location,
+            equipment_collection(item, collections),
+            mat,
+            root,
+            vertices=int(item.get("vertices", 32)),
+            rotation_deg=tuple(float(v) for v in item["rotation_deg"]) if "rotation_deg" in item else None,
+        )
+        cylinder_obj["part_type"] = str(item.get("part_type", "equipment_cylinder"))
+
+    for item in config.get("equipment", {}).get("spheres", []):
+        item_id = str(item["id"])
+        radius = mm(item["radius_mm"])
+        location = tuple(mm(v) for v in item["location_mm"])
+        mat_key = str(item.get("material", "electronics"))
+        mat = material_lookup.get(mat_key, electronics_material)
+        sphere_obj = create_sphere(
+            f"equipment_{item_id}",
+            radius,
+            location,
+            equipment_collection(item, collections),
+            mat,
+            root,
+            segments=int(item.get("segments", 32)),
+            ring_count=int(item.get("ring_count", 16)),
+        )
+        sphere_obj["part_type"] = str(item.get("part_type", "equipment_sphere"))
 
     arm = config["arm"]
     motor = config["motor"]
@@ -1278,6 +2063,9 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     esc = config.get("esc", {})
 
     for rotor_id in rotor_ids:
+        rotor_collection = collections.rotors[rotor_id]
+        mount_obj: bpy.types.Object | None = None
+        esc_obj: bpy.types.Object | None = None
         position_mm = positions[rotor_id]
         motor_xy = Vector((mm(position_mm[0]), mm(position_mm[1]), 0.0))
         support_axis = "x" if abs(motor_xy.x) >= abs(motor_xy.y) else "y"
@@ -1287,15 +2075,21 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         if arm_enabled:
             arm_style = str(arm.get("style", "solid"))
             if arm_style == "measured_triangle":
-                create_measured_triangle_arm(f"arm_{rotor_id}", motor_xy, arm, visual, dark, root)
+                create_measured_triangle_arm(
+                    f"arm_{rotor_id}", motor_xy, arm,
+                    require_collection(collections.arms, "arms"), dark, root,
+                )
             elif arm_style == "truss":
-                create_truss_arm(f"arm_{rotor_id}", root_point, motor_xy, arm, visual, dark, root)
+                create_truss_arm(
+                    f"arm_{rotor_id}", root_point, motor_xy, arm,
+                    require_collection(collections.arms, "arms"), dark, root,
+                )
             else:
                 create_tapered_arm(
                     f"arm_{rotor_id}", root_point, motor_xy,
                     mm(arm["root_width_mm"]), mm(arm["tip_width_mm"]),
                     mm(arm["thickness_mm"]), mm(arm["center_z_mm"]),
-                    visual, dark, root,
+                    require_collection(collections.arms, "arms"), dark, root,
                 )
 
         if motor_mount.get("enabled"):
@@ -1307,11 +2101,13 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                 tuple(mount_dimensions),
                 (motor_xy.x, motor_xy.y, per_rotor_mm(motor_mount, "center_z_mm", rotor_id)),
                 mm(motor_mount.get("bevel_mm", 3.0)),
-                visual,
+                rotor_collection,
                 aluminum,
                 root,
             )
             mount_obj["part_type"] = "motor_bracket"
+            if "rotation_deg_by_rotor" in motor_mount and rotor_id in motor_mount["rotation_deg_by_rotor"]:
+                mount_obj.rotation_euler = tuple(math.radians(v) for v in motor_mount["rotation_deg_by_rotor"][rotor_id])
 
         if esc.get("enabled"):
             offset = mm(esc.get("inward_offset_mm", 180.0))
@@ -1322,24 +2118,32 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             else:
                 esc_y -= math.copysign(offset, motor_xy.y)
                 esc_dimensions[0], esc_dimensions[1] = esc_dimensions[1], esc_dimensions[0]
+            if "location_by_rotor_mm" in esc and rotor_id in esc["location_by_rotor_mm"]:
+                esc_loc = tuple(mm(v) for v in esc["location_by_rotor_mm"][rotor_id])
+            else:
+                esc_loc = (esc_x, esc_y, mm(esc["center_z_mm"]))
+            if "dimensions_by_rotor_mm" in esc and rotor_id in esc["dimensions_by_rotor_mm"]:
+                esc_dimensions = [mm(v) for v in esc["dimensions_by_rotor_mm"][rotor_id]]
             esc_obj = create_rounded_box(
                 f"esc_{rotor_id}",
                 tuple(esc_dimensions),
-                (esc_x, esc_y, mm(esc["center_z_mm"])),
+                esc_loc,
                 mm(esc.get("bevel_mm", 4.0)),
-                visual,
+                rotor_collection,
                 electronics_material,
                 root,
             )
             esc_obj["part_type"] = "esc"
             esc_obj["model"] = str(esc.get("model", ""))
+            if "rotation_deg_by_rotor" in esc and rotor_id in esc["rotation_deg_by_rotor"]:
+                esc_obj.rotation_euler = tuple(math.radians(v) for v in esc["rotation_deg_by_rotor"][rotor_id])
 
         motor_obj = create_cylinder(
             f"motor_{rotor_id}",
             mm(motor["housing_diameter_mm"]) / 2.0,
             mm(motor["housing_height_mm"]),
             (motor_xy.x, motor_xy.y, motor_center_z),
-            visual,
+            rotor_collection,
             dark,
             root,
             vertices=32,
@@ -1353,12 +2157,12 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             if propeller_center_z >= motor_center_z
             else propeller_center_z + shaft_half_height
         )
-        create_cylinder(
+        shaft_obj = create_cylinder(
             f"motor_{rotor_id}_shaft",
             mm(motor["shaft_diameter_mm"]) / 2.0,
             mm(motor["shaft_height_mm"]),
             (motor_xy.x, motor_xy.y, shaft_center_z),
-            visual,
+            rotor_collection,
             black,
             root,
             vertices=16,
@@ -1367,7 +2171,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         axis = create_empty(
             f"motor_{rotor_id}_axis",
             (motor_xy.x, motor_xy.y, propeller_center_z),
-            anchors,
+            collections.motor_axes,
             root,
             size=0.009,
         )
@@ -1379,7 +2183,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         rotor_root = create_empty(
             f"rotor_{rotor_id}",
             (motor_xy.x, motor_xy.y, propeller_center_z),
-            visual,
+            rotor_collection,
             root,
             size=0.006,
         )
@@ -1387,24 +2191,39 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         rotor_root["rotation_direction"] = str(directions[rotor_id])
         display_angles = propeller.get("display_angles_deg", {})
         rotor_root.rotation_euler[2] = math.radians(float(display_angles.get(rotor_id, 0.0)))
-        create_rotor_mesh(
+        blades_obj = create_rotor_mesh(
             f"rotor_{rotor_id}_blades",
             propeller,
             str(directions[rotor_id]),
-            visual,
+            rotor_collection,
             rotor_material,
             rotor_root,
         )
-        create_cylinder(
+        hub_obj = create_cylinder(
             f"rotor_{rotor_id}_hub",
             mm(propeller["hub_diameter_mm"]) / 2.0,
             mm(propeller["hub_height_mm"]),
             (motor_xy.x, motor_xy.y, propeller_center_z),
-            visual,
+            rotor_collection,
             black,
             root,
             vertices=24,
         )
+        spin_root = create_empty(
+            f"rotor_{rotor_id}_spin",
+            (0.0, 0.0, 0.0),
+            rotor_collection,
+            rotor_root,
+            size=0.004,
+        )
+        spin_root["part_type"] = "rotor_spin"
+        spin_root["rotation_direction"] = str(directions[rotor_id])
+        rotor_root["assembly_role"] = "fixed"
+        parent_to_keep_world(blades_obj, spin_root)
+        parent_to_keep_world(hub_obj, spin_root)
+        for fixed_obj in (mount_obj, esc_obj, motor_obj, shaft_obj):
+            if fixed_obj is not None:
+                parent_to_keep_world(fixed_obj, rotor_root)
 
         if guard_enabled:
             mount_tube_diameter = mm(guard.get("mount_tube_diameter_mm", 0.0))
@@ -1416,7 +2235,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                     mount_tube_diameter / 2.0,
                     mount_tube_height,
                     (motor_xy.x, motor_xy.y, mount_tube_center_z),
-                    visual,
+                    require_collection(collections.guards, "guards"),
                     electronics_material,
                     root,
                     vertices=32,
@@ -1426,7 +2245,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                 f"guard_{rotor_id}", motor_xy, guard_outer_width, guard_outer_length,
                 mm(guard["tube_diameter_mm"]), mm(guard["center_z_mm"]),
                 float(guard["inner_gap_deg"]), int(guard["major_segments"]),
-                int(guard["minor_segments"]), visual, black, root,
+                int(guard["minor_segments"]), require_collection(collections.guards, "guards"), black, root,
                 float(guard["sweep_deg"]) if guard.get("sweep_deg") is not None else None,
             )
             guard_obj["part_type"] = "propeller_guard"
@@ -1440,6 +2259,10 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             strut_start_radius = mount_tube_diameter / 2.0 if mount_tube_diameter > 0.0 else 0.0
             strut_count = int(guard.get("strut_count", 3))
             configured_offsets = guard.get("strut_angle_offsets_deg")
+            strut_style = str(guard.get("strut_style", "straight"))
+            knee_radius_mm = guard.get("strut_knee_radius_mm")
+            knee_z_mm = guard.get("strut_knee_z_mm")
+
             if configured_offsets is not None:
                 offsets = [float(value) for value in configured_offsets]
             else:
@@ -1456,10 +2279,25 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                     motor_xy.y + guard_radii[1] * math.sin(angle),
                     strut_end_z,
                 ))
-                strut = create_cylinder_between(
-                    f"guard_{rotor_id}_strut_{index:02d}", start, end,
-                    mm(guard.get("strut_radius_mm", 0.72)), visual, black, root, vertices=10,
-                )
+                if strut_style == "bent" or knee_radius_mm is not None or knee_z_mm is not None:
+                    knee_r = mm(knee_radius_mm) if knee_radius_mm is not None else (strut_start_radius + (guard_radii[0] - strut_start_radius) * 0.75)
+                    knee_z = mm(knee_z_mm) if knee_z_mm is not None else strut_start_z
+                    knee = Vector((
+                        motor_xy.x + knee_r * math.cos(angle),
+                        motor_xy.y + knee_r * math.sin(angle),
+                        knee_z,
+                    ))
+                    strut = create_bent_strut(
+                        f"guard_{rotor_id}_strut_{index:02d}", start, knee, end,
+                        mm(guard.get("strut_radius_mm", 0.8)),
+                        require_collection(collections.guards, "guards"), black, root,
+                    )
+                else:
+                    strut = create_cylinder_between(
+                        f"guard_{rotor_id}_strut_{index:02d}", start, end,
+                        mm(guard.get("strut_radius_mm", 0.72)),
+                        require_collection(collections.guards, "guards"), black, root, vertices=10,
+                    )
                 strut["horizontal_projection_mm"] = round(
                     math.hypot(end.x - start.x, end.y - start.y) * 1000.0,
                     3,
@@ -1470,12 +2308,13 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             create_cylinder(
                 f"landing_leg_{rotor_id}", mm(landing["leg_diameter_mm"]) / 2.0,
                 mm(landing["leg_height_mm"]), (motor_xy.x, motor_xy.y, mm(landing["leg_center_z_mm"])),
-                visual, black, root, vertices=16,
+                require_collection(collections.landing, "landing"), black, root, vertices=16,
             )
             create_cylinder(
                 f"foot_{rotor_id}", mm(landing["foot_diameter_mm"]) / 2.0,
                 mm(landing["foot_height_mm"]), (motor_xy.x, motor_xy.y, mm(landing["foot_center_z_mm"])),
-                visual, material_lookup.get(str(landing.get("foot_material", "red")), red), root, vertices=20,
+                require_collection(collections.landing, "landing"),
+                material_lookup.get(str(landing.get("foot_material", "red")), red), root, vertices=20,
             )
 
     # 初期衝突形状は視覚モデルとは独立した単純形状にする。
@@ -1483,10 +2322,11 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         "collision_body",
         (mm(body["width_mm"]), mm(body["length_mm"]), mm(body["height_mm"])),
         (0.0, 0.0, mm(body["center_z_mm"])),
-        collision,
+        collections.collision_body,
         root,
     )
     if arm_enabled:
+        collision_structure = require_collection(collections.collision_structure, "collision_structure")
         for rotor_id in rotor_ids:
             position_mm = positions[rotor_id]
             end = Vector((mm(position_mm[0]), mm(position_mm[1]), mm(arm["center_z_mm"])))
@@ -1496,18 +2336,20 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             collision_arm = create_collision_box(
                 f"collision_arm_{rotor_id}",
                 (length, mm(arm["root_width_mm"]), mm(arm["thickness_mm"])),
-                tuple(midpoint), collision, root,
+                tuple(midpoint), collision_structure, root,
             )
             collision_arm.rotation_euler[2] = math.atan2(end.y - start.y, end.x - start.x)
     for frame_obj in frame_objects:
-        create_collision_box(
+        c_box = create_collision_box(
             f"collision_{frame_obj.name}",
             tuple(frame_obj.dimensions),
-            tuple(frame_obj.location),
-            collision,
+            tuple(frame_obj.matrix_world.translation),
+            require_collection(collections.collision_structure, "collision_structure"),
             root,
         )
+        c_box.rotation_euler = tuple(frame_obj.rotation_euler)
 
+    bpy.context.view_layer.update()
     visual_meshes = mesh_objects(visual)
     minimum, maximum = world_bounds(visual_meshes)
     dimensions = maximum - minimum
@@ -1519,20 +2361,32 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     all_names = {obj.name for obj in bpy.data.objects}
     missing_names = sorted(required_object_names(config) - all_names)
     duplicate_suffix_names = sorted(name for name in all_names if name.rsplit(".", 1)[-1].isdigit())
-    motor_axes = {
-        rotor_id: {
-            "location_mm": [round(value * 1000.0, 6) for value in bpy.data.objects[f"motor_{rotor_id}_axis"].location],
-            "motor_location_mm": [round(value * 1000.0, 6) for value in bpy.data.objects[f"motor_{rotor_id}"].location],
-            "motor_dimensions_mm": [round(value * 1000.0, 6) for value in bpy.data.objects[f"motor_{rotor_id}"].dimensions],
-            "mount_side": str(bpy.data.objects[f"motor_{rotor_id}"].get("mount_side", "unknown")),
+    duplicate_suffix_collection_names = sorted(
+        collection.name
+        for collection in bpy.data.collections
+        if collection.name.rsplit(".", 1)[-1].isdigit()
+    )
+    motor_axes: dict[str, dict[str, Any]] = {}
+    for rotor_id in rotor_ids:
+        axis_obj = bpy.data.objects[f"motor_{rotor_id}_axis"]
+        motor_obj = bpy.data.objects[f"motor_{rotor_id}"]
+        motor_axes[rotor_id] = {
+            "coordinate_space": "world",
+            "location_mm": world_location_mm(axis_obj),
+            "matrix_world": world_matrix_values(axis_obj),
+            "motor_location_mm": world_location_mm(motor_obj),
+            "motor_dimensions_mm": world_dimensions_mm(motor_obj),
+            "mount_side": str(motor_obj.get("mount_side", "unknown")),
             "local_thrust_axis": "+Z",
+            "world_thrust_axis": world_direction(axis_obj, Vector((0.0, 0.0, 1.0))),
             "rotation_direction": directions[rotor_id],
         }
-        for rotor_id in rotor_ids
-    }
     sensor_masts = {
         str(item["id"]): {
-            "height_mm": round(bpy.data.objects[f"equipment_{item['id']}_mast"].dimensions.z * 1000.0, 6),
+            "coordinate_space": "world",
+            "height_mm": world_dimensions_mm(bpy.data.objects[f"equipment_{item['id']}_mast"])[2],
+            "mast_location_mm": world_location_mm(bpy.data.objects[f"equipment_{item['id']}_mast"]),
+            "head_location_mm": world_location_mm(bpy.data.objects[f"equipment_{item['id']}_head"]),
             "base_mm": [float(value) for value in item["base_mm"]],
             "head_diameter_mm": float(item.get("head_diameter_mm", 70.0)),
         }
@@ -1540,7 +2394,9 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     }
     guard_mounts = {
         rotor_id: {
-            "dimensions_mm": [round(value * 1000.0, 6) for value in bpy.data.objects[f"guard_mount_{rotor_id}"].dimensions],
+            "coordinate_space": "world",
+            "location_mm": world_location_mm(bpy.data.objects[f"guard_mount_{rotor_id}"]),
+            "dimensions_mm": world_dimensions_mm(bpy.data.objects[f"guard_mount_{rotor_id}"]),
         }
         for rotor_id in rotor_ids
         if f"guard_mount_{rotor_id}" in bpy.data.objects
@@ -1593,7 +2449,9 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     camera_modules = {
         str(item["id"]): {
             "shape": str(item.get("shape", "rounded_box")),
-            "location_mm": [float(value) for value in item["location_mm"]],
+            "coordinate_space": "world",
+            "location_mm": world_location_mm(bpy.data.objects[f"camera_{item['id']}_housing"]),
+            "configured_location_mm": [float(value) for value in item["location_mm"]],
             "body_protrusion_mm": round(
                 (
                     body_minimum.y
@@ -1605,16 +2463,43 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             if tuple(item.get("aim_vector", [0.0, -1.0, 0.0])) == (0.0, -1.0, 0.0)
             else None,
             "configured_body_protrusion_mm": float(item.get("body_protrusion_mm", 0.0)),
-            "dimensions_mm": [
-                round(value * 1000.0, 6)
-                for value in bpy.data.objects[f"camera_{item['id']}_housing"].dimensions
-            ],
+            "dimensions_mm": world_dimensions_mm(bpy.data.objects[f"camera_{item['id']}_housing"]),
         }
         for item in config.get("equipment", {}).get("cameras", [])
     }
+    object_parents = {
+        obj.name: obj.parent.name if obj.parent is not None else None
+        for obj in sorted(bpy.data.objects, key=lambda item: item.name)
+    }
+    rotor_assemblies = {}
+    for rotor_id in rotor_ids:
+        assembly_obj = bpy.data.objects[f"rotor_{rotor_id}"]
+        spin_obj = bpy.data.objects[f"rotor_{rotor_id}_spin"]
+        axis_obj = bpy.data.objects[f"motor_{rotor_id}_axis"]
+        spin_origin = spin_obj.matrix_world.translation
+        axis_origin = axis_obj.matrix_world.translation
+        rotor_assemblies[rotor_id] = {
+            "coordinate_space": "world",
+            "assembly": assembly_obj.name,
+            "spin": spin_obj.name,
+            "fixed_children": sorted(child.name for child in assembly_obj.children if child != spin_obj),
+            "spinning_children": sorted(child.name for child in spin_obj.children),
+            "spin_origin_mm": world_location_mm(spin_obj),
+            "axis_origin_mm": world_location_mm(axis_obj),
+            "origin_error_mm": round((spin_origin - axis_origin).length * 1000.0, 9),
+        }
+    collision_proxies = {
+        obj.name: {
+            "coordinate_space": "world",
+            "location_mm": world_location_mm(obj),
+            "dimensions_mm": world_dimensions_mm(obj),
+            "matrix_world": world_matrix_values(obj),
+        }
+        for obj in sorted(mesh_objects(collision), key=lambda item: item.name)
+    }
 
     report = {
-        "schema_version": "1.0",
+        "schema_version": "1.3",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "blender_version": bpy.app.version_string,
         "subject_id": config["subject_id"],
@@ -1622,7 +2507,13 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         "layout_mode": config["derived"]["layout_mode"],
         "rotor_count": len(rotor_ids),
         "dimensions_provisional": config["dimensions_provisional"],
-        "coordinate_system": {"right": "+X", "front": "-Y", "up": "+Z", "origin": "estimated_center_of_mass"},
+        "coordinate_system": {
+            "right": "+X",
+            "front": "-Y",
+            "up": "+Z",
+            "origin": "estimated_center_of_mass",
+            "reported_transform_space": "world",
+        },
         "bbox_min_mm": [round(value * 1000.0, 6) for value in minimum],
         "bbox_max_mm": [round(value * 1000.0, 6) for value in maximum],
         "dimensions_mm": {
@@ -1645,6 +2536,15 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         "visual_mesh_count": len(visual_meshes),
         "triangles": triangles,
         "motor_axes": motor_axes,
+        "center_of_mass": {
+            "coordinate_space": "world",
+            "location_mm": world_location_mm(com),
+            "matrix_world": world_matrix_values(com),
+            "source": str(com.get("source", "unknown")),
+        },
+        "rotor_assemblies": rotor_assemblies,
+        "collision_proxies": collision_proxies,
+        "object_parents": object_parents,
         "sensor_masts": sensor_masts,
         "arm_members": arm_members,
         "guard_mounts": guard_mounts,
@@ -1652,7 +2552,12 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         "camera_modules": camera_modules,
         "missing_required_names": missing_names,
         "duplicate_suffix_names": duplicate_suffix_names,
+        "duplicate_suffix_collection_names": duplicate_suffix_collection_names,
         "collections": {collection.name: len(collection.all_objects) for collection in (visual, anchors, collision, cameras, references)},
+        "collection_hierarchy": {
+            collection.name: collection_hierarchy(collection)
+            for collection in (visual, anchors, collision, cameras, references)
+        },
     }
 
     output_cfg = config["output"]

@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-08-04T08:34:11.076370+00:00",
+  "config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\examples\\hex6_radial_model.yaml",
+  "config_sha256": "1e14cd8834efa4618cfac54ba020a7045942b9b8376b859f9b25a35d5c016f64",
+  "resolved_config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\drone2_parametric\\hex6_radial\\resolved_config.json",
+  "blend": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\drone2_parametric\\hex6_radial\\hex6_radial.blend",
+  "glb": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\drone2_parametric\\hex6_radial\\hex6_radial.glb",
+  "glb_sha256": "1d592bebc72efca5426bffa13cd954ffa7eb28f54a597339a945bd4b7e6f55eb",
+  "qa": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\drone2_parametric\\hex6_radial\\qa_report.json",
+  "qa_status": "PASS"
+}

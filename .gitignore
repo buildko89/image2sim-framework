@@ -5,6 +5,7 @@
 .venv_*/
 .venv_triposr/
 .venv_hunyuan3d/
+.gemini/
 external/
 third_party/
 
@@ -52,6 +53,13 @@ output/godot_run_error.txt
 *.fbx
 *.obj
 *.blend
+*.blend1
+
+# Temporary logs and environment-specific configs
+*.log
+/tmp/
+/mcp_config.json
+/blender/mcp/
 
 # Generated images and intermediate artifacts
 output/**/*.png
@@ -125,3 +133,15 @@ output_v2/godot/Godot3dcat/.godot/
 !/output/drone2_parametric/hex6_radial/renders/
 !/output/drone2_parametric/hex6_radial/renders/*.png
 /output/template_smoke/
+
+drone3.md
+
+/output/drone3_parametric/*
+/output/drone3_parametric_backup/*
+/output/drone3_parametric_backup2/*
+/config/drone3_model.yaml
+drone3_parametric.zip
+
+/output/hula_parametric_backup/*
+
+newplan2/*

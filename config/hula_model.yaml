@@ -198,8 +198,11 @@ guard:
   mount_tube_center_z_mm: 5.0
   mount_tube_source: measured_and_attachment_photos
   center_z_mm: 16.0
+  strut_style: bent
   strut_center_z_mm: 5.0
-  strut_start_z_mm: 5.0
+  strut_start_z_mm: 8.6
+  strut_knee_radius_mm: 36.7
+  strut_knee_z_mm: 8.6
   strut_end_z_mm: 16.0
   height_above_motor_pod_mm: 20.0
   height_reference: motor_pod_center
@@ -246,13 +249,34 @@ equipment:
       material: electronics
       part_type: decorative_marking
       source: photo_estimated
-    - id: front_sensor_panel
-      dimensions_mm: [34.0, 7.0, 25.0]
-      location_mm: [0.0, -43.0, -4.0]
+    - id: front_nose_frame
+      dimensions_mm: [36.0, 8.0, 24.0]
+      location_mm: [0.0, -42.5, -4.0]
       bevel_mm: 3.0
+      material: dark_gray
+      part_type: front_nose_frame
+      source: photo_hula_front
+    - id: battery_pack
+      dimensions_mm: [34.0, 42.0, 14.0]
+      location_mm: [0.0, 22.0, -3.0]
+      bevel_mm: 2.0
+      material: black
+      part_type: battery_cartridge
+      source: photo_hula_rear
+    - id: rear_chassis_panel
+      dimensions_mm: [32.0, 6.0, 8.0]
+      location_mm: [0.0, 42.5, -12.0]
+      bevel_mm: 1.5
+      material: dark_gray
+      part_type: rear_interface_panel
+      source: photo_hula_rear
+    - id: rear_charging_port
+      dimensions_mm: [8.0, 2.0, 4.0]
+      location_mm: [0.0, 45.2, -12.0]
+      bevel_mm: 0.5
       material: electronics
-      part_type: sensor_panel
-      source: photo_estimated
+      part_type: charging_port
+      source: photo_hula_rear
     - id: underside_controller
       dimensions_mm: [42.0, 54.0, 9.0]
       location_mm: [0.0, 8.0, -17.0]
@@ -262,23 +286,32 @@ equipment:
       source: photo_estimated
   cameras:
     - id: front
-      location_mm: [0.0, -52.5, -6.0]
-      shape: hemisphere
-      diameter_mm: 25.0
-      hemisphere_depth_mm: 12.5
+      location_mm: [0.0, -45.0, -6.0]
+      shape: half_cylinder_dual_lens
+      housing_width_mm: 16.0
+      housing_height_mm: 25.0
+      housing_depth_mm: 20.0
+      pivot_hub_radius_mm: 7.0
+      pivot_hub_thickness_mm: 1.8
       body_protrusion_mm: 20.0
       aim_vector: [0.0, -1.0, 0.0]
-      lens_diameter_mm: 9.0
-      glass_diameter_mm: 6.4
-      lens_depth_mm: 3.0
-      lens_center_offset_mm: 14.0
+      main_lens_diameter_mm: 10.0
+      main_glass_diameter_mm: 7.0
+      main_lens_depth_mm: 3.0
+      main_lens_center_z_mm: 4.0
+      main_lens_start_y_mm: -18.703
+      aux_lens_diameter_mm: 5.0
+      aux_glass_diameter_mm: 3.5
+      aux_lens_depth_mm: 2.0
+      aux_lens_center_z_mm: -6.0
+      aux_lens_start_y_mm: -18.252
       pivot_pin_diameter_mm: 4.5
       pivot_pin_length_mm: 3.0
       field_of_view_deg: 71.0
       movable: true
       tilt_range_deg: 120.0
       rotation_axis: +X
-      source: official_spec_and_photo
+      source: camera_dimensions_photo_and_spec
     - id: downward
       location_mm: [0.0, 16.0, -24.0]
       housing_dimensions_mm: [18.0, 17.0, 5.0]
@@ -293,25 +326,18 @@ equipment:
       source: photo_and_optical_flow_spec
   round_sensors:
     - id: infrared_left
-      location_mm: [-11.5, -47.2, 2.5]
+      location_mm: [-11.5, -45.0, 2.5]
       aim_vector: [0.0, -1.0, 0.0]
       diameter_mm: 5.5
       face_diameter_mm: 3.8
       depth_mm: 3.0
       part_type: infrared_obstacle_sensor
     - id: infrared_right
-      location_mm: [11.5, -47.2, 2.5]
+      location_mm: [11.5, -45.0, 2.5]
       aim_vector: [0.0, -1.0, 0.0]
       diameter_mm: 5.5
       face_diameter_mm: 3.8
       depth_mm: 3.0
-      part_type: infrared_obstacle_sensor
-    - id: front_lower
-      location_mm: [0.0, -49.0, -14.0]
-      aim_vector: [0.0, -1.0, 0.0]
-      diameter_mm: 4.2
-      face_diameter_mm: 2.8
-      depth_mm: 2.6
       part_type: infrared_obstacle_sensor
 
 physics:
