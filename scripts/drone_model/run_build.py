@@ -342,14 +342,40 @@ def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, 
         ]
         for rotor_id in config["derived"]["rotor_ids"]
     }
-    expected_motor_locations = {
-        rotor_id: [
-            float(config["derived"]["motor_positions_mm"][rotor_id][0]),
-            float(config["derived"]["motor_positions_mm"][rotor_id][1]),
-            per_rotor_value(config["motor"], "center_z_mm", rotor_id),
-        ]
+    # ★★★★ VTOL（2026-08-31）: 傾けたロータは **モータ筐体の位置も支点まわりに回る**。
+    #   期待値も同じ回転で作る（回さないと、傾けた瞬間に位置の検査が落ちる）。
+    def _rot_xyz(vec, euler_deg):
+        rx, ry, rz = (math.radians(float(v)) for v in euler_deg)
+        x, y, z = vec
+        # X → Y → Z の順（Blender の "XYZ" オイラーと同じ合成）
+        y, z = y * math.cos(rx) - z * math.sin(rx), y * math.sin(rx) + z * math.cos(rx)
+        x, z = x * math.cos(ry) + z * math.sin(ry), -x * math.sin(ry) + z * math.cos(ry)
+        x, y = x * math.cos(rz) - y * math.sin(rz), x * math.sin(rz) + y * math.cos(rz)
+        return [x, y, z]
+
+    rotor_orientations = config.get("layout", {}).get("rotor_orientation_deg", {})
+    expected_thrust_axes = {
+        rotor_id: _rot_xyz((0.0, 0.0, 1.0), rotor_orientations.get(rotor_id, (0.0, 0.0, 0.0)))
         for rotor_id in config["derived"]["rotor_ids"]
     }
+    expected_motor_locations = {}
+    for rotor_id in config["derived"]["rotor_ids"]:
+        pivot = [
+            float(config["derived"]["motor_positions_mm"][rotor_id][0]),
+            float(config["derived"]["motor_positions_mm"][rotor_id][1]),
+            per_rotor_value(config["propeller"], "center_z_mm", rotor_id),
+        ]
+        base = [
+            pivot[0],
+            pivot[1],
+            per_rotor_value(config["motor"], "center_z_mm", rotor_id),
+        ]
+        euler = rotor_orientations.get(rotor_id)
+        if euler:
+            offset = [base[i] - pivot[i] for i in range(3)]
+            rotated = _rot_xyz(offset, euler)
+            base = [pivot[i] + rotated[i] for i in range(3)]
+        expected_motor_locations[rotor_id] = base
     coordinate_records = [
         *build_report.get("motor_axes", {}).values(),
         build_report.get("center_of_mass", {}),
@@ -447,18 +473,25 @@ def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, 
             "pass": len(rotor_assemblies) == int(config["derived"]["rotor_count"])
             and all(float(item.get("origin_error_mm", math.inf)) <= 1e-6 for item in rotor_assemblies.values()),
         },
+        # ★★★★ VTOL（2026-08-31）: **推力軸は +Z とは限らない。**
+        #   プッシャやチルトロータは `layout.rotor_orientation_deg` で傾ける。
+        #   → **設定から期待値を作って照合する**（+Z 決め打ちでは傾けた瞬間に落ちる）。
         "world_thrust_axes": {
+            "expected": expected_thrust_axes,
             "actual": {
                 rotor_id: item.get("world_thrust_axis")
                 for rotor_id, item in build_report.get("motor_axes", {}).items()
             },
-            "pass": all(
-                item.get("world_thrust_axis") is not None
+            "pass": set(build_report.get("motor_axes", {})) == set(expected_thrust_axes)
+            and all(
+                build_report["motor_axes"][rotor_id].get("world_thrust_axis") is not None
                 and all(
-                    abs(float(actual) - expected) <= 1e-9
-                    for actual, expected in zip(item["world_thrust_axis"], (0.0, 0.0, 1.0))
+                    abs(float(actual) - expected) <= 1e-6
+                    for actual, expected in zip(
+                        build_report["motor_axes"][rotor_id]["world_thrust_axis"], expected_axis
+                    )
                 )
-                for item in build_report.get("motor_axes", {}).values()
+                for rotor_id, expected_axis in expected_thrust_axes.items()
             ),
         },
         "motor_axis_world_positions": {

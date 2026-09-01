@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 import bpy
+import mathutils
 from mathutils import Vector
 
 
@@ -1037,6 +1038,27 @@ def create_skid_clamp(
     return clamp
 
 
+def orient_about_pivot(obj, pivot, euler_deg) -> None:
+    """★★★★ VTOL（2026-08-31）: ロータを**支点まわりに傾ける**。
+
+    プッシャ（前進推力）やチルトロータは **推力軸が +Z ではない**。
+    ★★★ 推力の向きは、下流（`blend2mjcf.py` → MuJoCo）では
+      **プロペラ body のローカル z 軸**として扱われる（`propulsion_system.hpp` は
+      `d->xmat` の z 列に沿って `mj_applyFT` する）。
+      → **アンカーとロータを回しておけば、その向きに推力が出る。**
+    ★★ 位置も支点まわりに回す（モータ筐体やシャフトは軸点から z 方向にずれているため）。
+    """
+    if not euler_deg:
+        return
+    rot = mathutils.Euler(tuple(math.radians(float(v)) for v in euler_deg), "XYZ").to_matrix()
+    pivot_v = mathutils.Vector(pivot)
+    offset = mathutils.Vector(obj.location) - pivot_v
+    obj.location = pivot_v + rot @ offset
+    obj.rotation_euler = mathutils.Euler(
+        tuple(math.radians(float(v)) for v in euler_deg), "XYZ"
+    )
+
+
 def create_airfoil_wing(
     name: str,
     config: dict[str, Any],
@@ -1919,6 +1941,46 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                 parent_to_keep_world(flange, wing_root)
             parent_to_keep_world(bracket_obj, wing_root)
 
+    # ★★★★ VTOL 段階 1（2026-08-31）: **尾翼**（水平・垂直）。
+    #   ★★★ 翼の作りは主翼と同じものを使う（`create_airfoil_wing`）。違うのは寸法と姿勢だけ。
+    #   ★★ **いまは幾何と質量と抗力にしか効かない** —— シミュレータ側の空力は主翼 1 枚しか
+    #     持っていない（`aero/wing.hpp`）。**尾翼の揚力を使うのは段階 2**（舵面と一緒に入れる）。
+    #     ここで「尾翼が効いている」と思い込まないこと。
+    tail = config.get("tail", {})
+    if tail.get("enabled"):
+        tail_collection = require_collection(collections.wing, "wing")
+        for surface in tail.get("surfaces", []):
+            surf_id = str(surface["id"])
+            surf_obj = create_airfoil_wing(
+                f"tail_{surf_id}", surface, tail_collection, wing_material, root
+            )
+            surf_obj["part_type"] = str(surface.get("part_type", "tail_surface"))
+            if "rotation_deg" in surface:
+                surf_obj.rotation_euler = tuple(
+                    math.radians(float(v)) for v in surface["rotation_deg"]
+                )
+
+    # ★★★★ VTOL 段階 2（2026-08-31）: **舵面**（エレベータ・エルロン・ラダー）。
+    #   ★★★ 作りは翼と同じ（`create_airfoil_wing`）。舵面は「小さな翼」であって、
+    #     下流のシミュレータでは **取付角が可変の翼**として扱う（`aero/wing.hpp` を使い回す）。
+    #   ★★ **MuJoCo にヒンジ関節は入れない。** 力は推力と同じく我々のプラグインが加える。
+    #     ここで作るのは **見た目と、力を加える点（サイト）の出どころ**である。
+    #   ★ `surface_axis` は下流が「どの軸の舵か」を知るための名札（pitch / roll / yaw）。
+    for surface in config.get("control_surfaces", {}).get("surfaces", []):
+        cs_id = str(surface["id"])
+        cs_collection = require_collection(collections.wing, "wing")
+        cs_obj = create_airfoil_wing(
+            f"control_surface_{cs_id}", surface, cs_collection, wing_material, root
+        )
+        cs_obj["part_type"] = "control_surface"
+        cs_obj["surface_axis"] = str(surface.get("axis", "pitch"))
+        cs_obj["surface_id"] = cs_id
+        cs_obj["max_deflection_deg"] = float(surface.get("max_deflection_deg", 25.0))
+        if "rotation_deg" in surface:
+            cs_obj.rotation_euler = tuple(
+                math.radians(float(v)) for v in surface["rotation_deg"]
+            )
+
     for item in config.get("equipment", {}).get("boxes", []):
         item_id = str(item["id"])
         box_dim = tuple(mm(value) for value in item["dimensions_mm"])
@@ -2049,6 +2111,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     arm = config["arm"]
     motor = config["motor"]
     propeller = config["propeller"]
+    layout_cfg = config.get("layout", {})
     guard = config["guard"]
     landing = config["landing"]
     positions = config["derived"]["motor_positions_mm"]
@@ -2075,22 +2138,28 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         if arm_enabled:
             arm_style = str(arm.get("style", "solid"))
             if arm_style == "measured_triangle":
-                create_measured_triangle_arm(
+                arm_obj = create_measured_triangle_arm(
                     f"arm_{rotor_id}", motor_xy, arm,
                     require_collection(collections.arms, "arms"), dark, root,
                 )
             elif arm_style == "truss":
-                create_truss_arm(
+                arm_obj = create_truss_arm(
                     f"arm_{rotor_id}", root_point, motor_xy, arm,
                     require_collection(collections.arms, "arms"), dark, root,
                 )
             else:
-                create_tapered_arm(
+                arm_obj = create_tapered_arm(
                     f"arm_{rotor_id}", root_point, motor_xy,
                     mm(arm["root_width_mm"]), mm(arm["tip_width_mm"]),
                     mm(arm["thickness_mm"]), mm(arm["center_z_mm"]),
                     require_collection(collections.arms, "arms"), dark, root,
                 )
+            # ★★★★ 2026-08-31: **アームに part_type を付ける。**
+            #   これが無いと、下流（`blend2mjcf.py`）が質量表を引けず
+            #   **フォールバックで胴体と同じ質量になる**（実際に踏んだ: 全備 30 kg のはずが 130 kg）。
+            #   ★★ 部品には必ず名札を付ける。
+            if arm_obj is not None:
+                arm_obj["part_type"] = "arm"
 
         if motor_mount.get("enabled"):
             mount_dimensions = [mm(value) for value in motor_mount["dimensions_mm"]]
@@ -2176,9 +2245,18 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             size=0.009,
         )
         axis["anchor_type"] = "rotor_axis"
+        # ★ 推力は**このアンカーのローカル +Z**に出る。向きはオブジェクトの回転が持つ。
         axis["thrust_axis_local"] = "+Z"
         axis["rotation_direction"] = str(directions[rotor_id])
         axis["direction_source"] = str(propeller["direction_source"])
+        # ★★★★ VTOL: ロータごとの傾き（プッシャ / チルト）。
+        #   layout.rotor_orientation_deg: {<id>: [rx, ry, rz]}
+        #   例) 機首が -Y の機体で、前向き（-Y）に押すプッシャ … [90, 0, 0]
+        rotor_orientation = layout_cfg.get("rotor_orientation_deg", {}).get(rotor_id)
+        if rotor_orientation:
+            axis["rotor_role"] = str(
+                layout_cfg.get("rotor_roles", {}).get(rotor_id, "pusher")
+            )
 
         rotor_root = create_empty(
             f"rotor_{rotor_id}",
@@ -2187,6 +2265,11 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             root,
             size=0.006,
         )
+        # ★★★★ VTOL: 傾けるのは **支点（軸点）まわり**。位置と姿勢の両方を回す。
+        if rotor_orientation:
+            pivot = (motor_xy.x, motor_xy.y, propeller_center_z)
+            for tilt_obj in (motor_obj, shaft_obj, axis, rotor_root):
+                orient_about_pivot(tilt_obj, pivot, rotor_orientation)
         rotor_root["part_type"] = "rotor"
         rotor_root["rotation_direction"] = str(directions[rotor_id])
         display_angles = propeller.get("display_angles_deg", {})

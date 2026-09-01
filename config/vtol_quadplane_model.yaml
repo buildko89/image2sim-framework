@@ -1,0 +1,221 @@
+# ★★★★ VTOL（クアッドプレーン）—— 段階 0 の実験機（2026-08-31）
+#
+# ★★★ **なぜ作るか**: drone3（主翼を積んだマルチロータ）は
+#   **迎角 ＝ 取付角 − 機首下げ角**という関係に縛られている。前へ進むために機首を下げるので、
+#   主翼がいちばん効いてほしい高速域で迎角が痩せる（K2-3: 25 m/s で 6.2°）。
+#   ★★★★ **前進推力を別に持てば、この関係が切れる。**それを測るための機体である。
+#
+# ★★ 段階 0 の A/B は **同じ機体で「プッシャを使う / 使わない」**で取る。
+#   だから揚力ロータと主翼は drone3 と同じ級に揃えてある（数字が繋がるように）。
+#
+# ★ 舵面・尾翼はまだ入れない（段階 2 で入れる。いまの空力モデルに舵面の概念が無い）。
+template_file: config/drone_templates/multirotor_base.yaml
+schema_version: "1.1"
+subject_id: vtol_quadplane_s0
+units: mm
+dimensions_provisional: true
+
+coordinate_system:
+  right_axis: +X
+  front_axis: +Y          # ★★★ blend2mjcf は「機首は +Y」で MJCF の +x に写す
+  up_axis: +Z
+  root_origin: estimated_center_of_mass
+
+measurements:
+  propeller_diameter_mm:
+    value: 863.6
+    source: assumed
+    tolerance_mm: 5.0
+    note: 揚力ロータ。drone3 と同じ 34 インチに揃える（数字を繋げるため）
+
+layout:
+  mode: explicit
+  motor_axis_z_mm: 150.0
+  # ★ 揚力ロータ 4 発（X 配置）＋ プッシャ 1 発（尾部）
+  motor_positions_mm:
+    lift_fl: [-1000.0,  1000.0, 150.0]
+    lift_fr: [ 1000.0,  1000.0, 150.0]
+    lift_rl: [-1000.0, -1000.0, 150.0]
+    lift_rr: [ 1000.0, -1000.0, 150.0]
+    pusher:  [    0.0, -1750.0, 150.0]
+  # ★★★★ プッシャだけ傾ける。ローカル +Z を **機首（+Y）**へ向ける ＝ X 軸まわり −90 度。
+  #   ★★★ 推力の向きは下流（MuJoCo）では**プロペラ body のローカル z**として扱われるので、
+  #     ここで回しておけば、そのまま前向きの推力になる。
+  rotor_orientation_deg:
+    pusher: [-90.0, 0.0, 0.0]
+  rotor_roles:
+    lift_fl: lift
+    lift_fr: lift
+    lift_rl: lift
+    lift_rr: lift
+    pusher: pusher
+
+body:
+  shape: rounded_box
+  width_mm: 300.0
+  length_mm: 900.0
+  height_mm: 160.0
+  center_z_mm: 0.0
+  bevel_mm: 20.0
+
+arm:
+  enabled: true
+  root_width_mm: 60.0
+  tip_width_mm: 40.0
+  thickness_mm: 30.0
+  root_fraction: 0.25
+  center_z_mm: 120.0
+
+motor:
+  housing_diameter_mm: 120.0
+  housing_height_mm: 90.0
+  center_z_mm: 120.0
+  shaft_diameter_mm: 20.0
+  shaft_height_mm: 30.0
+
+propeller:
+  diameter_mm: 863.6
+  hub_diameter_mm: 60.0
+  hub_height_mm: 20.0
+  blade_count: 2
+  blade_root_width_mm: 60.0
+  blade_tip_width_mm: 35.0
+  blade_thickness_mm: 10.0
+  blade_root_radius_mm: 40.0
+  center_z_mm: 150.0
+  # ★ 揚力 4 発は隣どうしで逆回り。プッシャは 1 本なので反トルクは舵で取る（段階 2）
+  directions:
+    lift_fl: ccw
+    lift_fr: cw
+    lift_rl: cw
+    lift_rr: ccw
+    pusher: ccw
+  direction_source: design
+  # ★ プッシャだけ小さい（20 インチ級）
+  diameter_overrides:
+    pusher: 508.0
+
+guard:
+  enabled: false
+
+landing:
+  enabled: true
+  leg_diameter_mm: 40.0
+  leg_height_mm: 420.0
+  leg_center_z_mm: -230.0
+  foot_diameter_mm: 60.0
+  foot_height_mm: 30.0
+  foot_center_z_mm: -450.0
+
+wing:
+  enabled: true
+  span_mm: 2500.0
+  root_chord_mm: 400.0
+  tip_chord_mm: 320.0
+  thickness_mm: 60.0
+  center_x_mm: 0.0
+  center_y_mm: -250.0     # ★ 空力中心を重心のやや後ろに置く（釣り合いのため）
+  center_z_mm: 260.0
+
+# ★★★★ 段階 1: 尾翼（水平・垂直）。
+#   ★★ **いまは幾何・質量・抗力にしか効かない**（シミュレータの空力は主翼 1 枚だけ）。
+#     尾翼の揚力と舵面は段階 2 で入れる。
+tail:
+  enabled: true
+  surfaces:
+    - id: horizontal
+      part_type: tail_surface
+      span_mm: 1000.0
+      root_chord_mm: 260.0
+      tip_chord_mm: 200.0
+      thickness_mm: 40.0
+      center_x_mm: 0.0
+      center_y_mm: -1500.0
+      center_z_mm: 220.0
+    - id: vertical
+      part_type: tail_surface
+      span_mm: 600.0        # ★ 回して立てるので、これは「高さ」になる
+      root_chord_mm: 260.0
+      tip_chord_mm: 180.0
+      thickness_mm: 40.0
+      center_x_mm: 0.0
+      center_y_mm: -1500.0
+      center_z_mm: 500.0
+      rotation_deg: [0.0, 90.0, 0.0]   # ★ 翼幅を Z 方向へ倒す ＝ 垂直尾翼
+
+# ★★★★ 段階 2: 舵面。**取付角が可変の小さな翼**として下流が扱う。
+#   ★★★ エレベータ（ピッチ）は水平尾翼の後縁、エルロン（ロール）は主翼の左右後縁。
+#     ラダー（ヨー）はまだ置かない —— ヨーはロータの反トルクで取れており、
+#     **効果器を増やすほど配分が難しくなる**ので、まず 2 軸で成立させる。
+control_surfaces:
+  surfaces:
+    - id: elevator
+      axis: pitch
+      max_deflection_deg: 25.0
+      span_mm: 1000.0
+      root_chord_mm: 90.0
+      tip_chord_mm: 70.0
+      thickness_mm: 25.0
+      center_x_mm: 0.0
+      center_y_mm: -1660.0     # ★ 水平尾翼の後縁
+      center_z_mm: 220.0
+    - id: aileron_left
+      axis: roll
+      max_deflection_deg: 20.0
+      span_mm: 700.0
+      root_chord_mm: 110.0
+      tip_chord_mm: 90.0
+      thickness_mm: 30.0
+      center_x_mm: -850.0      # ★ 主翼の左外側
+      center_y_mm: -430.0      # 主翼（center_y -250・弦 400）の後縁
+      center_z_mm: 260.0
+    - id: aileron_right
+      axis: roll
+      max_deflection_deg: 20.0
+      span_mm: 700.0
+      root_chord_mm: 110.0
+      tip_chord_mm: 90.0
+      thickness_mm: 30.0
+      center_x_mm: 850.0
+      center_y_mm: -430.0
+      center_z_mm: 260.0
+
+# ★★★★ 装備品。**`equipment_flight_computer` は下流で IMU サイトになる**ので必須である
+#   （`blend2mjcf.py` の `collect_sites`）。無いと FC がセンサを構成できず飛べない。
+equipment:
+  boxes:
+    - id: flight_computer
+      part_type: flight_computer
+      dimensions_mm: [120.0, 160.0, 60.0]
+      location_mm: [0.0, 0.0, 110.0]
+      material: electronics
+    - id: gps_left_head
+      part_type: gps
+      dimensions_mm: [70.0, 70.0, 20.0]
+      location_mm: [-150.0, 300.0, 200.0]
+      material: electronics
+    - id: gps_right_head
+      part_type: gps
+      dimensions_mm: [70.0, 70.0, 20.0]
+      location_mm: [150.0, 300.0, 200.0]
+      material: electronics
+    - id: lidar
+      part_type: lidar
+      dimensions_mm: [80.0, 60.0, 50.0]
+      location_mm: [0.0, 420.0, 120.0]
+      material: electronics
+
+physics:
+  center_of_mass_mm: [0.0, 0.0, 0.0]
+  center_of_mass_source: placeholder
+  mass_g: null
+  inertia_kg_m2: null
+  inertia_source: pending
+
+output:
+  blend: vtol_quadplane.blend
+  glb: vtol_quadplane.glb
+  resolved_config: resolved_config.json
+  build_report: build_report.json
+  qa_report: qa_report.json
+  render_resolution: 720
