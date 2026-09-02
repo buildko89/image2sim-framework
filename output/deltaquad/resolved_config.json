@@ -1,0 +1,349 @@
+{
+  "schema_version": "1.1",
+  "template_id": "multirotor_base",
+  "units": "mm",
+  "dimensions_provisional": true,
+  "coordinate_system": {
+    "right_axis": "+X",
+    "front_axis": "+Y",
+    "up_axis": "+Z",
+    "root_origin": "estimated_center_of_mass"
+  },
+  "layout": {
+    "mode": "explicit",
+    "rotor_count": 4,
+    "radius_mm": 50.0,
+    "start_angle_deg": -45.0,
+    "id_prefix": "r",
+    "motor_axis_z_mm": 60.0,
+    "motor_positions_mm": {
+      "lift_fl": [
+        -520.0,
+        520.0,
+        60.0
+      ],
+      "lift_fr": [
+        520.0,
+        520.0,
+        60.0
+      ],
+      "lift_rl": [
+        -520.0,
+        -620.0,
+        60.0
+      ],
+      "lift_rr": [
+        520.0,
+        -620.0,
+        60.0
+      ],
+      "pusher": [
+        0.0,
+        -430.0,
+        40.0
+      ]
+    },
+    "rotor_orientation_deg": {
+      "pusher": [
+        -90.0,
+        0.0,
+        0.0
+      ]
+    },
+    "rotor_roles": {
+      "lift_fl": "lift",
+      "lift_fr": "lift",
+      "lift_rl": "lift",
+      "lift_rr": "lift",
+      "pusher": "pusher"
+    }
+  },
+  "body": {
+    "shape": "lofted",
+    "width_mm": 150.0,
+    "length_mm": 750.0,
+    "height_mm": 130.0,
+    "center_z_mm": 0.0,
+    "bevel_mm": 5.0,
+    "longitudinal_segments": 18,
+    "radial_segments": 16,
+    "width_profile_power": 0.55,
+    "height_profile_power": 0.6,
+    "cross_section_power": 2.4
+  },
+  "arm": {
+    "enabled": false,
+    "root_width_mm": 9.0,
+    "tip_width_mm": 6.0,
+    "thickness_mm": 4.0,
+    "root_fraction": 0.28,
+    "center_z_mm": 0.0
+  },
+  "motor": {
+    "housing_diameter_mm": 50.0,
+    "housing_height_mm": 40.0,
+    "center_z_mm": 40.0,
+    "shaft_diameter_mm": 10.0,
+    "shaft_height_mm": 15.0
+  },
+  "propeller": {
+    "diameter_mm": 355.6,
+    "hub_diameter_mm": 30.0,
+    "hub_height_mm": 12.0,
+    "blade_count": 2,
+    "blade_root_width_mm": 28.0,
+    "blade_tip_width_mm": 16.0,
+    "blade_thickness_mm": 5.0,
+    "blade_root_radius_mm": 18.0,
+    "center_z_mm": 60.0,
+    "direction_pattern": [
+      "ccw",
+      "cw"
+    ],
+    "direction_source": "design",
+    "directions": {
+      "lift_fl": "ccw",
+      "lift_fr": "cw",
+      "lift_rl": "cw",
+      "lift_rr": "ccw",
+      "pusher": "ccw"
+    },
+    "diameter_overrides": {
+      "pusher": 304.8
+    }
+  },
+  "guard": {
+    "enabled": false,
+    "size_mode": "explicit",
+    "outer_diameter_mm": 44.0,
+    "tube_diameter_mm": 2.0,
+    "center_z_mm": 6.0,
+    "inner_gap_deg": 80.0,
+    "major_segments": 40,
+    "minor_segments": 8,
+    "strut_count": 3,
+    "strut_radius_mm": 0.65
+  },
+  "landing": {
+    "enabled": false,
+    "leg_diameter_mm": 3.0,
+    "leg_height_mm": 8.0,
+    "leg_center_z_mm": -6.0,
+    "foot_diameter_mm": 4.5,
+    "foot_height_mm": 3.0,
+    "foot_center_z_mm": -10.0
+  },
+  "physics": {
+    "center_of_mass_mm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "center_of_mass_source": "placeholder",
+    "mass_g": null,
+    "inertia_kg_m2": null,
+    "inertia_source": "pending"
+  },
+  "references": {},
+  "output": {
+    "blend": "deltaquad.blend",
+    "glb": "deltaquad.glb",
+    "resolved_config": "resolved_config.json",
+    "build_report": "build_report.json",
+    "qa_report": "qa_report.json",
+    "render_resolution": 720,
+    "directory": "/data/buildman/drone/image2sim-framework/output/deltaquad"
+  },
+  "template_file": "config/drone_templates/multirotor_base.yaml",
+  "subject_id": "deltaquad_std_vtol",
+  "measurements": {
+    "propeller_diameter_mm": {
+      "value": 355.6,
+      "source": "assumed",
+      "tolerance_mm": 5.0,
+      "note": "揚力ロータ 14 インチ級。MTOW 10 kg・4 発で T/W 2 を狙う大きさ"
+    }
+  },
+  "structure": {
+    "enabled": true,
+    "show_grooves": false,
+    "members": [
+      {
+        "id": "boom_left",
+        "profile": "boom",
+        "dimensions_mm": [
+          36.0,
+          1300.0,
+          36.0
+        ],
+        "location_mm": [
+          -520.0,
+          -50.0,
+          20.0
+        ]
+      },
+      {
+        "id": "boom_right",
+        "profile": "boom",
+        "dimensions_mm": [
+          36.0,
+          1300.0,
+          36.0
+        ],
+        "location_mm": [
+          520.0,
+          -50.0,
+          20.0
+        ]
+      }
+    ]
+  },
+  "wing": {
+    "enabled": true,
+    "span_mm": 2690.0,
+    "root_chord_mm": 463.0,
+    "tip_chord_mm": 162.0,
+    "sweep_deg": 30.0,
+    "thickness_mm": 55.0,
+    "center_x_mm": 0.0,
+    "center_y_mm": -60.0,
+    "center_z_mm": 70.0
+  },
+  "tail": {
+    "enabled": false
+  },
+  "control_surfaces": {
+    "surfaces": [
+      {
+        "id": "elevon_left",
+        "axis": "pitch",
+        "max_deflection_deg": 25.0,
+        "span_mm": 900.0,
+        "root_chord_mm": 90.0,
+        "tip_chord_mm": 55.0,
+        "thickness_mm": 22.0,
+        "center_x_mm": -700.0,
+        "center_y_mm": -520.0,
+        "center_z_mm": 70.0
+      },
+      {
+        "id": "elevon_right",
+        "axis": "roll",
+        "max_deflection_deg": 25.0,
+        "span_mm": 900.0,
+        "root_chord_mm": 90.0,
+        "tip_chord_mm": 55.0,
+        "thickness_mm": 22.0,
+        "center_x_mm": 700.0,
+        "center_y_mm": -520.0,
+        "center_z_mm": 70.0
+      }
+    ]
+  },
+  "equipment": {
+    "boxes": [
+      {
+        "id": "flight_computer",
+        "part_type": "flight_computer",
+        "dimensions_mm": [
+          70.0,
+          90.0,
+          30.0
+        ],
+        "location_mm": [
+          0.0,
+          0.0,
+          45.0
+        ],
+        "material": "electronics"
+      },
+      {
+        "id": "gps",
+        "part_type": "gps",
+        "dimensions_mm": [
+          50.0,
+          50.0,
+          15.0
+        ],
+        "location_mm": [
+          0.0,
+          150.0,
+          80.0
+        ],
+        "material": "electronics"
+      },
+      {
+        "id": "battery",
+        "part_type": "battery",
+        "dimensions_mm": [
+          110.0,
+          260.0,
+          70.0
+        ],
+        "location_mm": [
+          0.0,
+          20.0,
+          0.0
+        ],
+        "material": "electronics"
+      }
+    ]
+  },
+  "template_metadata": {
+    "template_file": "/data/buildman/drone/image2sim-framework/config/drone_templates/multirotor_base.yaml",
+    "template_id": "multirotor_base",
+    "subject_config": "/data/buildman/drone/image2sim-framework/config/deltaquad_model.yaml"
+  },
+  "derived": {
+    "layout_mode": "explicit",
+    "rotor_ids": [
+      "lift_fl",
+      "lift_fr",
+      "lift_rl",
+      "lift_rr",
+      "pusher"
+    ],
+    "rotor_count": 5,
+    "rotor_directions": {
+      "lift_fl": "ccw",
+      "lift_fr": "cw",
+      "lift_rl": "cw",
+      "lift_rr": "ccw",
+      "pusher": "ccw"
+    },
+    "motor_center_spacing_x_mm": null,
+    "motor_center_spacing_y_mm": null,
+    "guard_outer_diameter_mm": null,
+    "guard_outer_width_mm": null,
+    "guard_outer_length_mm": null,
+    "guard_inner_diameter_mm": null,
+    "propeller_radial_clearance_mm": null,
+    "motor_positions_mm": {
+      "lift_fl": [
+        -520.0,
+        520.0,
+        60.0
+      ],
+      "lift_fr": [
+        520.0,
+        520.0,
+        60.0
+      ],
+      "lift_rl": [
+        -520.0,
+        -620.0,
+        60.0
+      ],
+      "lift_rr": [
+        520.0,
+        -620.0,
+        60.0
+      ],
+      "pusher": [
+        0.0,
+        -430.0,
+        40.0
+      ]
+    }
+  }
+}

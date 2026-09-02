@@ -1075,16 +1075,24 @@ def create_airfoil_wing(
     center_y = mm(config.get("center_y_mm", 0.0))
     center_z = mm(config.get("center_z_mm", 0.0))
     chord_segments = max(8, int(config.get("chord_segments", 18)))
+    # ★★★★ 2026-09-02: **後退角**（デルタ翼／全翼機に要る）。既定 0 ＝ 従来と同一の形。
+    #   ★★★ 前縁が翼端へ行くほど後ろへ下がる。`sweep_deg` は**前縁の後退角**で、
+    #     翼端の前縁が root の前縁から `|x| * tan(sweep)` だけ後方へ移る。
+    #   ★★ 我々の規約では機首が +Y なので、**後方は −Y**（符号を間違えると前進翼になる）。
+    sweep = math.radians(float(config.get("sweep_deg", 0.0)))
     span_stations = (-span / 2.0, 0.0, span / 2.0)
     verts: list[tuple[float, float, float]] = []
 
     for x in span_stations:
         taper = abs(x) / (span / 2.0) if span else 0.0
         chord = root_chord + (tip_chord - root_chord) * taper
+        # ★ 前縁を基準に後退させる（前縁 = +chord/2 の側）
+        le_root = root_chord / 2.0
+        le_here = le_root - abs(x) * math.tan(sweep)
         for surface in (1.0, -1.0):
             for index in range(chord_segments + 1):
                 fraction = index / chord_segments
-                y = -chord / 2.0 + chord * fraction
+                y = le_here - chord * fraction
                 profile = math.sin(math.pi * fraction) ** 0.72
                 z = surface * thickness * profile / 2.0
                 verts.append((x, y, z))

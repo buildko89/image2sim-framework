@@ -1,0 +1,394 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-02T13:40:17.636253+00:00",
+  "status": "PASS",
+  "dimensions_provisional": true,
+  "checks": {
+    "build_report_schema": {
+      "expected": "1.3",
+      "actual": "1.3",
+      "pass": true
+    },
+    "world_coordinate_metadata": {
+      "reported_transform_space": "world",
+      "record_count": 14,
+      "pass": true
+    },
+    "motor_count": {
+      "expected": 5,
+      "actual": 5,
+      "pass": true
+    },
+    "required_names": {
+      "missing": [],
+      "pass": true
+    },
+    "duplicate_suffix_names": {
+      "names": [],
+      "pass": true
+    },
+    "duplicate_suffix_collection_names": {
+      "names": [],
+      "pass": true
+    },
+    "top_level_collections": {
+      "expected": [
+        "ANCHORS",
+        "CAMERAS",
+        "COLLISION",
+        "MODEL_VISUAL",
+        "REF_PHOTOS"
+      ],
+      "actual": [
+        "ANCHORS",
+        "CAMERAS",
+        "COLLISION",
+        "MODEL_VISUAL",
+        "REF_PHOTOS"
+      ],
+      "pass": true
+    },
+    "rotor_collections": {
+      "expected": [
+        "VIS_ROTOR_lift_fl",
+        "VIS_ROTOR_lift_fr",
+        "VIS_ROTOR_lift_rl",
+        "VIS_ROTOR_lift_rr",
+        "VIS_ROTOR_pusher"
+      ],
+      "actual": [
+        "VIS_ROTOR_lift_fl",
+        "VIS_ROTOR_lift_fr",
+        "VIS_ROTOR_lift_rl",
+        "VIS_ROTOR_lift_rr",
+        "VIS_ROTOR_pusher"
+      ],
+      "pass": true
+    },
+    "collection_recursive_counts": {
+      "expected": {
+        "MODEL_VISUAL": 45,
+        "ANCHORS": 6,
+        "COLLISION": 3,
+        "CAMERAS": 0,
+        "REF_PHOTOS": 0
+      },
+      "actual": {
+        "REF_PHOTOS": 0,
+        "ANCHORS": 6,
+        "CAMERAS": 0,
+        "COLLISION": 3,
+        "MODEL_VISUAL": 45
+      },
+      "pass": true
+    },
+    "groove_parents": {
+      "errors": {},
+      "pass": true
+    },
+    "rotor_fixed_children": {
+      "expected": {
+        "lift_fl": [
+          "motor_lift_fl",
+          "motor_lift_fl_shaft"
+        ],
+        "lift_fr": [
+          "motor_lift_fr",
+          "motor_lift_fr_shaft"
+        ],
+        "lift_rl": [
+          "motor_lift_rl",
+          "motor_lift_rl_shaft"
+        ],
+        "lift_rr": [
+          "motor_lift_rr",
+          "motor_lift_rr_shaft"
+        ],
+        "pusher": [
+          "motor_pusher",
+          "motor_pusher_shaft"
+        ]
+      },
+      "actual": {
+        "lift_fl": [
+          "motor_lift_fl",
+          "motor_lift_fl_shaft"
+        ],
+        "lift_fr": [
+          "motor_lift_fr",
+          "motor_lift_fr_shaft"
+        ],
+        "lift_rl": [
+          "motor_lift_rl",
+          "motor_lift_rl_shaft"
+        ],
+        "lift_rr": [
+          "motor_lift_rr",
+          "motor_lift_rr_shaft"
+        ],
+        "pusher": [
+          "motor_pusher",
+          "motor_pusher_shaft"
+        ]
+      },
+      "pass": true
+    },
+    "rotor_spinning_children": {
+      "expected": {
+        "lift_fl": [
+          "rotor_lift_fl_blades",
+          "rotor_lift_fl_hub"
+        ],
+        "lift_fr": [
+          "rotor_lift_fr_blades",
+          "rotor_lift_fr_hub"
+        ],
+        "lift_rl": [
+          "rotor_lift_rl_blades",
+          "rotor_lift_rl_hub"
+        ],
+        "lift_rr": [
+          "rotor_lift_rr_blades",
+          "rotor_lift_rr_hub"
+        ],
+        "pusher": [
+          "rotor_pusher_blades",
+          "rotor_pusher_hub"
+        ]
+      },
+      "actual": {
+        "lift_fl": [
+          "rotor_lift_fl_blades",
+          "rotor_lift_fl_hub"
+        ],
+        "lift_fr": [
+          "rotor_lift_fr_blades",
+          "rotor_lift_fr_hub"
+        ],
+        "lift_rl": [
+          "rotor_lift_rl_blades",
+          "rotor_lift_rl_hub"
+        ],
+        "lift_rr": [
+          "rotor_lift_rr_blades",
+          "rotor_lift_rr_hub"
+        ],
+        "pusher": [
+          "rotor_pusher_blades",
+          "rotor_pusher_hub"
+        ]
+      },
+      "pass": true
+    },
+    "rotor_spin_origins": {
+      "maximum_error_mm": 0.0,
+      "pass": true
+    },
+    "world_thrust_axes": {
+      "expected": {
+        "lift_fl": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "lift_fr": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "lift_rl": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "lift_rr": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "pusher": [
+          0.0,
+          1.0,
+          6.123233995736766e-17
+        ]
+      },
+      "actual": {
+        "lift_fl": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "lift_fr": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "lift_rl": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "lift_rr": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "pusher": [
+          0.0,
+          1.0,
+          -4.4e-08
+        ]
+      },
+      "pass": true
+    },
+    "motor_axis_world_positions": {
+      "expected_mm": {
+        "lift_fl": [
+          -520.0,
+          520.0,
+          60.0
+        ],
+        "lift_fr": [
+          520.0,
+          520.0,
+          60.0
+        ],
+        "lift_rl": [
+          -520.0,
+          -620.0,
+          60.0
+        ],
+        "lift_rr": [
+          520.0,
+          -620.0,
+          60.0
+        ],
+        "pusher": [
+          0.0,
+          -430.0,
+          60.0
+        ]
+      },
+      "actual_mm": {
+        "lift_fl": [
+          -519.999981,
+          519.999981,
+          59.999999
+        ],
+        "lift_fr": [
+          519.999981,
+          519.999981,
+          59.999999
+        ],
+        "lift_rl": [
+          -519.999981,
+          -620.000005,
+          59.999999
+        ],
+        "lift_rr": [
+          519.999981,
+          -620.000005,
+          59.999999
+        ],
+        "pusher": [
+          0.0,
+          -430.000007,
+          59.999999
+        ]
+      },
+      "pass": true
+    },
+    "motor_world_positions": {
+      "expected_mm": {
+        "lift_fl": [
+          -520.0,
+          520.0,
+          40.0
+        ],
+        "lift_fr": [
+          520.0,
+          520.0,
+          40.0
+        ],
+        "lift_rl": [
+          -520.0,
+          -620.0,
+          40.0
+        ],
+        "lift_rr": [
+          520.0,
+          -620.0,
+          40.0
+        ],
+        "pusher": [
+          0.0,
+          -450.0,
+          60.0
+        ]
+      },
+      "actual_mm": {
+        "lift_fl": [
+          -519.999981,
+          519.999981,
+          39.999999
+        ],
+        "lift_fr": [
+          519.999981,
+          519.999981,
+          39.999999
+        ],
+        "lift_rl": [
+          -519.999981,
+          -620.000005,
+          39.999999
+        ],
+        "lift_rr": [
+          519.999981,
+          -620.000005,
+          39.999999
+        ],
+        "pusher": [
+          0.0,
+          -450.000018,
+          59.999999
+        ]
+      },
+      "pass": true
+    },
+    "anchor_matrix_world_consistency": {
+      "pass": true
+    },
+    "center_of_mass_world_position": {
+      "expected_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "actual_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass": true
+    },
+    "collision_proxy_world_records": {
+      "expected_count": 3,
+      "actual_count": 3,
+      "pass": true
+    },
+    "wing_parents": {
+      "expected_parent": "wing_root",
+      "children": [
+        "main_wing"
+      ],
+      "actual": {
+        "main_wing": "wing_root"
+      },
+      "pass": true
+    }
+  },
+  "notes": [
+    "写真から判別できない小部品形状は代表形状でモデル化しています。",
+    "質量、重心、慣性、実機ローター回転方向は実測・確認後に更新してください。"
+  ]
+}

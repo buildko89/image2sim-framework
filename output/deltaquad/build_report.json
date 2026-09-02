@@ -1,0 +1,784 @@
+{
+  "schema_version": "1.3",
+  "created_at": "2026-09-02T13:40:16.053680+00:00",
+  "blender_version": "5.2.0 LTS",
+  "subject_id": "deltaquad_std_vtol",
+  "template_id": "multirotor_base",
+  "layout_mode": "explicit",
+  "rotor_count": 5,
+  "dimensions_provisional": true,
+  "coordinate_system": {
+    "right": "+X",
+    "front": "-Y",
+    "up": "+Z",
+    "origin": "estimated_center_of_mass",
+    "reported_transform_space": "world"
+  },
+  "bbox_min_mm": [
+    -1345.000029,
+    -767.03614,
+    -64.999998
+  ],
+  "bbox_max_mm": [
+    1345.000029,
+    599.999964,
+    97.499996
+  ],
+  "dimensions_mm": {
+    "x": 2690.000057,
+    "y": 1367.036104,
+    "z": 162.499994
+  },
+  "part_dimensions_mm": {
+    "body_core": {
+      "x": 150.000006,
+      "y": 750.0,
+      "z": 129.999995
+    },
+    "structure_frame": {
+      "x": 1075.999975,
+      "y": 1299.999952,
+      "z": 35.999998
+    }
+  },
+  "visual_mesh_count": 33,
+  "triangles": 5416,
+  "motor_axes": {
+    "lift_fl": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -519.999981,
+        519.999981,
+        59.999999
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.519999981
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.519999981
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.059999999
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        -519.999981,
+        519.999981,
+        39.999999
+      ],
+      "motor_dimensions_mm": [
+        49.999982,
+        49.999982,
+        39.999999
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_direction": "ccw"
+    },
+    "lift_fr": {
+      "coordinate_space": "world",
+      "location_mm": [
+        519.999981,
+        519.999981,
+        59.999999
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.519999981
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.519999981
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.059999999
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        519.999981,
+        519.999981,
+        39.999999
+      ],
+      "motor_dimensions_mm": [
+        49.999982,
+        49.999982,
+        39.999999
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_direction": "cw"
+    },
+    "lift_rl": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -519.999981,
+        -620.000005,
+        59.999999
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.519999981
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.620000005
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.059999999
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        -519.999981,
+        -620.000005,
+        39.999999
+      ],
+      "motor_dimensions_mm": [
+        49.999982,
+        49.999952,
+        39.999999
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_direction": "cw"
+    },
+    "lift_rr": {
+      "coordinate_space": "world",
+      "location_mm": [
+        519.999981,
+        -620.000005,
+        59.999999
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.519999981
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.620000005
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.059999999
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        519.999981,
+        -620.000005,
+        39.999999
+      ],
+      "motor_dimensions_mm": [
+        49.999982,
+        49.999952,
+        39.999999
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "rotation_direction": "ccw"
+    },
+    "pusher": {
+      "coordinate_space": "world",
+      "location_mm": [
+        0.0,
+        -430.000007,
+        59.999999
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -4.4e-08,
+          1.0,
+          -0.430000007
+        ],
+        [
+          0.0,
+          -1.0,
+          -4.4e-08,
+          0.059999999
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        0.0,
+        -450.000018,
+        59.999999
+      ],
+      "motor_dimensions_mm": [
+        50.000001,
+        40.000021,
+        50.000004
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.0,
+        1.0,
+        -4.4e-08
+      ],
+      "rotation_direction": "ccw"
+    }
+  },
+  "center_of_mass": {
+    "coordinate_space": "world",
+    "location_mm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "matrix_world": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "source": "placeholder"
+  },
+  "rotor_assemblies": {
+    "lift_fl": {
+      "coordinate_space": "world",
+      "assembly": "rotor_lift_fl",
+      "spin": "rotor_lift_fl_spin",
+      "fixed_children": [
+        "motor_lift_fl",
+        "motor_lift_fl_shaft"
+      ],
+      "spinning_children": [
+        "rotor_lift_fl_blades",
+        "rotor_lift_fl_hub"
+      ],
+      "spin_origin_mm": [
+        -519.999981,
+        519.999981,
+        59.999999
+      ],
+      "axis_origin_mm": [
+        -519.999981,
+        519.999981,
+        59.999999
+      ],
+      "origin_error_mm": 0.0
+    },
+    "lift_fr": {
+      "coordinate_space": "world",
+      "assembly": "rotor_lift_fr",
+      "spin": "rotor_lift_fr_spin",
+      "fixed_children": [
+        "motor_lift_fr",
+        "motor_lift_fr_shaft"
+      ],
+      "spinning_children": [
+        "rotor_lift_fr_blades",
+        "rotor_lift_fr_hub"
+      ],
+      "spin_origin_mm": [
+        519.999981,
+        519.999981,
+        59.999999
+      ],
+      "axis_origin_mm": [
+        519.999981,
+        519.999981,
+        59.999999
+      ],
+      "origin_error_mm": 0.0
+    },
+    "lift_rl": {
+      "coordinate_space": "world",
+      "assembly": "rotor_lift_rl",
+      "spin": "rotor_lift_rl_spin",
+      "fixed_children": [
+        "motor_lift_rl",
+        "motor_lift_rl_shaft"
+      ],
+      "spinning_children": [
+        "rotor_lift_rl_blades",
+        "rotor_lift_rl_hub"
+      ],
+      "spin_origin_mm": [
+        -519.999981,
+        -620.000005,
+        59.999999
+      ],
+      "axis_origin_mm": [
+        -519.999981,
+        -620.000005,
+        59.999999
+      ],
+      "origin_error_mm": 0.0
+    },
+    "lift_rr": {
+      "coordinate_space": "world",
+      "assembly": "rotor_lift_rr",
+      "spin": "rotor_lift_rr_spin",
+      "fixed_children": [
+        "motor_lift_rr",
+        "motor_lift_rr_shaft"
+      ],
+      "spinning_children": [
+        "rotor_lift_rr_blades",
+        "rotor_lift_rr_hub"
+      ],
+      "spin_origin_mm": [
+        519.999981,
+        -620.000005,
+        59.999999
+      ],
+      "axis_origin_mm": [
+        519.999981,
+        -620.000005,
+        59.999999
+      ],
+      "origin_error_mm": 0.0
+    },
+    "pusher": {
+      "coordinate_space": "world",
+      "assembly": "rotor_pusher",
+      "spin": "rotor_pusher_spin",
+      "fixed_children": [
+        "motor_pusher",
+        "motor_pusher_shaft"
+      ],
+      "spinning_children": [
+        "rotor_pusher_blades",
+        "rotor_pusher_hub"
+      ],
+      "spin_origin_mm": [
+        0.0,
+        -430.000007,
+        59.999999
+      ],
+      "axis_origin_mm": [
+        0.0,
+        -430.000007,
+        59.999999
+      ],
+      "origin_error_mm": 0.0
+    }
+  },
+  "collision_proxies": {
+    "collision_body": {
+      "coordinate_space": "world",
+      "location_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_mm": [
+        150.000006,
+        750.0,
+        129.999995
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_frame_boom_left": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -519.999981,
+        -50.000001,
+        20.0
+      ],
+      "dimensions_mm": [
+        36.000013,
+        1299.999952,
+        35.999998
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.519999981
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.050000001
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.02
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_frame_boom_right": {
+      "coordinate_space": "world",
+      "location_mm": [
+        519.999981,
+        -50.000001,
+        20.0
+      ],
+      "dimensions_mm": [
+        36.000013,
+        1299.999952,
+        35.999998
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.519999981
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.050000001
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.02
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "object_parents": {
+    "body_core": "drone_root",
+    "center_of_mass": "drone_root",
+    "collision_body": "drone_root",
+    "collision_frame_boom_left": "drone_root",
+    "collision_frame_boom_right": "drone_root",
+    "control_surface_elevon_left": "drone_root",
+    "control_surface_elevon_right": "drone_root",
+    "drone_root": null,
+    "equipment_battery": "drone_root",
+    "equipment_battery_strap_1": "drone_root",
+    "equipment_battery_strap_2": "drone_root",
+    "equipment_battery_tray": "drone_root",
+    "equipment_fc_housing": "drone_root",
+    "equipment_flight_computer": "drone_root",
+    "equipment_gps": "drone_root",
+    "frame_boom_left": "drone_root",
+    "frame_boom_right": "drone_root",
+    "main_wing": "wing_root",
+    "motor_lift_fl": "rotor_lift_fl",
+    "motor_lift_fl_axis": "drone_root",
+    "motor_lift_fl_shaft": "rotor_lift_fl",
+    "motor_lift_fr": "rotor_lift_fr",
+    "motor_lift_fr_axis": "drone_root",
+    "motor_lift_fr_shaft": "rotor_lift_fr",
+    "motor_lift_rl": "rotor_lift_rl",
+    "motor_lift_rl_axis": "drone_root",
+    "motor_lift_rl_shaft": "rotor_lift_rl",
+    "motor_lift_rr": "rotor_lift_rr",
+    "motor_lift_rr_axis": "drone_root",
+    "motor_lift_rr_shaft": "rotor_lift_rr",
+    "motor_pusher": "rotor_pusher",
+    "motor_pusher_axis": "drone_root",
+    "motor_pusher_shaft": "rotor_pusher",
+    "rotor_lift_fl": "drone_root",
+    "rotor_lift_fl_blades": "rotor_lift_fl_spin",
+    "rotor_lift_fl_hub": "rotor_lift_fl_spin",
+    "rotor_lift_fl_spin": "rotor_lift_fl",
+    "rotor_lift_fr": "drone_root",
+    "rotor_lift_fr_blades": "rotor_lift_fr_spin",
+    "rotor_lift_fr_hub": "rotor_lift_fr_spin",
+    "rotor_lift_fr_spin": "rotor_lift_fr",
+    "rotor_lift_rl": "drone_root",
+    "rotor_lift_rl_blades": "rotor_lift_rl_spin",
+    "rotor_lift_rl_hub": "rotor_lift_rl_spin",
+    "rotor_lift_rl_spin": "rotor_lift_rl",
+    "rotor_lift_rr": "drone_root",
+    "rotor_lift_rr_blades": "rotor_lift_rr_spin",
+    "rotor_lift_rr_hub": "rotor_lift_rr_spin",
+    "rotor_lift_rr_spin": "rotor_lift_rr",
+    "rotor_pusher": "drone_root",
+    "rotor_pusher_blades": "rotor_pusher_spin",
+    "rotor_pusher_hub": "rotor_pusher_spin",
+    "rotor_pusher_spin": "rotor_pusher",
+    "wing_root": "drone_root"
+  },
+  "sensor_masts": {},
+  "arm_members": {
+    "lift_fl": {},
+    "lift_fr": {},
+    "lift_rl": {},
+    "lift_rr": {},
+    "pusher": {}
+  },
+  "guard_mounts": {},
+  "guard_modules": {},
+  "camera_modules": {},
+  "missing_required_names": [],
+  "duplicate_suffix_names": [],
+  "duplicate_suffix_collection_names": [],
+  "collections": {
+    "MODEL_VISUAL": 45,
+    "ANCHORS": 6,
+    "COLLISION": 3,
+    "CAMERAS": 0,
+    "REF_PHOTOS": 0
+  },
+  "collection_hierarchy": {
+    "MODEL_VISUAL": {
+      "direct_objects": 1,
+      "all_objects": 45,
+      "children": {
+        "VIS_BODY": {
+          "direct_objects": 1,
+          "all_objects": 1,
+          "children": {}
+        },
+        "VIS_EQUIPMENT": {
+          "direct_objects": 0,
+          "all_objects": 7,
+          "children": {
+            "VIS_FLIGHT_ELECTRONICS": {
+              "direct_objects": 2,
+              "all_objects": 2,
+              "children": {}
+            },
+            "VIS_POWER": {
+              "direct_objects": 4,
+              "all_objects": 4,
+              "children": {}
+            },
+            "VIS_SENSORS": {
+              "direct_objects": 1,
+              "all_objects": 1,
+              "children": {}
+            }
+          }
+        },
+        "VIS_PROPULSION": {
+          "direct_objects": 0,
+          "all_objects": 30,
+          "children": {
+            "VIS_ROTOR_lift_fl": {
+              "direct_objects": 6,
+              "all_objects": 6,
+              "children": {}
+            },
+            "VIS_ROTOR_lift_fr": {
+              "direct_objects": 6,
+              "all_objects": 6,
+              "children": {}
+            },
+            "VIS_ROTOR_lift_rl": {
+              "direct_objects": 6,
+              "all_objects": 6,
+              "children": {}
+            },
+            "VIS_ROTOR_lift_rr": {
+              "direct_objects": 6,
+              "all_objects": 6,
+              "children": {}
+            },
+            "VIS_ROTOR_pusher": {
+              "direct_objects": 6,
+              "all_objects": 6,
+              "children": {}
+            }
+          }
+        },
+        "VIS_STRUCTURE": {
+          "direct_objects": 0,
+          "all_objects": 6,
+          "children": {
+            "VIS_FRAME": {
+              "direct_objects": 2,
+              "all_objects": 2,
+              "children": {}
+            },
+            "VIS_WING": {
+              "direct_objects": 4,
+              "all_objects": 4,
+              "children": {}
+            }
+          }
+        }
+      }
+    },
+    "ANCHORS": {
+      "direct_objects": 0,
+      "all_objects": 6,
+      "children": {
+        "ANCHOR_CENTER_OF_MASS": {
+          "direct_objects": 1,
+          "all_objects": 1,
+          "children": {}
+        },
+        "ANCHOR_MOTOR_AXES": {
+          "direct_objects": 5,
+          "all_objects": 5,
+          "children": {}
+        }
+      }
+    },
+    "COLLISION": {
+      "direct_objects": 0,
+      "all_objects": 3,
+      "children": {
+        "COLLISION_BODY": {
+          "direct_objects": 1,
+          "all_objects": 1,
+          "children": {}
+        },
+        "COLLISION_STRUCTURE": {
+          "direct_objects": 2,
+          "all_objects": 2,
+          "children": {}
+        }
+      }
+    },
+    "CAMERAS": {
+      "direct_objects": 0,
+      "all_objects": 0,
+      "children": {}
+    },
+    "REF_PHOTOS": {
+      "direct_objects": 0,
+      "all_objects": 0,
+      "children": {}
+    }
+  }
+}

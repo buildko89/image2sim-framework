@@ -1,0 +1,203 @@
+# ★★★★ Standard VTOL: DeltaQuad 型（2026-09-02）
+#
+# ★★★★ **なぜこの機体か**: PX4 の VTOL の頁で Standard VTOL を代表しているのが
+#   Vertical Technologies の **DeltaQuad QuadPlane** である。内蔵 FC で VTOL を実証するにあたり、
+#   **見た目まで含めて忠実に**再現する（数字だけ合った机上の機体では意味がない）。
+#
+# ★★★★ **前の VTOL 実験機（vtol_quadplane）との違いは「重さと翼」である。**
+#   あちらは全備 33.9 kg に主翼 1.0 m² ＝ 翼面荷重 **332 N/m²** で、
+#   **主翼が自重の 17% しか支えられず、リフト＆クルーズが原理的に成立しなかった**
+#   （どの迎角でもプッシャが 1.9 倍足りない。2026-09-02 に実測と計算の両方で確認）。
+#   こちらは **117 N/m²** で、巡航 16.5 m/s のとき必要 CL 0.70 ＝ 失速 1.2 に十分な余裕がある。
+#
+# 公開諸元（DeltaQuad Evo・deltaquad.com の technical-specifications）:
+#   翼幅 2690 mm ／ 主翼 0.84 m²（84 dm²）／ 全長 750 mm ／ 全高 330 mm
+#   空虚 4.8 kg（電池 1 本で 6.8 kg）／ **MTOW 10 kg** ／ ペイロード 3 kg
+#   巡航 16.54 m/s（60 km/h）／ 航続 270 km・4.5 時間
+#
+# ★★ 平面形は公開諸元から逆算した（面積と翼幅が合うテーパ 0.35・前縁後退 30°）。
+#   ★ 写真から起こしたのではなく**寸法から起こした**ので、見た目は追って詰める。
+template_file: config/drone_templates/multirotor_base.yaml
+schema_version: "1.1"
+subject_id: deltaquad_std_vtol
+units: mm
+dimensions_provisional: true
+
+coordinate_system:
+  right_axis: +X
+  front_axis: +Y          # ★★★ blend2mjcf は「機首は +Y」で MJCF の +x に写す
+  up_axis: +Z
+  root_origin: estimated_center_of_mass
+
+measurements:
+  propeller_diameter_mm:
+    value: 355.6
+    source: assumed
+    tolerance_mm: 5.0
+    note: 揚力ロータ 14 インチ級。MTOW 10 kg・4 発で T/W 2 を狙う大きさ
+
+layout:
+  mode: explicit
+  motor_axis_z_mm: 60.0
+  # ★★★★ **双ブームに 4 発**（DeltaQuad の形）。胴体ではなく左右のブームに前後 2 発ずつ。
+  #   ★★★ 前後の間隔を広く取る（ピッチの権限は てこ腕 で決まる）。
+  motor_positions_mm:
+    lift_fl: [-520.0,  520.0, 60.0]
+    lift_fr: [ 520.0,  520.0, 60.0]
+    lift_rl: [-520.0, -620.0, 60.0]
+    lift_rr: [ 520.0, -620.0, 60.0]
+    pusher:  [   0.0, -430.0, 40.0]
+  # ★★★★ プッシャだけ傾ける。ローカル +Z を **機首（+Y）**へ向ける ＝ X 軸まわり −90 度。
+  rotor_orientation_deg:
+    pusher: [-90.0, 0.0, 0.0]
+  rotor_roles:
+    lift_fl: lift
+    lift_fr: lift
+    lift_rl: lift
+    lift_rr: lift
+    pusher: pusher
+
+# ★★ 細い胴体（全長 750 mm）。デルタ翼の中央に埋まる形。
+body:
+  shape: lofted            # ★ 前後へ絞る紡錘形（DeltaQuad の細い胴体）
+  width_mm: 150.0
+  length_mm: 750.0
+  height_mm: 130.0
+  center_z_mm: 0.0
+  longitudinal_segments: 18
+  radial_segments: 16
+  width_profile_power: 0.55
+  height_profile_power: 0.60
+  cross_section_power: 2.4
+
+# ★★★★ **放射状のアームは使わない**（それはマルチロータの形である）。
+#   ★★★ DeltaQuad は **前後に伸びる双ブーム**に前後 2 発ずつ載る。
+#     ブームは `structure.members`（押出フレーム）で作り、アームは切る。
+arm:
+  enabled: false
+
+structure:
+  enabled: true
+  show_grooves: false
+  members:
+    # ★ 左ブーム（前後 1200 mm・翼の下面に沿う）
+    - id: boom_left
+      profile: boom
+      dimensions_mm: [36.0, 1300.0, 36.0]
+      location_mm: [-520.0, -50.0, 20.0]
+    # ★ 右ブーム
+    - id: boom_right
+      profile: boom
+      dimensions_mm: [36.0, 1300.0, 36.0]
+      location_mm: [520.0, -50.0, 20.0]
+
+motor:
+  housing_diameter_mm: 50.0
+  housing_height_mm: 40.0
+  center_z_mm: 40.0
+  shaft_diameter_mm: 10.0
+  shaft_height_mm: 15.0
+
+propeller:
+  diameter_mm: 355.6
+  hub_diameter_mm: 30.0
+  hub_height_mm: 12.0
+  blade_count: 2
+  blade_root_width_mm: 28.0
+  blade_tip_width_mm: 16.0
+  blade_thickness_mm: 5.0
+  blade_root_radius_mm: 18.0
+  center_z_mm: 60.0
+  directions:
+    lift_fl: ccw
+    lift_fr: cw
+    lift_rl: cw
+    lift_rr: ccw
+    pusher: ccw
+  direction_source: design
+  # ★ プッシャは 12 インチ級（巡航の推力は小さくてよい）
+  diameter_overrides:
+    pusher: 304.8
+
+guard:
+  enabled: false
+
+# ★★★★ **脚は無い**。DeltaQuad は胴体着陸（belly landing）である。
+landing:
+  enabled: false
+
+# ★★★★ デルタ翼。**前縁後退 30°・テーパ 0.35** で面積 0.84 m²・翼幅 2690 mm に合わせた。
+#   ★★★ `sweep_deg` は 2026-09-02 に生成器へ足したもの（既定 0 ＝ 既存機体は変わらない）。
+wing:
+  enabled: true
+  span_mm: 2690.0
+  root_chord_mm: 463.0
+  tip_chord_mm: 162.0
+  sweep_deg: 30.0
+  thickness_mm: 55.0
+  center_x_mm: 0.0
+  center_y_mm: -60.0      # ★ 空力中心を重心のわずか後ろに置く
+  center_z_mm: 70.0
+
+# ★★★★ **尾翼は無い**（デルタ翼の全翼機。ピッチもロールもエレボンで取る）。
+tail:
+  enabled: false
+
+# ★★★★ エレボン（左右 2 枚）。**1 枚で ピッチとロールの両方**を作る。
+#   ★★★ いまの配分は「軸ごとに 1 枚」を前提にしているので、**左右を別々の面として置き、
+#     配分にピッチとロールの両方の列を持たせる**（段階 2-2 の枠がそのまま使える）。
+control_surfaces:
+  surfaces:
+    - id: elevon_left
+      axis: pitch
+      max_deflection_deg: 25.0
+      span_mm: 900.0
+      root_chord_mm: 90.0
+      tip_chord_mm: 55.0
+      thickness_mm: 22.0
+      center_x_mm: -700.0
+      center_y_mm: -520.0
+      center_z_mm: 70.0
+    - id: elevon_right
+      axis: roll
+      max_deflection_deg: 25.0
+      span_mm: 900.0
+      root_chord_mm: 90.0
+      tip_chord_mm: 55.0
+      thickness_mm: 22.0
+      center_x_mm: 700.0
+      center_y_mm: -520.0
+      center_z_mm: 70.0
+
+equipment:
+  boxes:
+    - id: flight_computer
+      part_type: flight_computer
+      dimensions_mm: [70.0, 90.0, 30.0]
+      location_mm: [0.0, 0.0, 45.0]
+      material: electronics
+    - id: gps
+      part_type: gps
+      dimensions_mm: [50.0, 50.0, 15.0]
+      location_mm: [0.0, 150.0, 80.0]
+      material: electronics
+    - id: battery
+      part_type: battery
+      dimensions_mm: [110.0, 260.0, 70.0]
+      location_mm: [0.0, 20.0, 0.0]
+      material: electronics
+
+physics:
+  center_of_mass_mm: [0.0, 0.0, 0.0]
+  center_of_mass_source: placeholder
+  mass_g: null
+  inertia_kg_m2: null
+  inertia_source: pending
+
+output:
+  blend: deltaquad.blend
+  glb: deltaquad.glb
+  resolved_config: resolved_config.json
+  build_report: build_report.json
+  qa_report: qa_report.json
+  render_resolution: 720
