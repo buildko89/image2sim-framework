@@ -369,25 +369,29 @@ def create_lofted_body(
     width = mm(config["width_mm"])
     length = mm(config["length_mm"])
     height = mm(config["height_mm"])
+    center_y = mm(config.get("center_y_mm", 0.0))
     center_z = mm(config["center_z_mm"])
     longitudinal_segments = int(config["longitudinal_segments"])
     radial_segments = int(config["radial_segments"])
     width_power = float(config["width_profile_power"])
     height_power = float(config["height_profile_power"])
     cross_power = float(config["cross_section_power"])
+    nose_bias = float(config.get("nose_bias", 0.0))
     if longitudinal_segments < 4 or radial_segments < 8:
         raise ValueError("ボディ分割数が少なすぎます。")
 
     half_width = width / 2.0
     half_length = length / 2.0
     half_height = height / 2.0
-    verts: list[tuple[float, float, float]] = [(0.0, -half_length, center_z)]
+    verts: list[tuple[float, float, float]] = [(0.0, center_y - half_length, center_z)]
     ring_starts: list[int] = []
 
     for i in range(1, longitudinal_segments):
         fraction = i / longitudinal_segments
-        y = -half_length + length * fraction
-        profile = math.sin(math.pi * fraction)
+        y = center_y - half_length + length * fraction
+        # nose_bias > 0 shifts the max width/height toward the nose (+Y side)
+        eff_fraction = fraction ** (1.0 - nose_bias * 0.5) if nose_bias > 0 else (1.0 - (1.0 - fraction) ** (1.0 + nose_bias * 0.5)) if nose_bias < 0 else fraction
+        profile = math.sin(math.pi * eff_fraction)
         radius_x = half_width * profile**width_power
         radius_z = half_height * profile**height_power
         ring_starts.append(len(verts))
@@ -398,7 +402,7 @@ def create_lofted_body(
             verts.append((x, y, z))
 
     rear_tip = len(verts)
-    verts.append((0.0, half_length, center_z))
+    verts.append((0.0, center_y + half_length, center_z))
     faces: list[tuple[int, ...]] = []
     first_ring = ring_starts[0]
     for j in range(radial_segments):
@@ -2288,20 +2292,47 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     if structure.get("enabled"):
         frame_collection = require_collection(collections.frame, "frame")
         for member in structure.get("members", []):
-            frame_obj = create_aluminum_extrusion(
-                f"frame_{member['id']}",
-                tuple(mm(value) for value in member["dimensions_mm"]),
-                tuple(mm(value) for value in member["location_mm"]),
-                frame_collection,
-                aluminum,
-                dark,
-                root,
-                bool(structure.get("show_grooves", True)),
-            )
-            frame_obj["profile"] = str(member.get("profile", "custom"))
+            mem_mat = material_lookup.get(str(member.get("material", "aluminum")), aluminum)
+            profile_name = str(member.get("profile", "custom"))
+            dim_values = tuple(mm(value) for value in member["dimensions_mm"])
+            loc_values = tuple(mm(value) for value in member["location_mm"])
+            member_shape = str(member.get("shape", ""))
+            if member_shape in ("cylinder", "tube", "pipe") or profile_name in ("boom", "tube", "cylinder", "pipe", "round"):
+                long_axis = max(range(3), key=lambda i: dim_values[i])
+                length = dim_values[long_axis]
+                cross_axes = [i for i in range(3) if i != long_axis]
+                diameter = max(dim_values[cross_axes[0]], dim_values[cross_axes[1]])
+                frame_obj = create_cylinder(
+                    f"frame_{member['id']}",
+                    diameter / 2.0,
+                    length,
+                    loc_values,
+                    frame_collection,
+                    mem_mat,
+                    root,
+                    vertices=32,
+                )
+                if "rotation_deg" in member:
+                    frame_obj.rotation_euler = tuple(math.radians(v) for v in member["rotation_deg"])
+                elif long_axis == 1:
+                    frame_obj.rotation_euler = (math.radians(90.0), 0.0, 0.0)
+                elif long_axis == 0:
+                    frame_obj.rotation_euler = (0.0, math.radians(90.0), 0.0)
+            else:
+                frame_obj = create_aluminum_extrusion(
+                    f"frame_{member['id']}",
+                    dim_values,
+                    loc_values,
+                    frame_collection,
+                    mem_mat,
+                    dark,
+                    root,
+                    bool(structure.get("show_grooves", True)),
+                )
+                if "rotation_deg" in member:
+                    frame_obj.rotation_euler = tuple(math.radians(v) for v in member["rotation_deg"])
+            frame_obj["profile"] = profile_name
             frame_obj["source"] = str(member.get("source", "configured"))
-            if "rotation_deg" in member:
-                frame_obj.rotation_euler = tuple(math.radians(v) for v in member["rotation_deg"])
             frame_objects.append(frame_obj)
         for bracket in structure.get("brackets", []):
             bracket_type = str(bracket.get("type", "triangle"))
@@ -2330,7 +2361,8 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         wing_collection = require_collection(collections.wing, "wing")
         wing_root = create_empty("wing_root", (0.0, 0.0, 0.0), wing_collection, root, size=0.04)
         wing_root["part_type"] = "wing_assembly"
-        wing_obj = create_airfoil_wing("main_wing", wing, wing_collection, wing_material, root)
+        current_wing_mat = material_lookup.get(str(wing.get("material", "wing")), wing_material)
+        wing_obj = create_airfoil_wing("main_wing", wing, wing_collection, current_wing_mat, root)
         parent_to_keep_world(wing_obj, wing_root)
         for bracket in wing.get("brackets", []):
             b_dim = tuple(mm(value) for value in bracket["dimensions_mm"])
@@ -2356,7 +2388,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                 parent_to_keep_world(flange, wing_root)
             parent_to_keep_world(bracket_obj, wing_root)
 
-    # ★★★★ VTOL 段階 1（2026-08-31）: **尾翼**（水平・垂直）。
+    # ★★★★ VTOL 段階 1（2026-08-31）: **尾翼**（水平・垂直・ウィングレット）。
     #   ★★★ 翼の作りは主翼と同じものを使う（`create_airfoil_wing`）。違うのは寸法と姿勢だけ。
     #   ★★ **いまは幾何と質量と抗力にしか効かない** —— シミュレータ側の空力は主翼 1 枚しか
     #     持っていない（`aero/wing.hpp`）。**尾翼の揚力を使うのは段階 2**（舵面と一緒に入れる）。
@@ -2366,8 +2398,9 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         tail_collection = require_collection(collections.wing, "wing")
         for surface in tail.get("surfaces", []):
             surf_id = str(surface["id"])
+            surf_mat = material_lookup.get(str(surface.get("material", tail.get("material", "wing"))), wing_material)
             surf_obj = create_airfoil_wing(
-                f"tail_{surf_id}", surface, tail_collection, wing_material, root
+                f"tail_{surf_id}", surface, tail_collection, surf_mat, root
             )
             surf_obj["part_type"] = str(surface.get("part_type", "tail_surface"))
             if "rotation_deg" in surface:
@@ -2375,7 +2408,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                     math.radians(float(v)) for v in surface["rotation_deg"]
                 )
 
-    # ★★★★ VTOL 段階 2（2026-08-31）: **舵面**（エレベータ・エルロン・ラダー）。
+    # ★★★★ VTOL 段階 2（2026-08-31）: **舵面**（エレベータ・エルロン・ラダー・エレボン）。
     #   ★★★ 作りは翼と同じ（`create_airfoil_wing`）。舵面は「小さな翼」であって、
     #     下流のシミュレータでは **取付角が可変の翼**として扱う（`aero/wing.hpp` を使い回す）。
     #   ★★ **MuJoCo にヒンジ関節は入れない。** 力は推力と同じく我々のプラグインが加える。
@@ -2384,8 +2417,9 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     for surface in config.get("control_surfaces", {}).get("surfaces", []):
         cs_id = str(surface["id"])
         cs_collection = require_collection(collections.wing, "wing")
+        cs_mat = material_lookup.get(str(surface.get("material", "wing")), wing_material)
         cs_obj = create_airfoil_wing(
-            f"control_surface_{cs_id}", surface, cs_collection, wing_material, root
+            f"control_surface_{cs_id}", surface, cs_collection, cs_mat, root
         )
         cs_obj["part_type"] = "control_surface"
         cs_obj["surface_axis"] = str(surface.get("axis", "pitch"))
@@ -2580,13 +2614,14 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             mount_dimensions = [mm(value) for value in motor_mount["dimensions_mm"]]
             if support_axis == "y":
                 mount_dimensions[0], mount_dimensions[1] = mount_dimensions[1], mount_dimensions[0]
+            mount_mat = material_lookup.get(str(motor_mount.get("material", "aluminum")), aluminum)
             mount_obj = create_rounded_box(
                 f"motor_mount_{rotor_id}",
                 tuple(mount_dimensions),
                 (motor_xy.x, motor_xy.y, per_rotor_mm(motor_mount, "center_z_mm", rotor_id)),
                 mm(motor_mount.get("bevel_mm", 3.0)),
                 rotor_collection,
-                aluminum,
+                mount_mat,
                 root,
             )
             mount_obj["part_type"] = "motor_bracket"

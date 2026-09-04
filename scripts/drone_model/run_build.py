@@ -282,25 +282,29 @@ def build_contact_sheet(config: dict[str, Any], output_dir: Path) -> Path:
     cell = (420, 315)
     label_width = 90
     header_height = 54
-    sheet = Image.new("RGB", (label_width + cell[0] * 2, header_height + cell[1] * len(VIEWS)), (32, 32, 35))
+    references = config.get("references", {})
+    available_views = [(view, label) for view, label in VIEWS if view in references]
+    if not available_views:
+        # 6方向の参照画像がない場合はコンタクトシートをスキップ
+        return output_dir / "comparison_sheet.png"
+
+    sheet = Image.new("RGB", (label_width + cell[0] * 2, header_height + cell[1] * len(available_views)), (32, 32, 35))
     draw = ImageDraw.Draw(sheet)
     title_font = font(18)
     label_font = font(16)
     draw.text((label_width + 8, 14), "実物写真", fill=(245, 245, 245), font=title_font)
     draw.text((label_width + cell[0] + 8, 14), "パラメトリックモデル", fill=(245, 245, 245), font=title_font)
 
-    references = config.get("references", {})
-    for row, (view, label) in enumerate(VIEWS):
+    for row, (view, label) in enumerate(available_views):
         y = header_height + row * cell[1]
         draw.text((12, y + 12), label, fill=(255, 225, 120), font=label_font)
-        if view not in references:
-            raise ValueError(f"比較シートに必要な参照画像がありません: references.{view}")
         source_path = resolve_repo_path(references[view])
         render_path = output_dir / "renders" / f"{view}.png"
         source = load_reference_image(source_path)
         sheet.paste(fit_panel(source, cell), (label_width, y))
-        with Image.open(render_path) as rendered:
-            sheet.paste(fit_panel(rendered, cell), (label_width + cell[0], y))
+        if render_path.exists():
+            with Image.open(render_path) as rendered:
+                sheet.paste(fit_panel(rendered, cell), (label_width + cell[0], y))
 
     path = output_dir / "comparison_sheet.png"
     sheet.save(path)
