@@ -134,6 +134,19 @@ output_v2/godot/Godot3dcat/.godot/
 !/output/drone2_parametric/hex6_radial/renders/*.png
 /output/template_smoke/
 
+# DeltaQuad VTOL
+!/output/deltaquad/*.blend
+!/output/deltaquad/*.glb
+!/output/deltaquad/renders/
+!/output/deltaquad/renders/*.png
+
+# CoDrone
+!/output/codrone_parametric/*.blend
+!/output/codrone_parametric/*.glb
+!/output/codrone_parametric/comparison_sheet.png
+!/output/codrone_parametric/renders/
+!/output/codrone_parametric/renders/*.png
+
 drone3.md
 
 /output/drone3_parametric/*
