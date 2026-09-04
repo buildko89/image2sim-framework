@@ -1,0 +1,178 @@
+template_file: config/drone_templates/quad_x_guarded.yaml
+schema_version: "1.1"
+subject_id: codrone
+units: mm
+dimensions_provisional: false
+
+coordinate_system:
+  right_axis: +X
+  front_axis: -Y
+  up_axis: +Z
+  root_origin: estimated_center_of_mass
+
+measurements:
+  overall_length_mm:
+    value: 133.0
+    source: measured
+    tolerance_mm: 1.0
+    note: プロペラガードを含む全長（133mm）
+  overall_width_mm:
+    value: 133.0
+    source: measured
+    tolerance_mm: 1.0
+    note: プロペラガードを含む全幅（133mm）
+  motor_center_diagonal_mm:
+    value: 95.0
+    source: measured
+    tolerance_mm: 1.0
+    note: 対角にあるモーター軸の中心間距離（95mm）
+  propeller_diameter_mm:
+    value: 50.0
+    source: measured
+    tolerance_mm: 1.0
+    note: プロペラ全長・直径（50mm）
+  body_height_mm:
+    value: 25.0
+    source: measured
+    tolerance_mm: 1.0
+    note: 中央ボディ高さ（25mm）
+  body_length_mm:
+    value: 50.0
+    source: measured
+    tolerance_mm: 1.0
+    note: 中央ボディ前後長（50mm）
+  overall_height_mm:
+    value: 35.0
+    source: measured
+    tolerance_mm: 1.5
+    note: モーターポッド・脚を含む機体最大高さ（35mm）
+  mass_g:
+    value: null
+    source: placeholder
+    tolerance_g: null
+    note: 未測定
+
+layout:
+  mode: square_diagonal
+  square_motor_layout: true
+  motor_center_x_mm:
+    value: 67.175144
+    source: derived
+    formula: motor_center_diagonal_mm / sqrt(2)
+  motor_center_y_mm:
+    value: 67.175144
+    source: derived
+    formula: motor_center_diagonal_mm / sqrt(2)
+  motor_axis_z_mm: 7.0
+
+body:
+  shape: lofted
+  width_mm: 34.0
+  length_mm: 50.0
+  height_mm: 25.0
+  canopy_cap: true
+  codrone_details: true
+  longitudinal_segments: 18
+  radial_segments: 32
+  width_profile_power: 0.72
+  height_profile_power: 1.05
+  cross_section_power: 0.78
+  center_z_mm: 0.0
+  width_source: photo_estimated
+  length_source: measured
+  height_source: measured
+
+arm:
+  enabled: true
+  root_width_mm: 10.0
+  tip_width_mm: 7.0
+  thickness_mm: 5.0
+  root_fraction: 0.34
+  center_z_mm: 0.0
+  source: photo_estimated
+
+motor:
+  housing_diameter_mm: 11.0
+  housing_height_mm: 14.0
+  center_z_mm: 3.0
+  shaft_diameter_mm: 2.0
+  shaft_height_mm: 4.0
+  source: photo_estimated
+
+propeller:
+  diameter_mm: 50.0
+  hub_diameter_mm: 7.0
+  hub_height_mm: 3.0
+  blade_count: 2
+  blade_root_width_mm: 7.0
+  blade_tip_width_mm: 4.0
+  blade_thickness_mm: 1.2
+  blade_root_radius_mm: 4.0
+  center_z_mm: 12.0
+  directions:
+    fl: ccw
+    fr: cw
+    rl: cw
+    rr: ccw
+  direction_source: placeholder
+
+guard:
+  enabled: true
+  style: side_integrated
+  size_mode: fit_overall
+  outer_diameter_mm:
+    value: 65.824856
+    source: derived
+    formula: overall_width_mm - motor_center_x_mm
+  tube_diameter_mm: 2.4
+  center_z_mm: 11.5
+  inner_gap_deg: 84.0
+  major_segments: 48
+  minor_segments: 8
+  strut_count: 2
+  strut_style: bent
+  strut_angle_offsets_deg: [-45.0, 45.0]
+  strut_knee_z_mm: 13.5
+  strut_knee_radius_mm: 18.0
+  source: derived_and_photo_estimated
+
+landing:
+  enabled: true
+  leg_diameter_mm: 3.5
+  leg_height_mm: 12.0
+  leg_center_z_mm: -12.0
+  foot_diameter_mm: 5.0
+  foot_height_mm: 4.0
+  foot_center_z_mm: -18.0
+  source: photo_estimated
+
+physics:
+  center_of_mass_mm: [0.0, 0.0, 0.0]
+  center_of_mass_source: placeholder
+  mass_g: null
+  inertia_kg_m2: null
+  inertia_source: pending
+
+references:
+  top: input/raw_photos/codrone/上.jpg
+  bottom: input/raw_photos/codrone/下.jpg
+  front: input/raw_photos/codrone/前.jpg
+  back: input/raw_photos/codrone/後.jpg
+  left: input/raw_photos/codrone/左.jpg
+  right: input/raw_photos/codrone/右.jpg
+  overall_dimensions: input/raw_photos/codrone/寸法/全長全幅寸法.png
+  body_dimensions: input/raw_photos/codrone/寸法/ボディ寸法.png
+  body_height_dimensions: input/raw_photos/codrone/寸法/ボディ高さ寸法.png
+  motor_diagonal_dimensions: input/raw_photos/codrone/寸法/モータ対角寸法.png
+  motor_pod_dimensions: input/raw_photos/codrone/寸法/モータ、モータポッド寸法.png
+  propeller_dimensions: input/raw_photos/codrone/寸法/プロペラ全長寸法.png
+  arm_dimensions: input/raw_photos/codrone/寸法/アーム寸法.png
+
+output:
+  directory: output/codrone_parametric
+  blend: codrone.blend
+  glb: codrone.glb
+  resolved_config: resolved_config.json
+  build_report: build_report.json
+  qa_report: qa_report.json
+  render_resolution: 720

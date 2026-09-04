@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-09-04T10:08:44.858704+00:00",
+  "config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\codrone_model.yaml",
+  "config_sha256": "b792662e902ecbdf6d0daa8f613f4a74ba1f00c93907c20716c743d9f3699179",
+  "resolved_config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\codrone_parametric\\resolved_config.json",
+  "blend": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\codrone_parametric\\codrone.blend",
+  "glb": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\codrone_parametric\\codrone.glb",
+  "glb_sha256": "f67a2e8355501f7dcfeaf0196f5d41a7ec5355c4556b0d595e8ad56b119c5997",
+  "qa": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\codrone_parametric\\qa_report.json",
+  "qa_status": "PASS"
+}

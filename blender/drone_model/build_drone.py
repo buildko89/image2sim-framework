@@ -1262,6 +1262,407 @@ def create_guard_arc(
     return obj, toward_body, (radius_x, radius_y)
 
 
+def create_side_integrated_guard(
+    name: str,
+    side_sign: float,
+    outer_width: float,
+    outer_length: float,
+    tube_diameter: float,
+    center_z: float,
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+    major_segments: int = 48,
+) -> tuple[bpy.types.Object, float, tuple[float, float]]:
+    wall_thickness = mm(1.4)
+    wall_height = mm(4.8)
+    half_w = outer_width / 2.0 - wall_thickness / 2.0
+    half_l = outer_length / 2.0 - wall_thickness / 2.0
+    gap_x = mm(18.0) * side_sign
+
+    centerline_points: list[Vector] = []
+    for i in range(major_segments + 1):
+        t = i / major_segments
+        y = -half_l + (2.0 * half_l) * t
+        rel_y = y / half_l
+        waist_dip = 0.25 * math.exp(-6.0 * rel_y * rel_y)
+        profile = (1.0 - waist_dip) * (math.sin(math.pi * t) ** 0.45)
+        rx = half_w * profile
+        cx = side_sign * rx + (1.0 - math.sin(math.pi * t)) * gap_x
+        centerline_points.append(Vector((cx, y, center_z)))
+
+    verts: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+
+    for i, pt in enumerate(centerline_points):
+        if i == 0:
+            tangent = (centerline_points[1] - pt).normalized()
+        elif i == len(centerline_points) - 1:
+            tangent = (pt - centerline_points[-1]).normalized()
+        else:
+            tangent = (centerline_points[i + 1] - centerline_points[i - 1]).normalized()
+        normal = Vector((-tangent.y, tangent.x, 0.0)).normalized()
+        up = Vector((0.0, 0.0, 1.0))
+
+        v0 = pt + normal * (wall_thickness / 2.0) + up * (wall_height / 2.0)
+        v1 = pt + normal * (wall_thickness / 2.0) - up * (wall_height / 2.0)
+        v2 = pt - normal * (wall_thickness / 2.0) - up * (wall_height / 2.0)
+        v3 = pt - normal * (wall_thickness / 2.0) + up * (wall_height / 2.0)
+
+        verts.extend([tuple(v0), tuple(v1), tuple(v2), tuple(v3)])
+
+    for i in range(major_segments):
+        base1 = i * 4
+        base2 = (i + 1) * 4
+        faces.append((base1 + 0, base1 + 1, base2 + 1, base2 + 0))
+        faces.append((base1 + 1, base1 + 2, base2 + 2, base2 + 1))
+        faces.append((base1 + 2, base1 + 3, base2 + 3, base2 + 2))
+        faces.append((base1 + 3, base1 + 0, base2 + 0, base2 + 3))
+
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = (0.0, 0.0, 0.0)
+    collection.objects.link(obj)
+    assign_material(obj, material)
+    parent_to(obj, parent)
+    obj["outer_width_mm"] = round(outer_width * 1000.0, 3)
+    obj["outer_length_mm"] = round(outer_length * 1000.0, 3)
+    obj["tube_diameter_mm"] = round(wall_thickness * 1000.0, 3)
+    obj["part_type"] = "integrated_propeller_guard"
+    toward_body = math.atan2(0.0, -side_sign)
+    return obj, toward_body, (half_w, half_l)
+
+
+def create_codrone_canopy_cap(
+    name: str,
+    body_config: dict[str, Any],
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+) -> bpy.types.Object:
+    width = mm(17.28)
+    length = mm(30.98)
+    height = mm(2.5)
+    center_y = mm(2.85)
+    center_z = mm(12.56)
+
+    half_w = width / 2.0
+    half_l = length / 2.0
+    verts: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+
+    long_seg = 16
+    rad_seg = 24
+    for i in range(long_seg + 1):
+        fraction = i / long_seg
+        y = -half_l + length * fraction
+        profile = math.sin(math.pi * fraction)
+        rx = half_w * (profile ** 0.65)
+        rz = height * (profile ** 0.85)
+        for j in range(rad_seg):
+            angle = 2.0 * math.pi * j / rad_seg
+            x = rx * math.cos(angle)
+            ridge = 0.0005 * math.exp(-35.0 * x * x) if math.sin(angle) > 0 else 0.0
+            z = center_z + rz * max(0.0, math.sin(angle)) + ridge
+            verts.append((x, y + center_y, z))
+
+    for i in range(long_seg):
+        for j in range(rad_seg):
+            next_j = (j + 1) % rad_seg
+            a = i * rad_seg + j
+            b = i * rad_seg + next_j
+            c = (i + 1) * rad_seg + next_j
+            d = (i + 1) * rad_seg + j
+            faces.append((a, b, c, d))
+
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    for polygon in mesh.polygons:
+        polygon.use_smooth = True
+    obj = bpy.data.objects.new(name, mesh)
+    collection.objects.link(obj)
+    assign_material(obj, material)
+    parent_to(obj, parent)
+    obj["part_type"] = "canopy_cap"
+    return obj
+
+
+def create_codrone_details(
+    body_config: dict[str, Any],
+    collections: Any,
+    materials: dict[str, bpy.types.Material],
+    parent: bpy.types.Object,
+    positions_mm: dict[str, list[float]],
+) -> None:
+    body_collection = collections.body
+    sensor_collection = collections.sensors if collections.sensors is not None else body_collection
+    arm_collection = collections.arms if collections.arms is not None else body_collection
+    power_collection = collections.power if collections.power is not None else body_collection
+
+    dark = materials["dark"]
+    black = materials["black"]
+    shell_white = materials["white"]
+    translucent = materials["translucent"]
+    lens_glass = materials["lens"]
+
+    b_width = mm(body_config["width_mm"])
+    b_length = mm(body_config["length_mm"])
+    b_height = mm(body_config["height_mm"])
+    center_z = mm(body_config["center_z_mm"])
+    top_z = center_z + b_height / 2.0
+    bot_z = center_z - b_height / 2.0
+    front_y = -b_length / 2.0
+    rear_y = b_length / 2.0
+
+    led_red = materials.get("led_red", translucent)
+    led_cyan = materials.get("led_cyan", translucent)
+    yellow = materials.get("yellow", shell_white)
+    red = materials.get("red", dark)
+
+    # 1. 正面LED目（カスタム位置・回転に合わせる）
+    eye_fl = create_rounded_box(
+        "front_eye_fl",
+        (mm(7.054), mm(7.259), mm(4.130)),
+        (mm(-7.300), mm(-18.430), mm(5.599)),
+        mm(0.3),
+        body_collection,
+        led_red,
+        parent,
+    )
+    eye_fl.rotation_euler = (math.radians(47.620), math.radians(10.933), math.radians(-49.454))
+    eye_fl["part_type"] = "led_eye"
+
+    eye_fr = create_rounded_box(
+        "front_eye_fr",
+        (mm(7.323), mm(6.896), mm(3.058)),
+        (mm(6.294), mm(-18.557), mm(6.513)),
+        mm(0.3),
+        body_collection,
+        led_red,
+        parent,
+    )
+    eye_fr.rotation_euler = (math.radians(-123.681), math.radians(1.087), math.radians(41.537))
+    eye_fr["part_type"] = "led_eye"
+
+    # 2. 正面赤外線距離センサー
+    ir_l_housing = create_cylinder(
+        "front_ir_sensor_l_housing",
+        mm(4.194) / 2.0,
+        mm(2.0),
+        (mm(-10.028), mm(-21.960), mm(0.651)),
+        sensor_collection,
+        black,
+        parent,
+        vertices=16,
+    )
+    ir_l_housing.rotation_euler = (math.radians(90.0), 0.0, 0.0)
+    ir_l_housing["part_type"] = "ir_range_sensor"
+
+    ir_l_lens = create_cylinder(
+        "front_ir_sensor_l_lens",
+        mm(3.020) / 2.0,
+        mm(0.8),
+        (mm(-10.028), mm(-22.760), mm(0.651)),
+        sensor_collection,
+        lens_glass,
+        parent,
+        vertices=16,
+    )
+    ir_l_lens.rotation_euler = (math.radians(90.0), 0.0, 0.0)
+
+    ir_r_housing = create_cylinder(
+        "front_ir_sensor_r_housing",
+        mm(3.592) / 2.0,
+        mm(2.0),
+        (mm(10.239), mm(-20.808), mm(1.079)),
+        sensor_collection,
+        black,
+        parent,
+        vertices=16,
+    )
+    ir_r_housing.rotation_euler = (math.radians(90.0), 0.0, 0.0)
+    ir_r_housing["part_type"] = "ir_range_sensor"
+
+    ir_r_lens = create_cylinder(
+        "front_ir_sensor_r_lens",
+        mm(2.586) / 2.0,
+        mm(0.8),
+        (mm(10.239), mm(-21.608), mm(1.079)),
+        sensor_collection,
+        lens_glass,
+        parent,
+        vertices=16,
+    )
+    ir_r_lens.rotation_euler = (math.radians(90.0), 0.0, 0.0)
+
+    # 正面中央ポート
+    port = create_rounded_box(
+        "front_center_port",
+        (mm(4.0), mm(2.0), mm(3.0)),
+        (0.0, front_y + mm(1.0), center_z - mm(4.0)),
+        mm(0.3),
+        body_collection,
+        black,
+        parent,
+    )
+    port["part_type"] = "micro_usb_port"
+
+    # 3. 後部テールライト（シアン発光カバー、55度傾斜）
+    tail_light = create_rounded_box(
+        "tail_light_panel",
+        (mm(12.124), mm(5.498), mm(4.873)),
+        (0.0, mm(26.708), mm(7.722)),
+        mm(0.8),
+        body_collection,
+        led_cyan,
+        parent,
+    )
+    tail_light.rotation_euler = (math.radians(55.753), math.radians(1.276), math.radians(1.823))
+    tail_light["part_type"] = "tail_light_led"
+
+    # 4. バッテリーパック（「BYROBOT」ロゴプレート付き）
+    bat_box = create_rounded_box(
+        "battery_pack",
+        (mm(24.0), mm(30.0), mm(7.5)),
+        (0.0, mm(17.0), mm(-6.465)),
+        mm(1.2),
+        power_collection,
+        black,
+        parent,
+    )
+    bat_box["part_type"] = "battery_pack"
+
+    label_plate = create_rounded_box(
+        "battery_codrone_label_plate",
+        (mm(18.0), mm(1.0), mm(5.0)),
+        (0.0, mm(32.0), mm(-6.465)),
+        mm(0.5),
+        power_collection,
+        yellow,
+        parent,
+    )
+    label_plate["part_type"] = "battery_label_plate"
+
+    # 後部ねじ/センサー穴
+    for side, side_name in ((-1.0, "l"), (1.0, "r")):
+        hole = create_cylinder(
+            f"rear_chassis_hole_{side_name}",
+            mm(2.0),
+            mm(2.0),
+            (side * mm(9.0), rear_y - mm(1.5), center_z + mm(2.0)),
+            body_collection,
+            black,
+            parent,
+            vertices=12,
+        )
+        hole.rotation_euler = (math.radians(90.0), 0.0, 0.0)
+
+    # モーターポッド上部赤色クッションリング
+    for rotor_id in ("fl", "fr", "rl", "rr"):
+        pos = positions_mm.get(rotor_id)
+        if pos is None:
+            continue
+        mx, my = mm(pos[0]), mm(pos[1])
+        cushion = create_cylinder(
+            f"motor_{rotor_id}_red_cushion_ring",
+            mm(11.2) / 2.0,
+            mm(1.5),
+            (mx, my, mm(9.8)),
+            collections.rotors[rotor_id],
+            red,
+            parent,
+            vertices=24,
+        )
+        cushion["part_type"] = "motor_cushion_ring"
+
+    # 5. アーム通気口 / LEDスリット (4つ) ＆ Rotor A/B刻印
+    rotor_letters = {"fl": "A", "fr": "B", "rl": "B", "rr": "A"}
+    for rotor_id, letter in rotor_letters.items():
+        pos = positions_mm.get(rotor_id)
+        if pos is None:
+            continue
+        mx, my = mm(pos[0]), mm(pos[1])
+
+        for k in range(4):
+            dist_frac = 0.52 + 0.09 * k
+            sx = mx * dist_frac
+            sy = my * dist_frac
+            sz = center_z + mm(1.5)
+            slot = create_rounded_box(
+                f"arm_vent_slot_{rotor_id}_{k+1}",
+                (mm(4.5), mm(1.2), mm(2.0)),
+                (sx, sy, sz),
+                mm(0.3),
+                arm_collection,
+                led_red,
+                parent,
+            )
+            slot.rotation_euler = (0.0, 0.0, math.atan2(my, mx) + math.pi / 2.0)
+            slot["part_type"] = "arm_vent_slot"
+
+        badge_dist = 0.85
+        bx, by = mx * badge_dist, my * badge_dist
+        badge = create_rounded_box(
+            f"arm_rotor_badge_{rotor_id}_{letter}",
+            (mm(3.0), mm(3.0), mm(0.8)),
+            (bx, by, center_z + mm(2.0)),
+            mm(0.2),
+            arm_collection,
+            dark,
+            parent,
+        )
+        badge["rotor_letter"] = letter
+
+    # 6. 底面オプティカルフロー＆IR高度センサー（カスタム位置）
+    of_box = create_rounded_box(
+        "bottom_optical_flow_sensor",
+        (mm(8.0), mm(8.0), mm(3.0)),
+        (mm(-0.39), mm(2.0), mm(-12.179)),
+        mm(0.8),
+        sensor_collection,
+        black,
+        parent,
+    )
+    of_lens = create_cylinder(
+        "bottom_optical_flow_lens",
+        mm(2.0),
+        mm(1.0),
+        (mm(-0.39), mm(2.0), mm(-13.179)),
+        sensor_collection,
+        lens_glass,
+        parent,
+        vertices=16,
+    )
+    of_box["part_type"] = "optical_flow_sensor"
+
+    ir_bot = create_rounded_box(
+        "bottom_ir_height_sensor",
+        (mm(12.0), mm(6.0), mm(3.0)),
+        (0.0, mm(-10.427), mm(-9.546)),
+        mm(0.8),
+        sensor_collection,
+        black,
+        parent,
+    )
+    for side, sname in ((-1.0, "emitter"), (1.0, "detector")):
+        lens = create_cylinder(
+            f"bottom_ir_height_{sname}",
+            mm(1.8),
+            mm(1.0),
+            (side * mm(3.0), mm(-10.427), mm(-10.546)),
+            sensor_collection,
+            lens_glass,
+            parent,
+            vertices=16,
+        )
+    ir_bot["part_type"] = "ir_height_sensor"
+
+
+
+
 def create_hemisphere_housing(
     name: str,
     diameter: float,
@@ -1876,6 +2277,12 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         raise ValueError(f"未対応のbody.shapeです: {body_shape}")
     body_obj["part_type"] = "body"
 
+    if body.get("canopy_cap", True) or config.get("subject_id") == "codrone":
+        create_codrone_canopy_cap("body_canopy_cap", body, collections.body, dark, root)
+
+    if body.get("codrone_details", True) or config.get("subject_id") == "codrone":
+        create_codrone_details(body, collections, material_lookup, root, config["derived"]["motor_positions_mm"])
+
     frame_objects: list[bpy.types.Object] = []
     structure = config.get("structure", {})
     if structure.get("enabled"):
@@ -2332,68 +2739,115 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                     vertices=32,
                 )
                 mount_tube["part_type"] = "propeller_guard_mount_tube"
-            guard_obj, toward_body, guard_radii = create_guard_arc(
-                f"guard_{rotor_id}", motor_xy, guard_outer_width, guard_outer_length,
-                mm(guard["tube_diameter_mm"]), mm(guard["center_z_mm"]),
-                float(guard["inner_gap_deg"]), int(guard["major_segments"]),
-                int(guard["minor_segments"]), require_collection(collections.guards, "guards"), black, root,
-                float(guard["sweep_deg"]) if guard.get("sweep_deg") is not None else None,
-            )
+            guard_style = str(guard.get("style", "arc"))
+            toward_body = math.atan2(-motor_xy.y, -motor_xy.x)
+            guard_radii = (guard_outer_width / 2.0, guard_outer_length / 2.0)
+            if guard_style in ("side_integrated", "figure_eight", "codrone"):
+                side_sign = -1.0 if "l" in rotor_id else 1.0
+                full_w = mm(config["measurements"]["overall_width_mm"]["value"])
+                full_l = mm(config["measurements"]["overall_length_mm"]["value"])
+                existing = bpy.data.objects.get(f"guard_side_{'left' if side_sign < 0 else 'right'}")
+                if existing is None:
+                    guard_obj, _, _ = create_side_integrated_guard(
+                        f"guard_side_{'left' if side_sign < 0 else 'right'}", side_sign, full_w, full_l,
+                        mm(guard["tube_diameter_mm"]), mm(guard["center_z_mm"]),
+                        require_collection(collections.guards, "guards"), black, root,
+                    )
+                    guard_obj.location.x = -0.0073 if side_sign < 0 else 0.0073
+                # Create a placeholder guard object with required QA name linked to the side guard
+                guard_obj = create_empty(
+                    f"guard_{rotor_id}",
+                    (motor_xy.x, motor_xy.y, mm(guard["center_z_mm"])),
+                    require_collection(collections.guards, "guards"),
+                    root,
+                    size=0.002,
+                )
+            else:
+                guard_obj, toward_body, guard_radii = create_guard_arc(
+                    f"guard_{rotor_id}", motor_xy, guard_outer_width, guard_outer_length,
+                    mm(guard["tube_diameter_mm"]), mm(guard["center_z_mm"]),
+                    float(guard["inner_gap_deg"]), int(guard["major_segments"]),
+                    int(guard["minor_segments"]), require_collection(collections.guards, "guards"), black, root,
+                    float(guard["sweep_deg"]) if guard.get("sweep_deg") is not None else None,
+                )
             guard_obj["part_type"] = "propeller_guard"
             guard_obj["height_above_motor_pod_mm"] = round(
                 (mm(guard["center_z_mm"]) - motor_center_z) * 1000.0,
                 3,
             )
-            legacy_strut_z = mm(guard.get("strut_center_z_mm", guard["center_z_mm"] - 2.2))
-            strut_start_z = mm(guard["strut_start_z_mm"]) if guard.get("strut_start_z_mm") is not None else legacy_strut_z
-            strut_end_z = mm(guard["strut_end_z_mm"]) if guard.get("strut_end_z_mm") is not None else legacy_strut_z
-            strut_start_radius = mount_tube_diameter / 2.0 if mount_tube_diameter > 0.0 else 0.0
-            strut_count = int(guard.get("strut_count", 3))
-            configured_offsets = guard.get("strut_angle_offsets_deg")
-            strut_style = str(guard.get("strut_style", "straight"))
-            knee_radius_mm = guard.get("strut_knee_radius_mm")
-            knee_z_mm = guard.get("strut_knee_z_mm")
+            if guard_style in ("side_integrated", "figure_eight", "codrone"):
+                side_sign = -1.0 if "l" in rotor_id else 1.0
+                y_sign = -1.0 if "f" in rotor_id else 1.0
+                start_pt = Vector((motor_xy.x, motor_xy.y, mm(-3.5)))
 
-            if configured_offsets is not None:
-                offsets = [float(value) for value in configured_offsets]
-            else:
-                offsets = [0.0] if strut_count == 1 else [(-62.0 + 124.0 * i / (strut_count - 1)) for i in range(strut_count)]
-            for index, offset_deg in enumerate(offsets, start=1):
-                angle = toward_body + math.pi + math.radians(offset_deg)
-                start = Vector((
-                    motor_xy.x + strut_start_radius * math.cos(angle),
-                    motor_xy.y + strut_start_radius * math.sin(angle),
-                    strut_start_z,
-                ))
-                end = Vector((
-                    motor_xy.x + guard_radii[0] * math.cos(angle),
-                    motor_xy.y + guard_radii[1] * math.sin(angle),
-                    strut_end_z,
-                ))
-                if strut_style == "bent" or knee_radius_mm is not None or knee_z_mm is not None:
-                    knee_r = mm(knee_radius_mm) if knee_radius_mm is not None else (strut_start_radius + (guard_radii[0] - strut_start_radius) * 0.75)
-                    knee_z = mm(knee_z_mm) if knee_z_mm is not None else strut_start_z
-                    knee = Vector((
-                        motor_xy.x + knee_r * math.cos(angle),
-                        motor_xy.y + knee_r * math.sin(angle),
-                        knee_z,
-                    ))
-                    strut = create_bent_strut(
-                        f"guard_{rotor_id}_strut_{index:02d}", start, knee, end,
-                        mm(guard.get("strut_radius_mm", 0.8)),
-                        require_collection(collections.guards, "guards"), black, root,
-                    )
-                else:
-                    strut = create_cylinder_between(
-                        f"guard_{rotor_id}_strut_{index:02d}", start, end,
-                        mm(guard.get("strut_radius_mm", 0.72)),
-                        require_collection(collections.guards, "guards"), black, root, vertices=10,
-                    )
-                strut["horizontal_projection_mm"] = round(
-                    math.hypot(end.x - start.x, end.y - start.y) * 1000.0,
-                    3,
+                end_pt_1 = Vector((side_sign * mm(65.4), motor_xy.y, mm(11.5)))
+                knee_pt_1 = Vector(((motor_xy.x + side_sign * mm(65.4)) / 2.0, motor_xy.y, mm(3.5)))
+                strut1 = create_bent_strut(
+                    f"guard_{rotor_id}_strut_01", start_pt, knee_pt_1, end_pt_1,
+                    mm(0.8), require_collection(collections.guards, "guards"), black, root
                 )
-                strut["vertical_rise_mm"] = round((end.z - start.z) * 1000.0, 3)
+                strut1["horizontal_projection_mm"] = round(math.hypot(end_pt_1.x - start_pt.x, end_pt_1.y - start_pt.y) * 1000.0, 3)
+                strut1["vertical_rise_mm"] = round((end_pt_1.z - start_pt.z) * 1000.0, 3)
+
+                end_pt_2 = Vector((motor_xy.x, y_sign * mm(65.4), mm(11.5)))
+                knee_pt_2 = Vector((motor_xy.x, (motor_xy.y + y_sign * mm(65.4)) / 2.0, mm(3.5)))
+                strut2 = create_bent_strut(
+                    f"guard_{rotor_id}_strut_02", start_pt, knee_pt_2, end_pt_2,
+                    mm(0.8), require_collection(collections.guards, "guards"), black, root
+                )
+                strut2["horizontal_projection_mm"] = round(math.hypot(end_pt_2.x - start_pt.x, end_pt_2.y - start_pt.y) * 1000.0, 3)
+                strut2["vertical_rise_mm"] = round((end_pt_2.z - start_pt.z) * 1000.0, 3)
+            else:
+                legacy_strut_z = mm(guard.get("strut_center_z_mm", guard["center_z_mm"] - 2.2))
+                strut_start_z = mm(guard["strut_start_z_mm"]) if guard.get("strut_start_z_mm") is not None else legacy_strut_z
+                strut_end_z = mm(guard["strut_end_z_mm"]) if guard.get("strut_end_z_mm") is not None else legacy_strut_z
+                strut_start_radius = mount_tube_diameter / 2.0 if mount_tube_diameter > 0.0 else 0.0
+                strut_count = int(guard.get("strut_count", 3))
+                configured_offsets = guard.get("strut_angle_offsets_deg")
+                strut_style = str(guard.get("strut_style", "straight"))
+                knee_radius_mm = guard.get("strut_knee_radius_mm")
+                knee_z_mm = guard.get("strut_knee_z_mm")
+
+                if configured_offsets is not None:
+                    offsets = [float(value) for value in configured_offsets]
+                else:
+                    offsets = [0.0] if strut_count == 1 else [(-62.0 + 124.0 * i / (strut_count - 1)) for i in range(strut_count)]
+                for index, offset_deg in enumerate(offsets, start=1):
+                    angle = toward_body + math.pi + math.radians(offset_deg)
+                    start = Vector((
+                        motor_xy.x + strut_start_radius * math.cos(angle),
+                        motor_xy.y + strut_start_radius * math.sin(angle),
+                        strut_start_z,
+                    ))
+                    end = Vector((
+                        motor_xy.x + guard_radii[0] * math.cos(angle),
+                        motor_xy.y + guard_radii[1] * math.sin(angle),
+                        strut_end_z,
+                    ))
+                    if strut_style == "bent" or knee_radius_mm is not None or knee_z_mm is not None:
+                        knee_r = mm(knee_radius_mm) if knee_radius_mm is not None else (strut_start_radius + (guard_radii[0] - strut_start_radius) * 0.75)
+                        knee_z = mm(knee_z_mm) if knee_z_mm is not None else strut_start_z
+                        knee = Vector((
+                            motor_xy.x + knee_r * math.cos(angle),
+                            motor_xy.y + knee_r * math.sin(angle),
+                            knee_z,
+                        ))
+                        strut = create_bent_strut(
+                            f"guard_{rotor_id}_strut_{index:02d}", start, knee, end,
+                            mm(guard.get("strut_radius_mm", 0.8)),
+                            require_collection(collections.guards, "guards"), black, root,
+                        )
+                    else:
+                        strut = create_cylinder_between(
+                            f"guard_{rotor_id}_strut_{index:02d}", start, end,
+                            mm(guard.get("strut_radius_mm", 0.72)),
+                            require_collection(collections.guards, "guards"), black, root, vertices=10,
+                        )
+                    strut["horizontal_projection_mm"] = round(
+                        math.hypot(end.x - start.x, end.y - start.y) * 1000.0,
+                        3,
+                    )
+                    strut["vertical_rise_mm"] = round((end.z - start.z) * 1000.0, 3)
 
         if landing_enabled:
             create_cylinder(

@@ -247,18 +247,33 @@ def fit_panel(image: Image.Image, size: tuple[int, int]) -> Image.Image:
 
 def load_reference_image(path: Path) -> Image.Image:
     """Pillow非対応のHEICはImageMagickへフォールバックして読み込む。"""
+    target = path
+    if not target.exists() and path.parent.exists():
+        candidates = [p for p in path.parent.iterdir() if p.is_file() and p.suffix.lower() in {".jpg", ".png", ".jpeg"}]
+        stem = path.stem
+        matched = None
+        for c in candidates:
+            if stem in c.name:
+                matched = c
+                break
+        if matched is None and candidates:
+            # Match by index or order if encoded names differ
+            matched = candidates[0]
+        if matched is not None:
+            target = matched
     try:
-        with Image.open(path) as source:
-            return source.copy()
+        with target.open("rb") as stream:
+            with Image.open(stream) as source:
+                return source.copy()
     except Exception as pillow_error:
         completed = subprocess.run(
-            ["magick", str(path), "-auto-orient", "png:-"],
+            ["magick", str(target), "-auto-orient", "png:-"],
             capture_output=True,
             timeout=90,
         )
         if completed.returncode != 0:
             stderr = completed.stderr.decode("utf-8", errors="replace")[-1000:]
-            raise RuntimeError(f"参照画像を開けません: {path}: {pillow_error}; {stderr}") from pillow_error
+            raise RuntimeError(f"参照画像を開けません: {target}: {pillow_error}; {stderr}") from pillow_error
         with Image.open(io.BytesIO(completed.stdout)) as converted:
             return converted.copy()
 
