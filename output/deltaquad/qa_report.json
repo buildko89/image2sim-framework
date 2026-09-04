@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "created_at": "2026-09-04T10:39:12.540393+00:00",
+  "created_at": "2026-09-04T12:41:10.406723+00:00",
   "status": "PASS",
   "dimensions_provisional": false,
   "checks": {
@@ -74,11 +74,11 @@
         "REF_PHOTOS": 0
       },
       "actual": {
+        "CAMERAS": 0,
         "ANCHORS": 6,
-        "MODEL_VISUAL": 70,
-        "COLLISION": 3,
         "REF_PHOTOS": 0,
-        "CAMERAS": 0
+        "COLLISION": 3,
+        "MODEL_VISUAL": 70
       },
       "pass": true
     },
@@ -109,7 +109,6 @@
           "motor_mount_lift_rr"
         ],
         "pusher": [
-          "motor_mount_pusher",
           "motor_pusher",
           "motor_pusher_shaft"
         ]
@@ -136,7 +135,6 @@
           "motor_mount_lift_rr"
         ],
         "pusher": [
-          "motor_mount_pusher",
           "motor_pusher",
           "motor_pusher_shaft"
         ]
@@ -163,7 +161,8 @@
         ],
         "pusher": [
           "rotor_pusher_blades",
-          "rotor_pusher_hub"
+          "rotor_pusher_hub",
+          "rotor_pusher_spinner"
         ]
       },
       "actual": {
@@ -185,7 +184,8 @@
         ],
         "pusher": [
           "rotor_pusher_blades",
-          "rotor_pusher_hub"
+          "rotor_pusher_hub",
+          "rotor_pusher_spinner"
         ]
       },
       "pass": true
@@ -275,7 +275,7 @@
         ],
         "pusher": [
           0.0,
-          -490.0,
+          -470.0,
           50.0
         ]
       },
@@ -302,7 +302,7 @@
         ],
         "pusher": [
           0.0,
-          -490.00001,
+          -469.999999,
           50.000001
         ]
       },
@@ -332,7 +332,7 @@
         ],
         "pusher": [
           0.0,
-          -505.0,
+          -454.0,
           50.0
         ]
       },
@@ -359,8 +359,8 @@
         ],
         "pusher": [
           0.0,
-          -504.999995,
-          50.000001
+          -453.999996,
+          50.000004
         ]
       },
       "pass": true
@@ -398,8 +398,8 @@
     },
     "overall_width": {
       "expected_mm": 2350.0,
-      "actual_mm": 2363.999844,
-      "error_mm": 13.99984399999994,
+      "actual_mm": 2363.995552,
+      "error_mm": 13.995551999999861,
       "tolerance_mm": 20.0,
       "pass": true
     },
@@ -411,9 +411,9 @@
       "pass": true
     },
     "overall_height": {
-      "expected_mm": 280.0,
-      "actual_mm": 277.488232,
-      "error_mm": -2.5117680000000178,
+      "expected_mm": 240.0,
+      "actual_mm": 257.488221,
+      "error_mm": 17.48822100000001,
       "tolerance_mm": 30.0,
       "pass": true
     }

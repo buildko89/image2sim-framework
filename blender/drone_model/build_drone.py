@@ -1143,6 +1143,166 @@ def create_airfoil_wing(
     return obj
 
 
+def create_curved_winglet(
+    name: str,
+    config: dict[str, Any],
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+    is_right: bool = False,
+) -> bpy.types.Object:
+    """実機PX4 DeltaQuad風の滑らかな背びれ型ブレンドウィングレット。
+    前縁は垂直に立ち上がり、上端は丸みを帯び、後縁は大きな円弧を描いて主翼後縁へ接続。
+    """
+    height = mm(config.get("span_mm", config.get("height_mm", 220.0)))
+    root_chord = mm(config.get("root_chord_mm", 180.0))
+    tip_chord = mm(config.get("tip_chord_mm", 65.0))
+    root_thickness = mm(config.get("thickness_mm", config.get("root_thickness_mm", 14.0)))
+    tip_thickness = mm(config.get("tip_thickness_mm", root_thickness * 0.5))
+    sweep = math.radians(float(config.get("sweep_deg", 2.0)))
+    curve_power = float(config.get("trailing_curve_power", 2.2))
+    center_x = mm(config.get("center_x_mm", 0.0))
+    center_y = mm(config.get("center_y_mm", 0.0))
+    center_z = mm(config.get("center_z_mm", 0.0))
+
+    stations = 16
+    chord_segments = 16
+    verts: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+
+    for s in range(stations + 1):
+        u = s / stations  # 0.0 (root) to 1.0 (tip)
+        z = u * height
+        y_le = -z * math.tan(sweep)
+        chord = tip_chord + (root_chord - tip_chord) * (1.0 - (u ** curve_power))
+
+        if u > 0.85:
+            tip_round = (u - 0.85) / 0.15
+            y_le -= mm(8.0) * (tip_round ** 1.5)
+            chord -= mm(15.0) * (tip_round ** 1.5)
+            chord = max(chord, mm(15.0))
+
+        y_te = y_le - chord
+        thickness = tip_thickness + (root_thickness - tip_thickness) * (1.0 - u)
+
+        ring_verts: list[tuple[float, float, float]] = []
+        for i in range(chord_segments + 1):
+            frac = i / chord_segments
+            y = y_le - frac * chord
+            profile = 5.0 * thickness * (
+                0.2969 * math.sqrt(frac)
+                - 0.1260 * frac
+                - 0.3516 * (frac ** 2)
+                + 0.2843 * (frac ** 3)
+                - 0.1015 * (frac ** 4)
+            )
+            x_out = profile * 1.05 if is_right else -profile * 0.95
+            ring_verts.append((x_out, y, z))
+
+        for i in range(chord_segments, -1, -1):
+            frac = i / chord_segments
+            y = y_le - frac * chord
+            profile = 5.0 * thickness * (
+                0.2969 * math.sqrt(frac)
+                - 0.1260 * frac
+                - 0.3516 * (frac ** 2)
+                + 0.2843 * (frac ** 3)
+                - 0.1015 * (frac ** 4)
+            )
+            x_in = -profile * 0.95 if is_right else profile * 1.05
+            ring_verts.append((x_in, y, z))
+
+        verts.extend(ring_verts)
+
+    pts_per_ring = len(ring_verts)
+    for s in range(stations):
+        cur = s * pts_per_ring
+        nxt = (s + 1) * pts_per_ring
+        for i in range(pts_per_ring - 1):
+            faces.append((cur + i, cur + i + 1, nxt + i + 1, nxt + i))
+
+    bottom_loop = list(range(pts_per_ring))
+    faces.append(tuple(reversed(bottom_loop)))
+    top_base = stations * pts_per_ring
+    top_loop = list(range(top_base, top_base + pts_per_ring))
+    faces.append(tuple(top_loop))
+
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.validate(verbose=False)
+    mesh.update()
+    for poly in mesh.polygons:
+        poly.use_smooth = True
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = (center_x, center_y, center_z)
+    if "rotation_deg" in config:
+        obj.rotation_euler = tuple(math.radians(float(v)) for v in config["rotation_deg"])
+    collection.objects.link(obj)
+    assign_material(obj, material)
+    parent_to(obj, parent)
+    obj["part_type"] = "curved_winglet"
+    obj["span_mm"] = float(config.get("span_mm", config.get("height_mm", 220.0)))
+    obj["root_chord_mm"] = float(config.get("root_chord_mm", 180.0))
+    return obj
+
+
+def create_spinner_cone(
+    name: str,
+    radius_m: float,
+    length_m: float,
+    collection: bpy.types.Collection,
+    material: bpy.types.Material,
+    parent: bpy.types.Object,
+    location: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    rotation_euler: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    segments: int = 24,
+    rings: int = 12,
+) -> bpy.types.Object:
+    """プロペラハブ先端の弾丸型スピナーコーン（Bullet Spinner Cone）。"""
+    verts: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+    for ri in range(rings + 1):
+        u = ri / rings
+        z = u * length_m
+        r_curr = radius_m * (1.0 - (u ** 1.6))
+        for si in range(segments):
+            angle = si * 2.0 * math.pi / segments
+            x = r_curr * math.cos(angle)
+            y = r_curr * math.sin(angle)
+            verts.append((x, y, z))
+
+    for ri in range(rings):
+        cur = ri * segments
+        nxt = (ri + 1) * segments
+        for si in range(segments):
+            si_nxt = (si + 1) % segments
+            faces.append((cur + si, cur + si_nxt, nxt + si_nxt, nxt + si))
+
+    base_loop = [si for si in range(segments)]
+    faces.append(tuple(reversed(base_loop)))
+    tip_idx = len(verts)
+    verts.append((0.0, 0.0, length_m))
+    top_base = rings * segments
+    for si in range(segments):
+        si_nxt = (si + 1) % segments
+        faces.append((top_base + si, top_base + si_nxt, tip_idx))
+
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(verts, [], faces)
+    mesh.validate(verbose=False)
+    mesh.update()
+    for poly in mesh.polygons:
+        poly.use_smooth = True
+    obj = bpy.data.objects.new(name, mesh)
+    obj.location = location
+    obj.rotation_euler = rotation_euler
+    collection.objects.link(obj)
+    assign_material(obj, material)
+    parent_to(obj, parent)
+    obj["part_type"] = "spinner_cone"
+    return obj
+
+
 def create_rotor_mesh(
     name: str,
     config: dict[str, Any],
@@ -1150,6 +1310,7 @@ def create_rotor_mesh(
     collection: bpy.types.Collection,
     material: bpy.types.Material,
     parent: bpy.types.Object,
+    blade_shape: str = "flat",
 ) -> bpy.types.Object:
     diameter = mm(config["diameter_mm"])
     r0 = mm(config["blade_root_radius_mm"])
@@ -1157,34 +1318,112 @@ def create_rotor_mesh(
     w0 = mm(config["blade_root_width_mm"])
     w1 = mm(config["blade_tip_width_mm"])
     thickness = mm(config["blade_thickness_mm"])
-    skew = mm(2.2) * (1.0 if direction_name == "ccw" else -1.0)
+    blade_count = int(config["blade_count"])
     verts: list[tuple[float, float, float]] = []
     faces: list[tuple[int, ...]] = []
-    for blade_index in range(int(config["blade_count"])):
-        angle = blade_index * 2.0 * math.pi / int(config["blade_count"])
-        forward = Vector((math.cos(angle), math.sin(angle), 0.0))
-        side = Vector((-forward.y, forward.x, 0.0))
-        corners = (
-            forward * r0 + side * w0 / 2.0,
-            forward * r0 - side * w0 / 2.0,
-            forward * r1 - side * w1 / 2.0 + side * skew,
-            forward * r1 + side * w1 / 2.0 + side * skew,
-        )
-        base = len(verts)
-        verts.extend((point.x, point.y, z) for z in (-thickness / 2.0, thickness / 2.0) for point in corners)
-        faces.extend(
-            [
-                (base + 0, base + 3, base + 2, base + 1),
-                (base + 4, base + 5, base + 6, base + 7),
-                (base + 0, base + 1, base + 5, base + 4),
-                (base + 1, base + 2, base + 6, base + 5),
-                (base + 2, base + 3, base + 7, base + 6),
-                (base + 3, base + 0, base + 4, base + 7),
-            ]
-        )
+
+    if blade_shape in ("scimitar", "tapered_pointed", "pointed"):
+        # ★★★★ 実機写真に忠実な高速固定翼・プッシャー用先細り曲刀型ブレード
+        span = r1 - r0
+        stations = 12
+        segments = 8
+        dir_mult = 1.0 if direction_name == "ccw" else -1.0
+        max_chord = max(w0, mm(config.get("blade_max_chord_mm", 26.0)))
+        tip_chord = max(mm(2.0), w1)
+
+        for b in range(blade_count):
+            blade_angle = b * 2.0 * math.pi / blade_count
+            base_vert = len(verts)
+
+            for s in range(stations + 1):
+                u = s / stations  # 0.0 to 1.0
+                r = r0 + u * span
+
+                if u < 0.35:
+                    w = w0 + (max_chord - w0) * ((u / 0.35) ** 0.8)
+                else:
+                    w = tip_chord + (max_chord - tip_chord) * (((1.0 - u) / 0.65) ** 1.3)
+
+                t_frac = (1.0 - 0.7 * u) * thickness
+                sweep_offset = dir_mult * mm(12.0) * (u ** 2.0)
+                pitch_angle = math.radians(25.0 * (1.0 - 0.6 * u)) * dir_mult
+
+                ring: list[tuple[float, float, float]] = []
+                for i in range(segments + 1):
+                    f = i / segments
+                    y_local = (0.5 - f) * w + sweep_offset
+                    z_local = math.sin(math.pi * f) ** 0.8 * (t_frac / 2.0)
+                    cos_p = math.cos(pitch_angle)
+                    sin_p = math.sin(pitch_angle)
+                    y_rot = y_local * cos_p - z_local * sin_p
+                    z_rot = y_local * sin_p + z_local * cos_p
+                    cos_b = math.cos(blade_angle)
+                    sin_b = math.sin(blade_angle)
+                    x_pos = r * cos_b - y_rot * sin_b
+                    y_pos = r * sin_b + y_rot * cos_b
+                    ring.append((x_pos, y_pos, z_rot))
+
+                for i in range(segments - 1, 0, -1):
+                    f = i / segments
+                    y_local = (0.5 - f) * w + sweep_offset
+                    z_local = -math.sin(math.pi * f) ** 0.8 * (t_frac / 2.0)
+                    cos_p = math.cos(pitch_angle)
+                    sin_p = math.sin(pitch_angle)
+                    y_rot = y_local * cos_p - z_local * sin_p
+                    z_rot = y_local * sin_p + z_local * cos_p
+                    cos_b = math.cos(blade_angle)
+                    sin_b = math.sin(blade_angle)
+                    x_pos = r * cos_b - y_rot * sin_b
+                    y_pos = r * sin_b + y_rot * cos_b
+                    ring.append((x_pos, y_pos, z_rot))
+
+                verts.extend(ring)
+
+            pts_per_ring = len(ring)
+            for s in range(stations):
+                cur = base_vert + s * pts_per_ring
+                nxt = base_vert + (s + 1) * pts_per_ring
+                for i in range(pts_per_ring):
+                    i_nxt = (i + 1) % pts_per_ring
+                    faces.append((cur + i, cur + i_nxt, nxt + i_nxt, nxt + i))
+
+            root_loop = [base_vert + i for i in range(pts_per_ring)]
+            faces.append(tuple(root_loop))
+            tip_loop = [base_vert + stations * pts_per_ring + i for i in range(pts_per_ring)]
+            faces.append(tuple(reversed(tip_loop)))
+
+    else:
+        # 従来の四角／台形ブレード
+        skew = mm(2.2) * (1.0 if direction_name == "ccw" else -1.0)
+        for blade_index in range(blade_count):
+            angle = blade_index * 2.0 * math.pi / blade_count
+            forward = Vector((math.cos(angle), math.sin(angle), 0.0))
+            side = Vector((-forward.y, forward.x, 0.0))
+            corners = (
+                forward * r0 + side * w0 / 2.0,
+                forward * r0 - side * w0 / 2.0,
+                forward * r1 - side * w1 / 2.0 + side * skew,
+                forward * r1 + side * w1 / 2.0 + side * skew,
+            )
+            base = len(verts)
+            verts.extend((point.x, point.y, z) for z in (-thickness / 2.0, thickness / 2.0) for point in corners)
+            faces.extend(
+                [
+                    (base + 0, base + 3, base + 2, base + 1),
+                    (base + 4, base + 5, base + 6, base + 7),
+                    (base + 0, base + 1, base + 5, base + 4),
+                    (base + 1, base + 2, base + 6, base + 5),
+                    (base + 2, base + 3, base + 7, base + 6),
+                    (base + 3, base + 0, base + 4, base + 7),
+                ]
+            )
+
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(verts, [], faces)
+    mesh.validate(verbose=False)
     mesh.update()
+    for poly in mesh.polygons:
+        poly.use_smooth = True
     obj = bpy.data.objects.new(name, mesh)
     collection.objects.link(obj)
     assign_material(obj, material)
@@ -2399,11 +2638,18 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         for surface in tail.get("surfaces", []):
             surf_id = str(surface["id"])
             surf_mat = material_lookup.get(str(surface.get("material", tail.get("material", "wing"))), wing_material)
-            surf_obj = create_airfoil_wing(
-                f"tail_{surf_id}", surface, tail_collection, surf_mat, root
-            )
-            surf_obj["part_type"] = str(surface.get("part_type", "tail_surface"))
-            if "rotation_deg" in surface:
+            surf_type = str(surface.get("part_type", surface.get("shape", "tail_surface")))
+            if surf_type in ("curved_winglet", "winglet") or surface.get("shape") == "curved_winglet":
+                is_right = float(surface.get("center_x_mm", 0.0)) > 0.0
+                surf_obj = create_curved_winglet(
+                    f"tail_{surf_id}", surface, tail_collection, surf_mat, root, is_right=is_right
+                )
+            else:
+                surf_obj = create_airfoil_wing(
+                    f"tail_{surf_id}", surface, tail_collection, surf_mat, root
+                )
+            surf_obj["part_type"] = surf_type
+            if "rotation_deg" in surface and surf_type not in ("curved_winglet", "winglet"):
                 surf_obj.rotation_euler = tuple(
                     math.radians(float(v)) for v in surface["rotation_deg"]
                 )
@@ -2610,7 +2856,10 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             if arm_obj is not None:
                 arm_obj["part_type"] = "arm"
 
-        if motor_mount.get("enabled"):
+        mount_enabled = bool(motor_mount.get("enabled", False))
+        if "enabled_by_rotor" in motor_mount:
+            mount_enabled = bool(motor_mount["enabled_by_rotor"].get(rotor_id, mount_enabled))
+        if mount_enabled:
             mount_dimensions = [mm(value) for value in motor_mount["dimensions_mm"]]
             if support_axis == "y":
                 mount_dimensions[0], mount_dimensions[1] = mount_dimensions[1], mount_dimensions[0]
@@ -2657,13 +2906,15 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             if "rotation_deg_by_rotor" in esc and rotor_id in esc["rotation_deg_by_rotor"]:
                 esc_obj.rotation_euler = tuple(math.radians(v) for v in esc["rotation_deg_by_rotor"][rotor_id])
 
+        motor_mat_name = motor.get("material_by_rotor", {}).get(rotor_id, motor.get("material", "dark"))
+        current_motor_mat = material_lookup.get(str(motor_mat_name), dark)
         motor_obj = create_cylinder(
             f"motor_{rotor_id}",
             mm(motor["housing_diameter_mm"]) / 2.0,
             mm(motor["housing_height_mm"]),
             (motor_xy.x, motor_xy.y, motor_center_z),
             rotor_collection,
-            dark,
+            current_motor_mat,
             root,
             vertices=32,
         )
@@ -2722,26 +2973,10 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                 orient_about_pivot(tilt_obj, pivot, rotor_orientation)
         rotor_root["part_type"] = "rotor"
         rotor_root["rotation_direction"] = str(directions[rotor_id])
+        rotor_root["assembly_role"] = "fixed"
+
         display_angles = propeller.get("display_angles_deg", {})
-        rotor_root.rotation_euler[2] = math.radians(float(display_angles.get(rotor_id, 0.0)))
-        blades_obj = create_rotor_mesh(
-            f"rotor_{rotor_id}_blades",
-            propeller,
-            str(directions[rotor_id]),
-            rotor_collection,
-            rotor_material,
-            rotor_root,
-        )
-        hub_obj = create_cylinder(
-            f"rotor_{rotor_id}_hub",
-            mm(propeller["hub_diameter_mm"]) / 2.0,
-            mm(propeller["hub_height_mm"]),
-            (motor_xy.x, motor_xy.y, propeller_center_z),
-            rotor_collection,
-            black,
-            root,
-            vertices=24,
-        )
+        spin_angle = math.radians(float(display_angles.get(rotor_id, 0.0)))
         spin_root = create_empty(
             f"rotor_{rotor_id}_spin",
             (0.0, 0.0, 0.0),
@@ -2751,9 +2986,54 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         )
         spin_root["part_type"] = "rotor_spin"
         spin_root["rotation_direction"] = str(directions[rotor_id])
-        rotor_root["assembly_role"] = "fixed"
-        parent_to_keep_world(blades_obj, spin_root)
-        parent_to_keep_world(hub_obj, spin_root)
+        spin_root.rotation_euler = (0.0, 0.0, spin_angle)
+
+        blade_shape = propeller.get("blade_shape_by_rotor", {}).get(rotor_id, propeller.get("blade_shape", "flat"))
+        blades_obj = create_rotor_mesh(
+            f"rotor_{rotor_id}_blades",
+            propeller,
+            str(directions[rotor_id]),
+            rotor_collection,
+            rotor_material,
+            spin_root,
+            blade_shape=blade_shape,
+        )
+
+        hub_height_m = mm(propeller["hub_height_mm"])
+        hub_radius_m = mm(propeller["hub_diameter_mm"]) / 2.0
+        hub_obj = create_cylinder(
+            f"rotor_{rotor_id}_hub",
+            hub_radius_m,
+            hub_height_m,
+            (0.0, 0.0, 0.0),
+            rotor_collection,
+            black,
+            spin_root,
+            vertices=24,
+        )
+
+        spinner_style = propeller.get("spinner_by_rotor", {}).get(rotor_id, propeller.get("spinner_style"))
+        is_pusher = layout_cfg.get("rotor_roles", {}).get(rotor_id) == "pusher"
+        if spinner_style in ("bullet", "cone") or (spinner_style is None and is_pusher):
+            spinner_length_m = mm(propeller.get("spinner_length_mm", 22.0))
+            spinner_mat = material_lookup.get(str(propeller.get("spinner_material", "aluminum")), aluminum)
+            if is_pusher:
+                spin_loc = (0.0, 0.0, -hub_height_m / 2.0)
+                spin_rot = (math.pi, 0.0, 0.0)
+            else:
+                spin_loc = (0.0, 0.0, hub_height_m / 2.0)
+                spin_rot = (0.0, 0.0, 0.0)
+            spinner_obj = create_spinner_cone(
+                f"rotor_{rotor_id}_spinner",
+                hub_radius_m,
+                spinner_length_m,
+                rotor_collection,
+                spinner_mat,
+                spin_root,
+                location=spin_loc,
+                rotation_euler=spin_rot,
+            )
+
         for fixed_obj in (mount_obj, esc_obj, motor_obj, shaft_obj):
             if fixed_obj is not None:
                 parent_to_keep_world(fixed_obj, rotor_root)

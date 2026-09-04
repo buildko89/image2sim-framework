@@ -1,6 +1,6 @@
 {
   "schema_version": "1.3",
-  "created_at": "2026-09-04T10:39:10.195992+00:00",
+  "created_at": "2026-09-04T12:41:08.018644+00:00",
   "blender_version": "5.2.0 LTS",
   "subject_id": "deltaquad",
   "template_id": "multirotor_base",
@@ -15,19 +15,19 @@
     "reported_transform_space": "world"
   },
   "bbox_min_mm": [
-    -1181.999922,
+    -1181.647897,
     -650.000036,
     -27.48823
   ],
   "bbox_max_mm": [
-    1181.999922,
+    1182.347655,
     450.000018,
-    250.0
+    230.000004
   ],
   "dimensions_mm": {
-    "x": 2363.999844,
+    "x": 2363.995552,
     "y": 1100.000024,
-    "z": 277.488232
+    "z": 257.488221
   },
   "part_dimensions_mm": {
     "body_core": {
@@ -42,7 +42,7 @@
     }
   },
   "visual_mesh_count": 58,
-  "triangles": 11616,
+  "triangles": 14530,
   "motor_axes": {
     "lift_fl": {
       "coordinate_space": "world",
@@ -256,7 +256,7 @@
       "coordinate_space": "world",
       "location_mm": [
         0.0,
-        -490.00001,
+        -469.999999,
         50.000001
       ],
       "matrix_world": [
@@ -270,7 +270,7 @@
           0.0,
           -4.4e-08,
           1.0,
-          -0.49000001
+          -0.469999999
         ],
         [
           0.0,
@@ -287,13 +287,13 @@
       ],
       "motor_location_mm": [
         0.0,
-        -504.999995,
-        50.000001
+        -453.999996,
+        50.000004
       ],
       "motor_dimensions_mm": [
         41.999999,
-        31.999975,
-        42.000003
+        32.000005,
+        41.999996
       ],
       "mount_side": "over_frame",
       "local_thrust_axis": "+Z",
@@ -446,22 +446,22 @@
       "assembly": "rotor_pusher",
       "spin": "rotor_pusher_spin",
       "fixed_children": [
-        "motor_mount_pusher",
         "motor_pusher",
         "motor_pusher_shaft"
       ],
       "spinning_children": [
         "rotor_pusher_blades",
-        "rotor_pusher_hub"
+        "rotor_pusher_hub",
+        "rotor_pusher_spinner"
       ],
       "spin_origin_mm": [
         0.0,
-        -490.00001,
+        -469.999999,
         50.000001
       ],
       "axis_origin_mm": [
         0.0,
-        -490.00001,
+        -469.999999,
         50.000001
       ],
       "origin_error_mm": 0.0
@@ -636,7 +636,6 @@
     "motor_mount_lift_fr": "rotor_lift_fr",
     "motor_mount_lift_rl": "rotor_lift_rl",
     "motor_mount_lift_rr": "rotor_lift_rr",
-    "motor_mount_pusher": "rotor_pusher",
     "motor_pusher": "rotor_pusher",
     "motor_pusher_axis": "drone_root",
     "motor_pusher_shaft": "rotor_pusher",
@@ -662,6 +661,7 @@
     "rotor_pusher_blades": "rotor_pusher_spin",
     "rotor_pusher_hub": "rotor_pusher_spin",
     "rotor_pusher_spin": "rotor_pusher",
+    "rotor_pusher_spinner": "rotor_pusher_spin",
     "tail_light_panel": "drone_root",
     "tail_winglet_left": "drone_root",
     "tail_winglet_right": "drone_root",

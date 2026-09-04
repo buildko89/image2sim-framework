@@ -335,15 +335,23 @@ def build_qa(config: dict[str, Any], build_report: dict[str, Any]) -> dict[str, 
     expected_spinning_children = {}
     for rotor_id in config["derived"]["rotor_ids"]:
         fixed = {f"motor_{rotor_id}", f"motor_{rotor_id}_shaft"}
-        if config.get("motor_mount", {}).get("enabled"):
+        mount_enabled = bool(config.get("motor_mount", {}).get("enabled", False))
+        if "enabled_by_rotor" in config.get("motor_mount", {}):
+            mount_enabled = bool(config["motor_mount"]["enabled_by_rotor"].get(rotor_id, mount_enabled))
+        if mount_enabled:
             fixed.add(f"motor_mount_{rotor_id}")
         if config.get("esc", {}).get("enabled"):
             fixed.add(f"esc_{rotor_id}")
         expected_fixed_children[rotor_id] = sorted(fixed)
-        expected_spinning_children[rotor_id] = sorted({
+        spinning = {
             f"rotor_{rotor_id}_blades",
             f"rotor_{rotor_id}_hub",
-        })
+        }
+        spinner_style = config.get("propeller", {}).get("spinner_by_rotor", {}).get(rotor_id, config.get("propeller", {}).get("spinner_style"))
+        is_pusher = config.get("layout", {}).get("rotor_roles", {}).get(rotor_id) == "pusher"
+        if spinner_style in ("bullet", "cone") or (spinner_style is None and is_pusher):
+            spinning.add(f"rotor_{rotor_id}_spinner")
+        expected_spinning_children[rotor_id] = sorted(spinning)
     groove_parent_errors = {
         name: parent
         for name, parent in object_parents.items()
