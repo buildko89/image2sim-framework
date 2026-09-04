@@ -49,7 +49,7 @@ layout:
     lift_fr: [ 480.0,  380.0, 50.0]
     lift_rl: [-480.0, -580.0, 50.0]
     lift_rr: [ 480.0, -580.0, 50.0]
-    pusher:  [   0.0, -470.0, 31.3]
+    pusher:  [   0.0, -481.4, 34.5]
   rotor_orientation_deg:
     pusher: [-90.0, 0.0, 0.0]
   rotor_roles:
