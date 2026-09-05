@@ -1,11 +1,11 @@
 {
-  "created_at": "2026-08-31T13:29:25.998008+00:00",
-  "config": "/data/buildman/drone/image2sim-framework/config/vtol_quadplane_model.yaml",
-  "config_sha256": "05540ce7d29b841ccaf70193a5c512f1524001f2108e0e775926ce791ed10734",
-  "resolved_config": "/data/buildman/drone/image2sim-framework/output/vtol_quadplane/resolved_config.json",
-  "blend": "/data/buildman/drone/image2sim-framework/output/vtol_quadplane/vtol_quadplane.blend",
-  "glb": "/data/buildman/drone/image2sim-framework/output/vtol_quadplane/vtol_quadplane.glb",
-  "glb_sha256": "f947e006c6309f28bc8233654cddaa1b600faa6fe6a5666e7e35425aa697ccaa",
-  "qa": "/data/buildman/drone/image2sim-framework/output/vtol_quadplane/qa_report.json",
+  "created_at": "2026-09-05T06:00:13.333041+00:00",
+  "config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\vtol_quadplane_model.yaml",
+  "config_sha256": "1cdc7abb06843a8ff6bb5c324d8dc770907b5371472df80f111e07730fa1d792",
+  "resolved_config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\vtol_quadplane\\resolved_config.json",
+  "blend": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\vtol_quadplane\\vtol_quadplane.blend",
+  "glb": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\vtol_quadplane\\vtol_quadplane.glb",
+  "glb_sha256": "9cacfd3a02a0b1cd778056684cf54b317d292db8d8e6e280b352e67fdbefb810",
+  "qa": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\vtol_quadplane\\qa_report.json",
   "qa_status": "PASS"
 }

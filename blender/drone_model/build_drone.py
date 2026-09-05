@@ -2988,6 +2988,8 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         spin_root["rotation_direction"] = str(directions[rotor_id])
         spin_root.rotation_euler = (0.0, 0.0, spin_angle)
 
+        prop_offset_z = mm(propeller["offset_z_by_rotor_mm"][rotor_id]) if "offset_z_by_rotor_mm" in propeller and rotor_id in propeller["offset_z_by_rotor_mm"] else 0.0
+
         blade_shape = propeller.get("blade_shape_by_rotor", {}).get(rotor_id, propeller.get("blade_shape", "flat"))
         blades_obj = create_rotor_mesh(
             f"rotor_{rotor_id}_blades",
@@ -2998,6 +3000,8 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             spin_root,
             blade_shape=blade_shape,
         )
+        if prop_offset_z != 0.0:
+            blades_obj.location.z = prop_offset_z
 
         hub_height_m = mm(propeller["hub_height_mm"])
         hub_radius_m = mm(propeller["hub_diameter_mm"]) / 2.0
@@ -3005,7 +3009,7 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             f"rotor_{rotor_id}_hub",
             hub_radius_m,
             hub_height_m,
-            (0.0, 0.0, 0.0),
+            (0.0, 0.0, prop_offset_z),
             rotor_collection,
             black,
             spin_root,
@@ -3017,12 +3021,25 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         if spinner_style in ("bullet", "cone") or (spinner_style is None and is_pusher):
             spinner_length_m = mm(propeller.get("spinner_length_mm", 22.0))
             spinner_mat = material_lookup.get(str(propeller.get("spinner_material", "aluminum")), aluminum)
-            if is_pusher:
-                spin_loc = (0.0, 0.0, -hub_height_m / 2.0)
+            spinner_offset_z_by_rotor = propeller.get("spinner_offset_z_by_rotor_mm", {})
+            spinner_rot_by_rotor = propeller.get("spinner_rotation_deg_by_rotor", {})
+
+            if rotor_id in spinner_offset_z_by_rotor:
+                spin_loc = (0.0, 0.0, mm(spinner_offset_z_by_rotor[rotor_id]))
+            elif is_pusher:
+                spin_loc = (0.0, 0.0, prop_offset_z - hub_height_m / 2.0)
+            else:
+                spin_loc = (0.0, 0.0, prop_offset_z + hub_height_m / 2.0)
+
+            if rotor_id in spinner_rot_by_rotor:
+                spin_rot = tuple(math.radians(v) for v in spinner_rot_by_rotor[rotor_id])
+            elif rotor_id in spinner_offset_z_by_rotor:
+                spin_rot = (0.0, 0.0, 0.0)
+            elif is_pusher:
                 spin_rot = (math.pi, 0.0, 0.0)
             else:
-                spin_loc = (0.0, 0.0, hub_height_m / 2.0)
                 spin_rot = (0.0, 0.0, 0.0)
+
             spinner_obj = create_spinner_cone(
                 f"rotor_{rotor_id}_spinner",
                 hub_radius_m,

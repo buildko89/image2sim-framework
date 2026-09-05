@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "created_at": "2026-08-31T13:29:25.995678+00:00",
+  "created_at": "2026-09-05T06:00:13.332143+00:00",
   "status": "PASS",
-  "dimensions_provisional": true,
+  "dimensions_provisional": false,
   "checks": {
     "build_report_schema": {
       "expected": "1.3",
@@ -11,7 +11,7 @@
     },
     "world_coordinate_metadata": {
       "reported_transform_space": "world",
-      "record_count": 17,
+      "record_count": 14,
       "pass": true
     },
     "motor_count": {
@@ -67,18 +67,18 @@
     },
     "collection_recursive_counts": {
       "expected": {
-        "MODEL_VISUAL": 59,
+        "MODEL_VISUAL": 69,
         "ANCHORS": 6,
-        "COLLISION": 6,
+        "COLLISION": 3,
         "CAMERAS": 0,
         "REF_PHOTOS": 0
       },
       "actual": {
-        "MODEL_VISUAL": 59,
-        "REF_PHOTOS": 0,
+        "ANCHORS": 6,
+        "COLLISION": 3,
         "CAMERAS": 0,
-        "COLLISION": 6,
-        "ANCHORS": 6
+        "REF_PHOTOS": 0,
+        "MODEL_VISUAL": 69
       },
       "pass": true
     },
@@ -90,19 +90,23 @@
       "expected": {
         "lift_fl": [
           "motor_lift_fl",
-          "motor_lift_fl_shaft"
+          "motor_lift_fl_shaft",
+          "motor_mount_lift_fl"
         ],
         "lift_fr": [
           "motor_lift_fr",
-          "motor_lift_fr_shaft"
+          "motor_lift_fr_shaft",
+          "motor_mount_lift_fr"
         ],
         "lift_rl": [
           "motor_lift_rl",
-          "motor_lift_rl_shaft"
+          "motor_lift_rl_shaft",
+          "motor_mount_lift_rl"
         ],
         "lift_rr": [
           "motor_lift_rr",
-          "motor_lift_rr_shaft"
+          "motor_lift_rr_shaft",
+          "motor_mount_lift_rr"
         ],
         "pusher": [
           "motor_pusher",
@@ -112,19 +116,23 @@
       "actual": {
         "lift_fl": [
           "motor_lift_fl",
-          "motor_lift_fl_shaft"
+          "motor_lift_fl_shaft",
+          "motor_mount_lift_fl"
         ],
         "lift_fr": [
           "motor_lift_fr",
-          "motor_lift_fr_shaft"
+          "motor_lift_fr_shaft",
+          "motor_mount_lift_fr"
         ],
         "lift_rl": [
           "motor_lift_rl",
-          "motor_lift_rl_shaft"
+          "motor_lift_rl_shaft",
+          "motor_mount_lift_rl"
         ],
         "lift_rr": [
           "motor_lift_rr",
-          "motor_lift_rr_shaft"
+          "motor_lift_rr_shaft",
+          "motor_mount_lift_rr"
         ],
         "pusher": [
           "motor_pusher",
@@ -153,7 +161,8 @@
         ],
         "pusher": [
           "rotor_pusher_blades",
-          "rotor_pusher_hub"
+          "rotor_pusher_hub",
+          "rotor_pusher_spinner"
         ]
       },
       "actual": {
@@ -175,7 +184,8 @@
         ],
         "pusher": [
           "rotor_pusher_blades",
-          "rotor_pusher_hub"
+          "rotor_pusher_hub",
+          "rotor_pusher_spinner"
         ]
       },
       "pass": true
@@ -244,56 +254,56 @@
     "motor_axis_world_positions": {
       "expected_mm": {
         "lift_fl": [
-          -1000.0,
-          1000.0,
-          150.0
+          -380.0,
+          370.0,
+          95.0
         ],
         "lift_fr": [
-          1000.0,
-          1000.0,
-          150.0
+          380.0,
+          370.0,
+          95.0
         ],
         "lift_rl": [
-          -1000.0,
-          -1000.0,
-          150.0
+          -380.0,
+          -370.0,
+          95.0
         ],
         "lift_rr": [
-          1000.0,
-          -1000.0,
-          150.0
+          380.0,
+          -370.0,
+          95.0
         ],
         "pusher": [
           0.0,
-          -1750.0,
-          150.0
+          450.0,
+          0.0
         ]
       },
       "actual_mm": {
         "lift_fl": [
-          -1000.0,
-          1000.0,
-          150.000006
+          -379.999995,
+          370.000005,
+          94.999999
         ],
         "lift_fr": [
-          1000.0,
-          1000.0,
-          150.000006
+          379.999995,
+          370.000005,
+          94.999999
         ],
         "lift_rl": [
-          -1000.0,
-          -1000.0,
-          150.000006
+          -379.999995,
+          -370.000005,
+          94.999999
         ],
         "lift_rr": [
-          1000.0,
-          -1000.0,
-          150.000006
+          379.999995,
+          -370.000005,
+          94.999999
         ],
         "pusher": [
           0.0,
-          -1750.0,
-          150.000006
+          449.999988,
+          0.0
         ]
       },
       "pass": true
@@ -301,56 +311,56 @@
     "motor_world_positions": {
       "expected_mm": {
         "lift_fl": [
-          -1000.0,
-          1000.0,
-          120.0
+          -380.0,
+          370.0,
+          86.0
         ],
         "lift_fr": [
-          1000.0,
-          1000.0,
-          120.0
+          380.0,
+          370.0,
+          86.0
         ],
         "lift_rl": [
-          -1000.0,
-          -1000.0,
-          120.0
+          -380.0,
+          -370.0,
+          86.0
         ],
         "lift_rr": [
-          1000.0,
-          -1000.0,
-          120.0
+          380.0,
+          -370.0,
+          86.0
         ],
         "pusher": [
           0.0,
-          -1780.0,
-          150.0
+          408.8,
+          -2.522772406243548e-15
         ]
       },
       "actual_mm": {
         "lift_fl": [
-          -1000.0,
-          1000.0,
-          119.999997
+          -379.999995,
+          370.000005,
+          86.000003
         ],
         "lift_fr": [
-          1000.0,
-          1000.0,
-          119.999997
+          379.999995,
+          370.000005,
+          86.000003
         ],
         "lift_rl": [
-          -1000.0,
-          -1000.0,
-          119.999997
+          -379.999995,
+          -370.000005,
+          86.000003
         ],
         "lift_rr": [
-          1000.0,
-          -1000.0,
-          119.999997
+          379.999995,
+          -370.000005,
+          86.000003
         ],
         "pusher": [
           0.0,
-          -1779.999971,
-          150.000006
+          408.799976,
+          2e-06
         ]
       },
       "pass": true
@@ -362,18 +372,18 @@
       "expected_mm": [
         0.0,
         0.0,
-        0.0
+        10.0
       ],
       "actual_mm": [
         0.0,
         0.0,
-        0.0
+        10.0
       ],
       "pass": true
     },
     "collision_proxy_world_records": {
-      "expected_count": 6,
-      "actual_count": 6,
+      "expected_count": 3,
+      "actual_count": 3,
       "pass": true
     },
     "wing_parents": {
@@ -384,6 +394,27 @@
       "actual": {
         "main_wing": "wing_root"
       },
+      "pass": true
+    },
+    "overall_width": {
+      "expected_mm": 2160.0,
+      "actual_mm": 2160.000086,
+      "error_mm": 8.600000001024455e-05,
+      "tolerance_mm": 20.0,
+      "pass": true
+    },
+    "overall_length": {
+      "expected_mm": 1370.0,
+      "actual_mm": 1369.500041,
+      "error_mm": -0.49995899999998983,
+      "tolerance_mm": 20.0,
+      "pass": true
+    },
+    "overall_height": {
+      "expected_mm": 330.0,
+      "actual_mm": 329.950243,
+      "error_mm": -0.04975699999999961,
+      "tolerance_mm": 40.0,
       "pass": true
     }
   },
