@@ -39,6 +39,24 @@ def load_config(path: Path) -> dict[str, Any]:
     return data
 
 
+def landing_style(config: dict[str, Any]) -> str:
+    """脚の形式。
+
+    ★★★★ 2026-09-08 新設。既定は `per_rotor`（従来どおり ＝ 各ロータの真下に脚と足を 1 本ずつ）。
+      `skid` は **左右のスキッド 2 本 ＋ 支柱** で、胴体の下に大きな接地面を作る形式である。
+
+    ★★★★ **なぜ要るか**: 尾部にプッシャを持つ機体は、**プロペラが機体の最下点より下まで回る**。
+      DeltaQuad の実測では 円板中心 z = 34 mm・半径 165 mm に対し、機体の最下点は −27.5 mm しか
+      なく、**プロペラが 131 mm ぶん地面より下**にあった。ロータ直下の短い脚では持ち上がらない。
+    """
+    return str(config.get("landing", {}).get("style", "per_rotor"))
+
+
+def landing_strut_ys(config: dict[str, Any]) -> list[float]:
+    struts = config.get("landing", {}).get("struts", {}) or {}
+    return [float(v) for v in (struts.get("y_mm") or [])]
+
+
 def required_object_names(config: dict[str, Any]) -> set[str]:
     names = {"drone_root", "body_core", "center_of_mass"}
     arm_enabled = bool(config.get("arm", {}).get("enabled", True))
@@ -57,7 +75,7 @@ def required_object_names(config: dict[str, Any]) -> set[str]:
             names.add(f"guard_{rotor_id}")
             if float(config.get("guard", {}).get("mount_tube_diameter_mm", 0.0)) > 0.0:
                 names.add(f"guard_mount_{rotor_id}")
-        if landing_enabled:
+        if landing_enabled and landing_style(config) == "per_rotor":
             names.add(f"landing_leg_{rotor_id}")
     structure = config.get("structure", {})
     if structure.get("enabled"):
@@ -69,6 +87,12 @@ def required_object_names(config: dict[str, Any]) -> set[str]:
         names.add(f"camera_{item['id']}_gimbal")
     for item in config.get("equipment", {}).get("round_sensors", []):
         names.add(f"sensor_{item['id']}_barrel")
+    names.update(f"light_{item['id']}" for item in (config.get("lights") or []))
+    if landing_enabled and landing_style(config) == "skid":
+        for side in ("left", "right"):
+            names.add(f"landing_skid_{side}")
+            for k in range(len(landing_strut_ys(config))):
+                names.add(f"landing_leg_{k}_{side}")
     return names
 
 
@@ -2430,8 +2454,20 @@ def add_scene_metadata(root: bpy.types.Object, config: dict[str, Any]) -> None:
     root["subject_id"] = str(config["subject_id"])
     root["schema_version"] = str(config["schema_version"])
     root["dimensions_provisional"] = bool(config["dimensions_provisional"])
-    root["front_axis"] = "-Y"
-    root["up_axis"] = "+Z"
+    # ★★★★ 2026-09-08 修正: **座標系は config から読む**（べた書きをやめた）。
+    #
+    #   ★★★★ 直す前は `root["front_axis"] = "-Y"` と**べた書き**で、
+    #     `coordinate_system.front_axis` を一切見ていなかった。そのため
+    #     **`resolved_config.json` は "+Y"、`.blend` は "-Y"** という食い違いが起き、
+    #     機首の向きを .blend から読む下流（箱庭の `blend2mjcf.py` など）が必ず騙される。
+    #   ★★★ 実害: DeltaQuad（機首 +Y）で「宣言は -Y だが幾何は +Y」という矛盾になり、
+    #     下流は**宣言を無視して幾何から判定する**という回避策を持つはめになった。
+    #     drone3 でも同じ食い違いが起きている（8 発すべてロータ名も前後が逆）。
+    #   ★★ 宣言と実体が食い違うくらいなら、宣言は出さないほうがまだ安全である。
+    coord = config.get("coordinate_system", {}) or {}
+    root["front_axis"] = str(coord.get("front_axis", "-Y"))
+    root["up_axis"] = str(coord.get("up_axis", "+Z"))
+    root["right_axis"] = str(coord.get("right_axis", "+X"))
     root["template_id"] = str(config.get("template_metadata", {}).get("template_id", "legacy"))
     root["layout_mode"] = str(config["derived"]["layout_mode"])
     root["rotor_count"] = int(config["derived"]["rotor_count"])
@@ -2520,10 +2556,28 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         raise ValueError(f"未対応のbody.shapeです: {body_shape}")
     body_obj["part_type"] = "body"
 
-    if body.get("canopy_cap", True) or config.get("subject_id") == "codrone":
+    # ★★★★ 2026-09-08 修正: **CoDrone 専用の細部は「明示的に頼まれたときだけ」出す。**
+    #
+    #   ★★★★ 直す前は既定が `True` で、しかも `or subject_id == "codrone"` が付いていたため、
+    #     **どの機体を作っても CoDrone の LED・IR センサ・光学フロー・USB ポート・
+    #     テールライト・キャノピー・小型電池が付いてきた**（機体 1 台あたり 18 個）。
+    #     実害:
+    #       ・2.35 m の DeltaQuad に 7 mm の LED や 8 mm の光学フローが載る
+    #       ・★★★★ **CoDrone は -Y を機首とするので、これらだけ前後が逆に付く**
+    #         （`tail_light_panel` が機首側に来る）
+    #       ・下流（箱庭の `blend2mjcf.py`）が part_type を質量表で引けず、質量を持ってしまう
+    #   ★★★ 2026-09-04 に CoDrone 対応を入れた時点から、**それ以降に生成した全機体**が該当する
+    #     （deltaquad 09-04・vtol_quadplane 09-05 で実際に混入していた）。
+    #     それより前に作った drone2・hula・emo_jp が無傷なのは**まだこのコードが無かっただけ**で、
+    #     いま作り直すと同じように混入する。
+    #   ★★★★ もう 1 つ直したこと: `or subject_id == "codrone"` があると
+    #     **CoDrone では旗を false にしても消せなかった**（or が必ず真になる）。
+    #     既定値のほうに寄せることで、明示的な false がちゃんと効くようになる。
+    is_codrone = config.get("subject_id") == "codrone"
+    if body.get("canopy_cap", is_codrone):
         create_codrone_canopy_cap("body_canopy_cap", body, collections.body, dark, root)
 
-    if body.get("codrone_details", True) or config.get("subject_id") == "codrone":
+    if body.get("codrone_details", is_codrone):
         create_codrone_details(body, collections, material_lookup, root, config["derived"]["motor_positions_mm"])
 
     frame_objects: list[bpy.types.Object] = []
@@ -3181,18 +3235,89 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                     )
                     strut["vertical_rise_mm"] = round((end.z - start.z) * 1000.0, 3)
 
-        if landing_enabled:
-            create_cylinder(
+        if landing_enabled and landing_style(config) == "per_rotor":
+            leg_obj = create_cylinder(
                 f"landing_leg_{rotor_id}", mm(landing["leg_diameter_mm"]) / 2.0,
                 mm(landing["leg_height_mm"]), (motor_xy.x, motor_xy.y, mm(landing["leg_center_z_mm"])),
                 require_collection(collections.landing, "landing"), black, root, vertices=16,
             )
-            create_cylinder(
+            # ★★★★ 2026-09-08: **脚にも part_type を付ける。**
+            #   アームで同じ穴を踏んでいる（2026-08-31 の注記）—— 名札が無いと下流が質量表を
+            #   引けず、フォールバックで胴体と同じ質量になる。**部品には必ず名札を付ける。**
+            leg_obj["part_type"] = "landing_leg"
+            foot_obj = create_cylinder(
                 f"foot_{rotor_id}", mm(landing["foot_diameter_mm"]) / 2.0,
                 mm(landing["foot_height_mm"]), (motor_xy.x, motor_xy.y, mm(landing["foot_center_z_mm"])),
                 require_collection(collections.landing, "landing"),
                 material_lookup.get(str(landing.get("foot_material", "red")), red), root, vertices=20,
             )
+            foot_obj["part_type"] = "landing_foot"
+
+    # ★★★★ 2026-09-08 新設: **汎用の灯火（`lights`）**。
+    #
+    #   ★★★★ **なぜ要るか**: これまで LED は `create_codrone_details()` の中に
+    #     **CoDrone の寸法と位置で直書き**されていた。そのため
+    #     「LED は付けたいが CoDrone の細部は要らない」が表現できず、
+    #     `codrone_details` を切ると LED まで消えてしまう。
+    #   ★★★ ここは **位置・大きさ・材質を config が決める**ので、機体ごとに正しい場所へ置ける。
+    #     ★★★★ CoDrone は **-Y が機首**、DeltaQuad は **+Y が機首**なので、
+    #       直書きの位置を使い回すと**前後が逆に付く**（実際に起きた）。
+    for light in config.get("lights", []) or []:
+        size = tuple(mm(float(v)) for v in light["size_mm"])
+        loc = tuple(mm(float(v)) for v in light["location_mm"])
+        obj = create_rounded_box(
+            f"light_{light['id']}", size, loc,
+            mm(float(light.get("bevel_mm", 0.8))),
+            require_collection(collections.body, "body"),
+            material_lookup.get(str(light.get("material", "led_red")), dark),
+            root,
+        )
+        obj["part_type"] = str(light.get("part_type", "led"))
+        rot = light.get("rotation_deg")
+        if rot:
+            obj.rotation_euler = tuple(math.radians(float(v)) for v in rot)
+
+    # ★★★★ 2026-09-08: スキッド形式の脚（`landing.style: skid`）。
+    if landing_enabled and landing_style(config) == "skid":
+        skid = landing.get("skid", {}) or {}
+        struts = landing.get("struts", {}) or {}
+        leg_material = material_lookup.get(str(landing.get("material", "black")), black)
+        s_w = mm(float(skid.get("width_mm", 22.0)))
+        s_l = mm(float(skid.get("length_mm", 700.0)))
+        s_h = mm(float(skid.get("height_mm", 24.0)))
+        s_x = mm(float(skid.get("offset_x_mm", 480.0)))
+        s_y = mm(float(skid.get("center_y_mm", 0.0)))
+        s_z = mm(float(skid.get("center_z_mm", -137.0)))
+        t_w = mm(float(struts.get("width_mm", 18.0)))
+        t_d = mm(float(struts.get("depth_mm", 34.0)))
+        t_top = mm(float(struts.get("top_z_mm", 0.0)))
+        t_bot = mm(float(struts.get("bottom_z_mm", -151.0)))
+        t_ys = [mm(v) for v in landing_strut_ys(config)]
+        landing_collection = require_collection(collections.landing, "landing")
+        for sign, side in ((-1.0, "left"), (1.0, "right")):
+            # ★ 機体座標は右が +X なので、left は -X 側。
+            obj = create_rounded_box(
+                f"landing_skid_{side}", (s_w, s_l, s_h),
+                (sign * s_x, s_y, s_z), mm(float(skid.get("bevel_mm", 4.0))),
+                landing_collection, leg_material, root,
+            )
+            obj["part_type"] = "landing_skid"
+            # ★★★ 接地するのはスキッドなので、**衝突形状はこれだけ**で足りる
+            #   （支柱はスキッドより上にあり、先に地面へ触ることがない）。
+            create_collision_box(
+                f"collision_landing_skid_{side}", (s_w, s_l, s_h),
+                (sign * s_x, s_y, s_z),
+                require_collection(collections.collision_landing, "collision_landing"),
+                root,
+            )
+            for k, ty in enumerate(t_ys):
+                leg = create_rounded_box(
+                    f"landing_leg_{k}_{side}", (t_w, t_d, t_top - t_bot),
+                    (sign * s_x, ty, (t_top + t_bot) / 2.0),
+                    mm(float(struts.get("bevel_mm", 2.0))),
+                    landing_collection, leg_material, root,
+                )
+                leg["part_type"] = "landing_leg"
 
     # 初期衝突形状は視覚モデルとは独立した単純形状にする。
     create_collision_box(
