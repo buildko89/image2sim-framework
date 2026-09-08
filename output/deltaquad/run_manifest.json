@@ -1,11 +1,11 @@
 {
-  "created_at": "2026-09-08T08:59:34.947737+00:00",
+  "created_at": "2026-09-08T11:06:45.653694+00:00",
   "config": "/data/buildman/drone/image2sim-framework/config/deltaquad_model.yaml",
-  "config_sha256": "5eec7957a2e63f91d948f9ff207480bc55e9479c3ae0e586dbe48cbc93116823",
+  "config_sha256": "2c558f4eacc3e6bbacf5251de1a0bde8a0f1eb3258bc3079b775deb421f0c530",
   "resolved_config": "/data/buildman/drone/image2sim-framework/output/deltaquad/resolved_config.json",
   "blend": "/data/buildman/drone/image2sim-framework/output/deltaquad/deltaquad.blend",
   "glb": "/data/buildman/drone/image2sim-framework/output/deltaquad/deltaquad.glb",
-  "glb_sha256": "ee44461673314260f7b8552b6089da8ab4b02663e5189e97bfa672932459a09f",
+  "glb_sha256": "336d61ed0191b1012e9424d8c5d0f6d19bbf8270865650bc55ca5867d7fea6f8",
   "qa": "/data/buildman/drone/image2sim-framework/output/deltaquad/qa_report.json",
   "qa_status": "PASS"
 }

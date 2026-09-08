@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "created_at": "2026-09-08T08:59:34.945449+00:00",
+  "created_at": "2026-09-08T11:06:45.652212+00:00",
   "status": "PASS",
   "dimensions_provisional": false,
   "checks": {
@@ -74,11 +74,11 @@
         "REF_PHOTOS": 0
       },
       "actual": {
-        "MODEL_VISUAL": 61,
-        "REF_PHOTOS": 0,
         "COLLISION": 5,
-        "CAMERAS": 0,
-        "ANCHORS": 6
+        "MODEL_VISUAL": 61,
+        "ANCHORS": 6,
+        "REF_PHOTOS": 0,
+        "CAMERAS": 0
       },
       "pass": true
     },

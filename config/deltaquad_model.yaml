@@ -265,28 +265,41 @@ tail:
       center_z_mm: 30.0
 
 control_surfaces:
+  # ★★★★ 2026-09-08: エレボンを大きくした（スパン 550 -> 700 / 弦 75 -> 95 / 中心 x 820 -> 760）。
+  #   面積は 2 枚で 0.0825 -> 0.1330 m2 ＝ **主翼の 10.0% -> 16.2%**（無尾翼機の定石 15〜20%）。
+  #   ロール権限 1.49 倍・ピッチ権限 1.61 倍。
+  #
+  # ★★★★ **なぜ要るか**: 舵角は ±14 度（失速角）しかなく、**ピッチのトリムがそれを食うと
+  #   ロールに残らない**。実測（静安定余裕 9%・崩れる直前）では
+  #     ロール指令 -20.89 度に対し 実測 -5.57 度／エレボンの左右差はわずか 2.23 度
+  #   となり、バンクが出せず針路が戻せずスパイラルに入った。
+  # ★★★ 舵面が小さいぶんを重心（静安定余裕 5%）で補っていたが、それは無尾翼機として
+  #   落ち着きが悪い側に寄せている。**舵面を大きくして重心を 8〜12% に戻すのが本筋。**
+  #
+  # ★ 翼の平面形に収まることを確認済み: x=410 で局所翼弦 401 mm（舵面は 24%）、
+  #   x=1110 で 199 mm（48%）。翼の後縁は y=-466..-612 で、舵面 -432..-528 はその内側。
   surfaces:
     - id: elevon_left
       axis: pitch
       material: dark
       max_deflection_deg: 25.0
-      span_mm: 550.0
-      root_chord_mm: 75.0
-      tip_chord_mm: 55.0
+      span_mm: 700.0
+      root_chord_mm: 95.0
+      tip_chord_mm: 70.0
       thickness_mm: 18.0
-      center_x_mm: -820.0
-      center_y_mm: -450.0
+      center_x_mm: -760.0
+      center_y_mm: -480.0
       center_z_mm: 30.0
     - id: elevon_right
       axis: roll
       material: dark
       max_deflection_deg: 25.0
-      span_mm: 550.0
-      root_chord_mm: 75.0
-      tip_chord_mm: 55.0
+      span_mm: 700.0
+      root_chord_mm: 95.0
+      tip_chord_mm: 70.0
       thickness_mm: 18.0
-      center_x_mm: 820.0
-      center_y_mm: -450.0
+      center_x_mm: 760.0
+      center_y_mm: -480.0
       center_z_mm: 30.0
 
 equipment:
