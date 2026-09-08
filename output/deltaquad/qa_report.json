@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "created_at": "2026-09-04T12:41:10.406723+00:00",
+  "created_at": "2026-09-08T08:59:34.945449+00:00",
   "status": "PASS",
   "dimensions_provisional": false,
   "checks": {
@@ -11,7 +11,7 @@
     },
     "world_coordinate_metadata": {
       "reported_transform_space": "world",
-      "record_count": 14,
+      "record_count": 16,
       "pass": true
     },
     "motor_count": {
@@ -67,18 +67,18 @@
     },
     "collection_recursive_counts": {
       "expected": {
-        "MODEL_VISUAL": 70,
+        "MODEL_VISUAL": 61,
         "ANCHORS": 6,
-        "COLLISION": 3,
+        "COLLISION": 5,
         "CAMERAS": 0,
         "REF_PHOTOS": 0
       },
       "actual": {
-        "CAMERAS": 0,
-        "ANCHORS": 6,
+        "MODEL_VISUAL": 61,
         "REF_PHOTOS": 0,
-        "COLLISION": 3,
-        "MODEL_VISUAL": 70
+        "COLLISION": 5,
+        "CAMERAS": 0,
+        "ANCHORS": 6
       },
       "pass": true
     },
@@ -275,8 +275,8 @@
         ],
         "pusher": [
           0.0,
-          -470.0,
-          50.0
+          -481.4,
+          31.23
         ]
       },
       "actual_mm": {
@@ -302,8 +302,8 @@
         ],
         "pusher": [
           0.0,
-          -469.999999,
-          50.000001
+          -481.400013,
+          31.230001
         ]
       },
       "pass": true
@@ -332,8 +332,8 @@
         ],
         "pusher": [
           0.0,
-          -454.0,
-          50.0
+          -468.75,
+          31.23
         ]
       },
       "actual_mm": {
@@ -359,8 +359,8 @@
         ],
         "pusher": [
           0.0,
-          -453.999996,
-          50.000004
+          -468.75,
+          31.230001
         ]
       },
       "pass": true
@@ -382,8 +382,8 @@
       "pass": true
     },
     "collision_proxy_world_records": {
-      "expected_count": 3,
-      "actual_count": 3,
+      "expected_count": 5,
+      "actual_count": 5,
       "pass": true
     },
     "wing_parents": {
@@ -411,9 +411,9 @@
       "pass": true
     },
     "overall_height": {
-      "expected_mm": 240.0,
-      "actual_mm": 257.488221,
-      "error_mm": 17.48822100000001,
+      "expected_mm": 381.0,
+      "actual_mm": 379.000008,
+      "error_mm": -1.9999920000000202,
       "tolerance_mm": 30.0,
       "pass": true
     }

@@ -39,8 +39,8 @@
       ],
       "pusher": [
         0.0,
-        -470.0,
-        31.3
+        -481.4,
+        34.5
       ]
     },
     "rotor_orientation_deg": {
@@ -89,7 +89,7 @@
     "shaft_diameter_mm": 6.0,
     "shaft_height_mm": 15.0,
     "center_z_by_rotor_mm": {
-      "pusher": 66.0
+      "pusher": 43.88
     },
     "material_by_rotor": {
       "pusher": "aluminum"
@@ -110,6 +110,15 @@
       "cw"
     ],
     "direction_source": "design",
+    "center_z_by_rotor_mm": {
+      "pusher": 31.23
+    },
+    "offset_z_by_rotor_mm": {
+      "pusher": -10.22
+    },
+    "spinner_offset_z_by_rotor_mm": {
+      "pusher": -8.35
+    },
     "directions": {
       "lift_fl": "ccw",
       "lift_fr": "cw",
@@ -118,7 +127,7 @@
       "pusher": "ccw"
     },
     "diameter_overrides": {
-      "pusher": 254.0
+      "pusher": 330.2
     },
     "blade_shape_by_rotor": {
       "pusher": "scimitar"
@@ -142,13 +151,35 @@
     "strut_radius_mm": 0.65
   },
   "landing": {
-    "enabled": false,
+    "enabled": true,
     "leg_diameter_mm": 3.0,
     "leg_height_mm": 8.0,
     "leg_center_z_mm": -6.0,
     "foot_diameter_mm": 4.5,
     "foot_height_mm": 3.0,
-    "foot_center_z_mm": -10.0
+    "foot_center_z_mm": -10.0,
+    "style": "skid",
+    "material": "black",
+    "skid": {
+      "offset_x_mm": 480.0,
+      "center_y_mm": -100.0,
+      "length_mm": 700.0,
+      "width_mm": 22.0,
+      "height_mm": 24.0,
+      "center_z_mm": -137.0,
+      "bevel_mm": 4.0
+    },
+    "struts": {
+      "width_mm": 22.0,
+      "depth_mm": 34.0,
+      "top_z_mm": 1.0,
+      "bottom_z_mm": -149.0,
+      "y_mm": [
+        230.0,
+        -430.0
+      ],
+      "bevel_mm": 4.0
+    }
   },
   "physics": {
     "center_of_mass_mm": [
@@ -171,7 +202,7 @@
     "build_report": "build_report.json",
     "qa_report": "qa_report.json",
     "render_resolution": 720,
-    "directory": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\deltaquad"
+    "directory": "/data/buildman/drone/image2sim-framework/output/deltaquad"
   },
   "template_file": "config/drone_templates/multirotor_base.yaml",
   "subject_id": "deltaquad",
@@ -189,10 +220,10 @@
       "note": "カーボンブーム全長および機体前後長"
     },
     "overall_height_mm": {
-      "value": 240.0,
+      "value": 381.0,
       "source": "estimated",
       "tolerance_mm": 30.0,
-      "note": "ウィングレット先端からブーム下面までの全高"
+      "note": "ウィングレット先端から脚の接地面までの全高（脚を除くと 240 mm）"
     },
     "propeller_diameter_mm": {
       "value": 330.2,
@@ -259,6 +290,53 @@
       "pusher": false
     }
   },
+  "lights": [
+    {
+      "id": "nav_left",
+      "part_type": "led_eye",
+      "material": "led_cyan",
+      "size_mm": [
+        8.0,
+        6.0,
+        4.0
+      ],
+      "location_mm": [
+        -40.0,
+        250.0,
+        40.0
+      ]
+    },
+    {
+      "id": "nav_right",
+      "part_type": "led_eye",
+      "material": "led_cyan",
+      "size_mm": [
+        8.0,
+        6.0,
+        4.0
+      ],
+      "location_mm": [
+        40.0,
+        250.0,
+        40.0
+      ]
+    },
+    {
+      "id": "tail",
+      "part_type": "tail_light_led",
+      "material": "led_red",
+      "size_mm": [
+        12.0,
+        6.0,
+        5.0
+      ],
+      "location_mm": [
+        0.0,
+        -420.0,
+        60.0
+      ]
+    }
+  ],
   "wing": {
     "enabled": true,
     "material": "dark",
@@ -385,9 +463,9 @@
     ]
   },
   "template_metadata": {
-    "template_file": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\drone_templates\\multirotor_base.yaml",
+    "template_file": "/data/buildman/drone/image2sim-framework/config/drone_templates/multirotor_base.yaml",
     "template_id": "multirotor_base",
-    "subject_config": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\config\\deltaquad_model.yaml"
+    "subject_config": "/data/buildman/drone/image2sim-framework/config/deltaquad_model.yaml"
   },
   "derived": {
     "layout_mode": "explicit",
@@ -436,8 +514,8 @@
       ],
       "pusher": [
         0.0,
-        -470.0,
-        31.3
+        -481.4,
+        34.5
       ]
     }
   }

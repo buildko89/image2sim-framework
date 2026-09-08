@@ -26,10 +26,13 @@ measurements:
     tolerance_mm: 20.0
     note: カーボンブーム全長および機体前後長
   overall_height_mm:
-    value: 240.0
+    # ★★★★ 2026-09-08: 240.0 -> 381.0（脚を付けたため）。
+    #   内訳: ウィングレット先端 z=+230 mm から 脚の支柱の下端 z=-151 mm まで。
+    #   ★ 脚を除いた機体だけの全高は従来どおり 240 mm（ウィングレット先端〜ブーム下面）。
+    value: 381.0
     source: estimated
     tolerance_mm: 30.0
-    note: ウィングレット先端からブーム下面までの全高
+    note: ウィングレット先端から脚の接地面までの全高（脚を除くと 240 mm）
   propeller_diameter_mm:
     value: 330.2
     source: assumed
@@ -108,7 +111,11 @@ motor:
   housing_height_mm: 32.0
   center_z_mm: 35.0
   center_z_by_rotor_mm:
-    pusher: 66.0
+    # ★★★★ 2026-09-08: 66.0 -> 43.88（ユーザが .blend で下げた位置に合わせた）。
+    #   ★ プッシャは -90 度倒してあるので、**ここの「z」は世界の +Y（機体の後ろ向き）**である。
+    #     軸点（propeller.center_z_by_rotor_mm = 31.23）からの差 12.65 mm が、
+    #     モータ中心の 軸からの後方距離 になる（実測 y = -481.40 + 12.65 = -468.75）。
+    pusher: 43.88
   shaft_diameter_mm: 6.0
   shaft_height_mm: 15.0
   material_by_rotor:
@@ -124,6 +131,22 @@ propeller:
   blade_thickness_mm: 3.5
   blade_root_radius_mm: 14.0
   center_z_mm: 50.0
+  center_z_by_rotor_mm:
+    # ★★★★ 2026-09-08 新設: **プッシャの取り付け高さ**。
+    #   ★★★★ ここはロータの「軸点」そのもの —— `motor_pusher_axis` / `rotor_pusher` の位置になり、
+    #     **下流（箱庭）が推力を出す点**でもある。50.0 -> 31.23 に下げた。
+    #   ★★★★ ユーザは .blend で **見た目の部品だけ** 18.77 mm 下げていたが、
+    #     軸点は 50 のままだった。そのままだと **プロペラの 18.8 mm 上に推力がかかる**ので、
+    #     軸点も一緒に下げてある（見た目と物理を一致させる）。
+    pusher: 31.23
+  offset_z_by_rotor_mm:
+    # ★ 軸点から見たプロペラ（羽根＋ハブ）の後方距離。実測 y = -481.40 - 10.22 = -491.62。
+    #   ★ .blend ではハブだけ 2.81 mm 前（-488.81）にあったが、ハブと羽根は同じ部品なので
+    #     羽根に合わせてある（手で動かしたときのばらつきと判断。意図なら教えてください）。
+    pusher: -10.22
+  spinner_offset_z_by_rotor_mm:
+    # ★ スピナ。実測 y = -481.40 - 8.35 = -489.75。
+    pusher: -8.35
   directions:
     lift_fl: ccw
     lift_fr: cw
@@ -131,8 +154,12 @@ propeller:
     lift_rr: ccw
     pusher: ccw
   direction_source: design
+  # ★★★★ 2026-09-08: 254.0 -> 330.2 に修正。
+  #   この上書きは **メッシュに反映されていなかった**（生成されたプロペラは 330.2 mm ＝ 揚力ロータと同じ）。
+  #   つまり **設定だけが嘘をついている**状態で、下流は推力係数を径の 4 乗で決めるため
+  #   信じると推力が 2.86 倍ずれる。実体（330.2 mm）を正とする（ユーザ確定 2026-09-08）。
   diameter_overrides:
-    pusher: 254.0
+    pusher: 330.2
   blade_shape_by_rotor:
     pusher: scimitar
   spinner_by_rotor:
@@ -144,7 +171,57 @@ guard:
   enabled: false
 
 landing:
-  enabled: false
+  # ★★★★ 2026-09-08: 脚を追加（ユーザ依頼）。
+  #   ★★★★ **なぜ要るか**: 尾部プッシャの円板は 中心 z=34 mm・半径 165 mm なので
+  #     **最下点が z = -131 mm**。機体そのものの最下点は -27.5 mm しかなく、
+  #     脚が無いと**着陸のたびにプロペラが地面を叩く**。
+  #   ★ style: skid = 左右のスキッド 2 本 ＋ 支柱。ロータ直下の短い脚（per_rotor）では届かない。
+  enabled: true
+  style: skid
+  material: black          # ★ 脚は黒で統一（ユーザ指示 2026-09-08）
+  skid:
+    offset_x_mm: 480.0     # ブームの真下（x = ±480）
+    center_y_mm: -100.0
+    length_mm: 700.0
+    width_mm: 22.0
+    height_mm: 24.0
+    center_z_mm: -137.0
+    bevel_mm: 4.0
+  struts:
+    # ★★★★ 2026-09-08: 縦の棒と横の棒の**継ぎ目が目立たない**ように 3 点そろえた。
+    #   ① 幅を スキッドと同じ 22 mm に（18 mm だと正面から見て左右に 2 mm ずつの棚ができる）
+    #   ② 下端を スキッドの下端と同じ -149 mm に（-151 だと 2 mm 下に出っ張る）
+    #   ③ 面取りも スキッドと同じ 4 mm に（違うと稜線がずれて筋が出る）
+    #   ★ さらに y を 240 -> 230 / -440 -> -430 に寄せた。スキッドは y = -450 .. +250 なので、
+    #     元の位置では **支柱が前後とも 7 mm はみ出していた**（横から見ると角に段が出る）。
+    width_mm: 22.0
+    depth_mm: 34.0
+    top_z_mm: 1.0          # ブームの下端
+    bottom_z_mm: -149.0    # ★ ここが接地面。プッシャのプロペラの下に 22 mm の余裕
+    y_mm: [230.0, -430.0]
+    bevel_mm: 4.0
+
+# ★★★★ 2026-09-08 新設: 灯火。
+#   ★★★★ **なぜここに書くか**: 直す前は LED が `create_codrone_details()` の中に
+#     CoDrone の寸法と位置で直書きされており、**CoDrone は -Y が機首**なので
+#     この機体（機首 +Y）では**前後が逆に付いていた**（テールライトが機首側にあった）。
+#   ★ 位置は胴体（y = -490 .. +290 / x = -110 .. +110 / z = -27.5 .. +97.5 mm）の内側に置く。
+lights:
+  - id: nav_left
+    part_type: led_eye
+    material: led_cyan
+    size_mm: [8.0, 6.0, 4.0]
+    location_mm: [-40.0, 250.0, 40.0]      # 機首 左
+  - id: nav_right
+    part_type: led_eye
+    material: led_cyan
+    size_mm: [8.0, 6.0, 4.0]
+    location_mm: [40.0, 250.0, 40.0]       # 機首 右
+  - id: tail
+    part_type: tail_light_led
+    material: led_red
+    size_mm: [12.0, 6.0, 5.0]
+    location_mm: [0.0, -420.0, 60.0]       # 尾部（プッシャの円板 y=-487 より前）
 
 wing:
   enabled: true
