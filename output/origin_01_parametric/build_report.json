@@ -1,0 +1,23 @@
+{
+  "subject_id": "origin_01",
+  "schema_version": "1.2",
+  "outputs": {
+    "glb": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\origin-01.glb",
+    "blend": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\origin-01.blend",
+    "parts_param": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\parts_param.json",
+    "modules": {
+      "origin_01_body": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\origin_01_body.glb",
+      "origin_01_transporter": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\origin_01_transporter.glb",
+      "propeller_origin_01": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\propeller_origin_01.glb",
+      "origin_01_camera": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\origin_01_camera.glb",
+      "origin_01_lidar": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\origin_01_lidar.glb",
+      "origin_01_lidar2": "D:\\source\\repos\\3DModelDevPJ\\image2sim-framework\\output\\origin_01_parametric\\origin_01_lidar2.glb"
+    }
+  },
+  "dimensions_m": {
+    "overall_width": 2.0,
+    "overall_length": 2.0,
+    "overall_height": 0.7
+  },
+  "rotor_count": 4
+}

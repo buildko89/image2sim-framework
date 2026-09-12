@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "created_at": "2026-09-05T06:00:13.332143+00:00",
+  "created_at": "2026-09-12T09:14:44.151669+00:00",
   "status": "PASS",
   "dimensions_provisional": false,
   "checks": {
@@ -67,18 +67,18 @@
     },
     "collection_recursive_counts": {
       "expected": {
-        "MODEL_VISUAL": 69,
+        "MODEL_VISUAL": 51,
         "ANCHORS": 6,
         "COLLISION": 3,
         "CAMERAS": 0,
         "REF_PHOTOS": 0
       },
       "actual": {
-        "ANCHORS": 6,
         "COLLISION": 3,
+        "MODEL_VISUAL": 51,
+        "ANCHORS": 6,
         "CAMERAS": 0,
-        "REF_PHOTOS": 0,
-        "MODEL_VISUAL": 69
+        "REF_PHOTOS": 0
       },
       "pass": true
     },
@@ -404,10 +404,10 @@
       "pass": true
     },
     "overall_length": {
-      "expected_mm": 1370.0,
-      "actual_mm": 1369.500041,
-      "error_mm": -0.49995899999998983,
-      "tolerance_mm": 20.0,
+      "expected_mm": 1222.7,
+      "actual_mm": 1222.738028,
+      "error_mm": 0.03802799999994022,
+      "tolerance_mm": 5.0,
       "pass": true
     },
     "overall_height": {

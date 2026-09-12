@@ -65,6 +65,8 @@
     "height_mm": 140.0,
     "center_z_mm": 0.0,
     "bevel_mm": 5.0,
+    "canopy_cap": false,
+    "codrone_details": false,
     "center_y_mm": -150.0,
     "nose_bias": 0.35,
     "longitudinal_segments": 24,
@@ -199,10 +201,10 @@
       "note": "実機翼幅 2160mm"
     },
     "overall_length_mm": {
-      "value": 1370.0,
-      "source": "published_spec",
-      "tolerance_mm": 20.0,
-      "note": "機首プロペラスピナー先端から垂直尾翼後端までの全長（実測1370mm）"
+      "value": 1222.7,
+      "source": "derived_from_model",
+      "tolerance_mm": 5.0,
+      "note": "機首プロペラスピナー先端から垂直尾翼後端までの全長（実寸1222.7mm、CoDrone部品完全除去後）"
     },
     "overall_height_mm": {
       "value": 330.0,

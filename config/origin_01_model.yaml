@@ -1,0 +1,164 @@
+schema_version: '1.2'
+subject_id: origin_01
+builder: origin_01
+units: m
+dimensions_provisional: false
+drone_scale: 0.6
+coordinate_system:
+  right_axis: +X
+  front_axis: -Z
+  up_axis: +Y
+  root_origin: center_of_mass
+measurements:
+  overall_width_m:
+    value: 2.0
+    source: measured
+  overall_length_m:
+    value: 2.0
+    source: measured
+  overall_height_m:
+    value: 0.7
+    source: measured
+  propeller_diameter_m:
+    value: 0.45
+    source: measured
+layout:
+  mode: explicit
+  rotor_count: 4
+  rotors:
+  - id: propeller1
+    position_m:
+    - 0.831
+    - 0.544
+    - -0.849
+    direction: ccw
+  - id: propeller2
+    position_m:
+    - -0.837
+    - 0.544
+    - 0.845
+    direction: cw
+  - id: propeller3
+    position_m:
+    - -0.837
+    - 0.544
+    - -0.849
+    direction: cw
+  - id: propeller4
+    position_m:
+    - 0.831
+    - 0.544
+    - 0.845
+    direction: ccw
+assets:
+  root_dir: input/models/origin_01
+  meshes:
+    frame: meshes/frame.glb
+    body: meshes/body.glb
+    propeller: meshes/propeller_origin_01_raw.glb
+  textures:
+    body: textures/origin-01_Hodaka-ver1.jpg
+modules:
+  body:
+    enabled: true
+    subnodes:
+    - frame
+    - body
+    - Cube
+    - D1
+    - Front
+    - D2
+    - D3
+    - D4
+    - D4 (1)
+    - D4 (2)
+  transporter:
+    enabled: true
+    subnodes:
+    - Holder
+    - Magnet
+    - Pole-d
+    - Pole-c
+    - Pole-b
+    - Pole-a
+    - Pole1
+    - Pole2
+    - Pole3
+    - Pole4
+  camera:
+    enabled: true
+    position_m:
+    - 0.0
+    - 0.218
+    - -0.54
+    subnodes:
+    - Camera
+    - Cylinder_4
+  lidar:
+    enabled: true
+    position_m:
+    - 0.0
+    - 0.382
+    - -0.44
+    subnodes:
+    - Cube_1
+    - Cylinder_5
+  lidar2:
+    enabled: true
+    position_m:
+    - 0.0
+    - 0.218
+    - 0.0
+    subnodes:
+    - Cube_2
+    - Cylinder_6
+  propeller:
+    enabled: true
+    scale:
+    - 15.43925
+    - 15.43925
+    - 4.28949
+    rotation_euler_deg:
+    - -90.0
+    - 0.0
+    - 0.0
+collision:
+  name: collision_box1
+  size_m:
+  - 1.8
+  - 0.6
+  - 1.8
+  position_m:
+  - 0.0
+  - 0.352
+  - 0.0
+camera_positions:
+- name: drone_camera
+  pos:
+  - 0.0
+  - 1.0
+  - 3.5
+leds:
+- scene: led_back
+- scene: led_back_2
+- scene: led_front
+- scene: led_front_2
+flight_leds:
+- scene: led_flight_mode_back
+- scene: led_flight_mode_front
+- scene: led_flight_mode_front_2
+output:
+  directory: output/origin_01_parametric
+  blend: origin-01.blend
+  glb: origin-01.glb
+  modules:
+    origin_01_body: origin_01_body.glb
+    origin_01_transporter: origin_01_transporter.glb
+    propeller_origin_01: propeller_origin_01.glb
+    origin_01_camera: origin_01_camera.glb
+    origin_01_lidar: origin_01_lidar.glb
+    origin_01_lidar2: origin_01_lidar2.glb
+  parts_param: parts_param.json
+  render_resolution: 1024
+  qa_report: qa_report.json
+  build_report: build_report.json

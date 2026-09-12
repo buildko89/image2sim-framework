@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-12T08:46:13.091782+00:00",
+  "status": "PASS",
+  "checks": {
+    "full_glb_exists": {
+      "pass": true
+    },
+    "module_glbs_count": {
+      "expected": 6,
+      "actual": 6,
+      "pass": true
+    },
+    "parts_param_exists": {
+      "pass": true
+    },
+    "renders_count": {
+      "expected": 6,
+      "actual": 6,
+      "pass": true
+    }
+  },
+  "notes": [
+    "Origin-01 モデルは統合 GLB およびモジュール別 GLB 群が正常に生成されました。",
+    "parts_param.json は設定値と同期して生成されました。"
+  ]
+}

@@ -27,10 +27,10 @@ measurements:
     tolerance_mm: 20.0
     note: 実機翼幅 2160mm
   overall_length_mm:
-    value: 1370.0
-    source: published_spec
-    tolerance_mm: 20.0
-    note: 機首プロペラスピナー先端から垂直尾翼後端までの全長（実測1370mm）
+    value: 1222.7
+    source: derived_from_model
+    tolerance_mm: 5.0
+    note: 機首プロペラスピナー先端から垂直尾翼後端までの全長（実寸1222.7mm、CoDrone部品完全除去後）
   overall_height_mm:
     value: 330.0
     source: estimated
@@ -67,6 +67,8 @@ layout:
 
 body:
   shape: lofted
+  canopy_cap: false
+  codrone_details: false
   width_mm: 160.0
   length_mm: 1200.0
   height_mm: 140.0

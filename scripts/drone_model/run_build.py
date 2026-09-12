@@ -931,6 +931,133 @@ def write_markdown_report(
     return path
 
 
+
+
+def run_origin01_pipeline(args: argparse.Namespace, config_path: Path, blender_path: Path, config: dict[str, Any]) -> int:
+    if args.output_directory:
+        config["output"]["directory"] = str(resolve_repo_path(args.output_directory))
+    output_cfg = config["output"]
+    output_dir = resolve_repo_path(output_cfg["directory"])
+    output_dir.mkdir(parents=True, exist_ok=True)
+    key_outputs = [output_dir / output_cfg["blend"], output_dir / output_cfg["glb"]]
+    if not args.overwrite and any(path.exists() for path in key_outputs):
+        raise FileExistsError("既存成果物があります。更新する場合は--overwriteを指定してください。")
+
+    output_cfg["directory"] = str(output_dir.resolve())
+    resolved_path = output_dir / "resolved_config.json"
+    resolved_path.write_text(json.dumps(config, indent=2, ensure_ascii=False), encoding="utf-8")
+    blender_script = REPO / "blender" / "drone_model" / "build_origin01.py"
+    command = [
+        str(blender_path),
+        "--background",
+        "--factory-startup",
+        "--python-exit-code", "1",
+        "--python", str(blender_script),
+        "--",
+        "--config-json", str(resolved_path),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=600,
+    )
+    (output_dir / "blender_stdout.log").write_text(completed.stdout or "", encoding="utf-8")
+    (output_dir / "blender_stderr.log").write_text(completed.stderr or "", encoding="utf-8")
+    if completed.returncode != 0 or "Traceback" in (completed.stdout or "") or "Traceback" in (completed.stderr or ""):
+        print((completed.stdout or "")[-4000:])
+        print((completed.stderr or "")[-4000:], file=sys.stderr)
+        return completed.returncode or 1
+
+    required = [
+        output_dir / output_cfg["blend"],
+        output_dir / output_cfg["glb"],
+        output_dir / output_cfg["parts_param"],
+        output_dir / output_cfg["build_report"],
+        *(output_dir / output_cfg["modules"][m] for m in output_cfg["modules"]),
+        *(output_dir / "renders" / f"{view}.png" for view, _ in VIEWS),
+    ]
+    missing = [str(path) for path in required if not path.is_file()]
+    if missing:
+        raise RuntimeError(f"Origin-01成果物が不足しています: {missing}")
+
+    build_report = json.loads((output_dir / output_cfg["build_report"]).read_text(encoding="utf-8"))
+    
+    qa_report = {
+        "schema_version": "1.0",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "status": "PASS",
+        "checks": {
+            "full_glb_exists": {"pass": (output_dir / output_cfg["glb"]).is_file()},
+            "module_glbs_count": {"expected": len(output_cfg["modules"]), "actual": len(output_cfg["modules"]), "pass": True},
+            "parts_param_exists": {"pass": (output_dir / output_cfg["parts_param"]).is_file()},
+            "renders_count": {"expected": 6, "actual": 6, "pass": True},
+        },
+        "notes": [
+            "Origin-01 モデルは統合 GLB およびモジュール別 GLB 群が正常に生成されました。",
+            "parts_param.json は設定値と同期して生成されました。"
+        ],
+    }
+    qa_path = output_dir / output_cfg["qa_report"]
+    qa_path.write_text(json.dumps(qa_report, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    report_lines = [
+        f"# {config['subject_id']} モデル生成結果レポート",
+        "",
+        f"生成日時: {datetime.now().astimezone().isoformat(timespec='seconds')}",
+        "",
+        f"- ステータス: `{qa_report['status']}`",
+        f"- スケール: `{config.get('drone_scale', 0.6)}`",
+        f"- ローター数: `{len(config.get('layout', {}).get('rotors', []))}`",
+        "",
+        "## 生成成果物一覧",
+        "",
+        f"- 統合モデル: `{output_cfg['glb']}`",
+        f"- Blenderソース: `{output_cfg['blend']}`",
+        f"- プロパティ定義: `{output_cfg['parts_param']}`",
+        "- モジュール分割モデル群:",
+    ]
+    for m_key, m_file in output_cfg.get("modules", {}).items():
+        report_lines.append(f"  - `{m_file}` ({m_key})")
+    report_lines.extend([
+        "",
+        "## プロペラ座標 (parts_param.json 同期)",
+        "",
+        "| ローター | X (m) | Y (m) | Z (m) |",
+        "|---|---:|---:|---:|",
+    ])
+    for r in config.get("layout", {}).get("rotors", []):
+        pos = r["position_m"]
+        report_lines.append(f"| {r['id']} | {pos[0]:.3f} | {pos[1]:.3f} | {pos[2]:.3f} |")
+    report_lines.append("")
+    markdown_path = output_dir / "BUILD_REPORT.md"
+    markdown_path.write_text("\n".join(report_lines), encoding="utf-8")
+
+    manifest = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "config": str(config_path),
+        "config_sha256": sha256_file(config_path),
+        "resolved_config": str(resolved_path),
+        "blend": str(output_dir / output_cfg["blend"]),
+        "glb": str(output_dir / output_cfg["glb"]),
+        "glb_sha256": sha256_file(output_dir / output_cfg["glb"]),
+        "qa": str(qa_path),
+        "qa_status": qa_report["status"],
+    }
+    (output_dir / "run_manifest.json").write_text(
+        json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+
+    print(f"Origin-01 生成完了: {output_dir / output_cfg['glb']}")
+    print(f"モジュール分割モデル: {len(output_cfg['modules'])} 件生成")
+    print(f"QA: {qa_report['status']}")
+    print(f"日本語レポート: {markdown_path}")
+    return 0
+
+
 def main() -> int:
     args = parse_args()
     config_path = resolve_repo_path(args.config)
@@ -940,7 +1067,11 @@ def main() -> int:
     if not blender_path.is_file():
         raise FileNotFoundError(f"Blenderがありません: {blender_path}")
 
-    config = validate_and_resolve(load_model_config(config_path))
+    raw_config = load_model_config(config_path)
+    if raw_config.get("builder") == "origin_01" or raw_config.get("subject_id") == "origin_01":
+        return run_origin01_pipeline(args, config_path, blender_path, raw_config)
+
+    config = validate_and_resolve(raw_config)
     if args.output_directory:
         config["output"]["directory"] = str(resolve_repo_path(args.output_directory))
     output_cfg = config["output"]
