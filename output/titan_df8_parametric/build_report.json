@@ -1,0 +1,1694 @@
+{
+  "schema_version": "1.3",
+  "created_at": "2026-09-13T06:10:48.540669+00:00",
+  "blender_version": "5.2.0 LTS",
+  "subject_id": "titan_df8",
+  "template_id": "multirotor_base",
+  "layout_mode": "explicit",
+  "rotor_count": 8,
+  "dimensions_provisional": true,
+  "coordinate_system": {
+    "right": "+X",
+    "front": "-Y",
+    "up": "+Z",
+    "origin": "estimated_center_of_mass",
+    "reported_transform_space": "world"
+  },
+  "bbox_min_mm": [
+    -1214.156747,
+    -1058.306813,
+    -529.999971
+  ],
+  "bbox_max_mm": [
+    1214.156747,
+    1058.306813,
+    652.662218
+  ],
+  "dimensions_mm": {
+    "x": 2428.313494,
+    "y": 2116.613626,
+    "z": 1182.662249
+  },
+  "part_dimensions_mm": {
+    "body_core": {
+      "x": 899.999976,
+      "y": 1559.999943,
+      "z": 419.999987
+    },
+    "structure_frame": {
+      "x": 741.999984,
+      "y": 1317.999959,
+      "z": 504.999995
+    }
+  },
+  "visual_mesh_count": 95,
+  "triangles": 19028,
+  "motor_axes": {
+    "fl_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -800.000012,
+        649.999976,
+        540.000021
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          -0.014893549,
+          0.109501518,
+          -0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          0.134771392,
+          0.649999976
+        ],
+        [
+          -0.110509731,
+          -0.133945912,
+          0.98480767,
+          0.540000021
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        -807.66511,
+        640.565991,
+        471.063465
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.109501518,
+        0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "ccw"
+    },
+    "fl_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -800.000012,
+        649.999976,
+        289.999992
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          -0.014893549,
+          -0.109501518,
+          -0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          -0.134771392,
+          0.649999976
+        ],
+        [
+          0.110509731,
+          0.133945912,
+          0.98480767,
+          0.289999992
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        -807.66511,
+        640.565991,
+        358.936548
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        -0.109501518,
+        -0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "cw"
+    },
+    "fr_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        800.000012,
+        649.999976,
+        540.000021
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          0.014893549,
+          -0.109501518,
+          0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          0.134771392,
+          0.649999976
+        ],
+        [
+          0.110509731,
+          -0.133945912,
+          0.98480767,
+          0.540000021
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        807.66511,
+        640.565991,
+        471.063465
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        -0.109501518,
+        0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "cw"
+    },
+    "fr_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        800.000012,
+        649.999976,
+        289.999992
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          0.014893549,
+          0.109501518,
+          0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          -0.134771392,
+          0.649999976
+        ],
+        [
+          -0.110509731,
+          0.133945912,
+          0.98480767,
+          0.289999992
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        807.66511,
+        640.565991,
+        358.936548
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.109501518,
+        -0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "ccw"
+    },
+    "rl_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -800.000012,
+        -649.999976,
+        540.000021
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          0.014893549,
+          0.109501518,
+          -0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          -0.134771392,
+          -0.649999976
+        ],
+        [
+          -0.110509731,
+          0.133945912,
+          0.98480767,
+          0.540000021
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        -807.66511,
+        -640.565991,
+        471.063465
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.109501518,
+        -0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "cw"
+    },
+    "rl_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -800.000012,
+        -649.999976,
+        289.999992
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          0.014893549,
+          -0.109501518,
+          -0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          0.134771392,
+          -0.649999976
+        ],
+        [
+          0.110509731,
+          -0.133945912,
+          0.98480767,
+          0.289999992
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        -807.66511,
+        -640.565991,
+        358.936548
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        -0.109501518,
+        0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "ccw"
+    },
+    "rr_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        800.000012,
+        -649.999976,
+        540.000021
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          -0.014893549,
+          -0.109501518,
+          0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          -0.134771392,
+          -0.649999976
+        ],
+        [
+          0.110509731,
+          0.133945912,
+          0.98480767,
+          0.540000021
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        807.66511,
+        -640.565991,
+        471.063465
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        -0.109501518,
+        -0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "ccw"
+    },
+    "rr_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        800.000012,
+        -649.999976,
+        289.999992
+      ],
+      "matrix_world": [
+        [
+          0.993875027,
+          -0.014893549,
+          0.109501518,
+          0.800000012
+        ],
+        [
+          0.0,
+          0.990876734,
+          0.134771392,
+          -0.649999976
+        ],
+        [
+          -0.110509731,
+          -0.133945912,
+          0.98480767,
+          0.289999992
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "motor_location_mm": [
+        807.66511,
+        -640.565991,
+        358.936548
+      ],
+      "motor_dimensions_mm": [
+        132.002354,
+        132.382393,
+        127.815425
+      ],
+      "mount_side": "over_frame",
+      "local_thrust_axis": "+Z",
+      "world_thrust_axis": [
+        0.109501518,
+        0.134771392,
+        0.98480767
+      ],
+      "rotation_direction": "cw"
+    }
+  },
+  "center_of_mass": {
+    "coordinate_space": "world",
+    "location_mm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "matrix_world": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "source": "placeholder"
+  },
+  "rotor_assemblies": {
+    "fl_u": {
+      "coordinate_space": "world",
+      "assembly": "rotor_fl_u",
+      "spin": "rotor_fl_u_spin",
+      "fixed_children": [
+        "motor_fl_u",
+        "motor_fl_u_shaft",
+        "motor_mount_fl_u"
+      ],
+      "spinning_children": [
+        "rotor_fl_u_blades",
+        "rotor_fl_u_hub"
+      ],
+      "spin_origin_mm": [
+        -800.000012,
+        649.999976,
+        540.000021
+      ],
+      "axis_origin_mm": [
+        -800.000012,
+        649.999976,
+        540.000021
+      ],
+      "origin_error_mm": 0.0
+    },
+    "fl_l": {
+      "coordinate_space": "world",
+      "assembly": "rotor_fl_l",
+      "spin": "rotor_fl_l_spin",
+      "fixed_children": [
+        "motor_fl_l",
+        "motor_fl_l_shaft",
+        "motor_mount_fl_l"
+      ],
+      "spinning_children": [
+        "rotor_fl_l_blades",
+        "rotor_fl_l_hub"
+      ],
+      "spin_origin_mm": [
+        -800.000012,
+        649.999976,
+        289.999992
+      ],
+      "axis_origin_mm": [
+        -800.000012,
+        649.999976,
+        289.999992
+      ],
+      "origin_error_mm": 0.0
+    },
+    "fr_u": {
+      "coordinate_space": "world",
+      "assembly": "rotor_fr_u",
+      "spin": "rotor_fr_u_spin",
+      "fixed_children": [
+        "motor_fr_u",
+        "motor_fr_u_shaft",
+        "motor_mount_fr_u"
+      ],
+      "spinning_children": [
+        "rotor_fr_u_blades",
+        "rotor_fr_u_hub"
+      ],
+      "spin_origin_mm": [
+        800.000012,
+        649.999976,
+        540.000021
+      ],
+      "axis_origin_mm": [
+        800.000012,
+        649.999976,
+        540.000021
+      ],
+      "origin_error_mm": 0.0
+    },
+    "fr_l": {
+      "coordinate_space": "world",
+      "assembly": "rotor_fr_l",
+      "spin": "rotor_fr_l_spin",
+      "fixed_children": [
+        "motor_fr_l",
+        "motor_fr_l_shaft",
+        "motor_mount_fr_l"
+      ],
+      "spinning_children": [
+        "rotor_fr_l_blades",
+        "rotor_fr_l_hub"
+      ],
+      "spin_origin_mm": [
+        800.000012,
+        649.999976,
+        289.999992
+      ],
+      "axis_origin_mm": [
+        800.000012,
+        649.999976,
+        289.999992
+      ],
+      "origin_error_mm": 0.0
+    },
+    "rl_u": {
+      "coordinate_space": "world",
+      "assembly": "rotor_rl_u",
+      "spin": "rotor_rl_u_spin",
+      "fixed_children": [
+        "motor_mount_rl_u",
+        "motor_rl_u",
+        "motor_rl_u_shaft"
+      ],
+      "spinning_children": [
+        "rotor_rl_u_blades",
+        "rotor_rl_u_hub"
+      ],
+      "spin_origin_mm": [
+        -800.000012,
+        -649.999976,
+        540.000021
+      ],
+      "axis_origin_mm": [
+        -800.000012,
+        -649.999976,
+        540.000021
+      ],
+      "origin_error_mm": 0.0
+    },
+    "rl_l": {
+      "coordinate_space": "world",
+      "assembly": "rotor_rl_l",
+      "spin": "rotor_rl_l_spin",
+      "fixed_children": [
+        "motor_mount_rl_l",
+        "motor_rl_l",
+        "motor_rl_l_shaft"
+      ],
+      "spinning_children": [
+        "rotor_rl_l_blades",
+        "rotor_rl_l_hub"
+      ],
+      "spin_origin_mm": [
+        -800.000012,
+        -649.999976,
+        289.999992
+      ],
+      "axis_origin_mm": [
+        -800.000012,
+        -649.999976,
+        289.999992
+      ],
+      "origin_error_mm": 0.0
+    },
+    "rr_u": {
+      "coordinate_space": "world",
+      "assembly": "rotor_rr_u",
+      "spin": "rotor_rr_u_spin",
+      "fixed_children": [
+        "motor_mount_rr_u",
+        "motor_rr_u",
+        "motor_rr_u_shaft"
+      ],
+      "spinning_children": [
+        "rotor_rr_u_blades",
+        "rotor_rr_u_hub"
+      ],
+      "spin_origin_mm": [
+        800.000012,
+        -649.999976,
+        540.000021
+      ],
+      "axis_origin_mm": [
+        800.000012,
+        -649.999976,
+        540.000021
+      ],
+      "origin_error_mm": 0.0
+    },
+    "rr_l": {
+      "coordinate_space": "world",
+      "assembly": "rotor_rr_l",
+      "spin": "rotor_rr_l_spin",
+      "fixed_children": [
+        "motor_mount_rr_l",
+        "motor_rr_l",
+        "motor_rr_l_shaft"
+      ],
+      "spinning_children": [
+        "rotor_rr_l_blades",
+        "rotor_rr_l_hub"
+      ],
+      "spin_origin_mm": [
+        800.000012,
+        -649.999976,
+        289.999992
+      ],
+      "axis_origin_mm": [
+        800.000012,
+        -649.999976,
+        289.999992
+      ],
+      "origin_error_mm": 0.0
+    }
+  },
+  "collision_proxies": {
+    "collision_arm_fl_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -568.000019,
+        461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559455,
+        491.780281,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          -0.776114047,
+          -0.630592525,
+          0.0,
+          -0.568000019
+        ],
+        [
+          0.630592525,
+          -0.776114047,
+          0.0,
+          0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_arm_fl_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -568.000019,
+        461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559455,
+        491.780281,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          -0.776114047,
+          -0.630592525,
+          0.0,
+          -0.568000019
+        ],
+        [
+          0.630592525,
+          -0.776114047,
+          0.0,
+          0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_arm_fr_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        568.000019,
+        461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559336,
+        491.78037,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          0.776113987,
+          -0.630592644,
+          0.0,
+          0.568000019
+        ],
+        [
+          0.630592644,
+          0.776113987,
+          0.0,
+          0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_arm_fr_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        568.000019,
+        461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559336,
+        491.78037,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          0.776113987,
+          -0.630592644,
+          0.0,
+          0.568000019
+        ],
+        [
+          0.630592644,
+          0.776113987,
+          0.0,
+          0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_arm_rl_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -568.000019,
+        -461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559455,
+        491.780281,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          -0.776114047,
+          0.630592525,
+          0.0,
+          -0.568000019
+        ],
+        [
+          -0.630592525,
+          -0.776114047,
+          0.0,
+          -0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_arm_rl_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -568.000019,
+        -461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559455,
+        491.780281,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          -0.776114047,
+          0.630592525,
+          0.0,
+          -0.568000019
+        ],
+        [
+          -0.630592525,
+          -0.776114047,
+          0.0,
+          -0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_arm_rr_l": {
+      "coordinate_space": "world",
+      "location_mm": [
+        568.000019,
+        -461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559336,
+        491.78037,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          0.776113987,
+          0.630592644,
+          0.0,
+          0.568000019
+        ],
+        [
+          -0.630592644,
+          0.776113987,
+          0.0,
+          -0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_arm_rr_u": {
+      "coordinate_space": "world",
+      "location_mm": [
+        568.000019,
+        -461.499989,
+        294.649988
+      ],
+      "dimensions_mm": [
+        569.559336,
+        491.78037,
+        69.999993
+      ],
+      "matrix_world": [
+        [
+          0.776113987,
+          0.630592644,
+          0.0,
+          0.568000019
+        ],
+        [
+          -0.630592644,
+          0.776113987,
+          0.0,
+          -0.461499989
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.294649988
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_body": {
+      "coordinate_space": "world",
+      "location_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_mm": [
+        899.999976,
+        1559.999943,
+        419.999987
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_frame_pylon_fl": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -335.999995,
+        273.000002,
+        300.000012
+      ],
+      "dimensions_mm": [
+        69.999993,
+        69.999993,
+        230.000019
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.335999995
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.273000002
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.300000012
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_frame_pylon_fr": {
+      "coordinate_space": "world",
+      "location_mm": [
+        335.999995,
+        273.000002,
+        300.000012
+      ],
+      "dimensions_mm": [
+        69.999993,
+        69.999993,
+        230.000019
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.335999995
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.273000002
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.300000012
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_frame_pylon_rl": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -335.999995,
+        -273.000002,
+        300.000012
+      ],
+      "dimensions_mm": [
+        69.999993,
+        69.999993,
+        230.000019
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.335999995
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.273000002
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.300000012
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_frame_pylon_rr": {
+      "coordinate_space": "world",
+      "location_mm": [
+        335.999995,
+        -273.000002,
+        300.000012
+      ],
+      "dimensions_mm": [
+        69.999993,
+        69.999993,
+        230.000019
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.335999995
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.273000002
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.300000012
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_frame_rtg": {
+      "coordinate_space": "world",
+      "location_mm": [
+        0.0,
+        -800.000012,
+        39.999999
+      ],
+      "dimensions_mm": [
+        259.99999,
+        419.999957,
+        259.99999
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          -4.4e-08,
+          -1.0,
+          -0.800000012
+        ],
+        [
+          0.0,
+          1.0,
+          -4.4e-08,
+          0.039999999
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_landing_skid_left": {
+      "coordinate_space": "world",
+      "location_mm": [
+        -430.000007,
+        0.0,
+        -504.999995
+      ],
+      "dimensions_mm": [
+        60.000002,
+        1700.000048,
+        49.999982
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.430000007
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.504999995
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    },
+    "collision_landing_skid_right": {
+      "coordinate_space": "world",
+      "location_mm": [
+        430.000007,
+        0.0,
+        -504.999995
+      ],
+      "dimensions_mm": [
+        60.000002,
+        1700.000048,
+        49.999982
+      ],
+      "matrix_world": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.430000007
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.504999995
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ]
+    }
+  },
+  "object_parents": {
+    "arm_fl_l": "drone_root",
+    "arm_fl_u": "drone_root",
+    "arm_fr_l": "drone_root",
+    "arm_fr_u": "drone_root",
+    "arm_rl_l": "drone_root",
+    "arm_rl_u": "drone_root",
+    "arm_rr_l": "drone_root",
+    "arm_rr_u": "drone_root",
+    "body_core": "drone_root",
+    "body_core_side_line_left": "drone_root",
+    "body_core_side_line_right": "drone_root",
+    "body_core_side_panel_left": "drone_root",
+    "body_core_side_panel_right": "drone_root",
+    "body_core_stripe_left": "drone_root",
+    "body_core_stripe_right": "drone_root",
+    "body_core_top_panel": "drone_root",
+    "body_core_vent_01": "drone_root",
+    "body_core_vent_02": "drone_root",
+    "body_core_vent_03": "drone_root",
+    "body_core_vent_04": "drone_root",
+    "body_core_vent_05": "drone_root",
+    "body_core_visor": "drone_root",
+    "center_of_mass": "drone_root",
+    "collision_arm_fl_l": "drone_root",
+    "collision_arm_fl_u": "drone_root",
+    "collision_arm_fr_l": "drone_root",
+    "collision_arm_fr_u": "drone_root",
+    "collision_arm_rl_l": "drone_root",
+    "collision_arm_rl_u": "drone_root",
+    "collision_arm_rr_l": "drone_root",
+    "collision_arm_rr_u": "drone_root",
+    "collision_body": "drone_root",
+    "collision_frame_pylon_fl": "drone_root",
+    "collision_frame_pylon_fr": "drone_root",
+    "collision_frame_pylon_rl": "drone_root",
+    "collision_frame_pylon_rr": "drone_root",
+    "collision_frame_rtg": "drone_root",
+    "collision_landing_skid_left": "drone_root",
+    "collision_landing_skid_right": "drone_root",
+    "drone_root": null,
+    "equipment_battery": "drone_root",
+    "equipment_battery_strap_1": "drone_root",
+    "equipment_battery_strap_2": "drone_root",
+    "equipment_battery_tray": "drone_root",
+    "equipment_drill_left": "drone_root",
+    "equipment_drill_right": "drone_root",
+    "equipment_fc_housing": "drone_root",
+    "equipment_flight_computer": "drone_root",
+    "frame_pylon_fl": "drone_root",
+    "frame_pylon_fr": "drone_root",
+    "frame_pylon_rl": "drone_root",
+    "frame_pylon_rr": "drone_root",
+    "frame_rtg": "drone_root",
+    "landing_leg_0_left": "drone_root",
+    "landing_leg_0_right": "drone_root",
+    "landing_leg_1_left": "drone_root",
+    "landing_leg_1_right": "drone_root",
+    "landing_skid_left": "drone_root",
+    "landing_skid_right": "drone_root",
+    "light_nav_left": "drone_root",
+    "light_nav_right": "drone_root",
+    "motor_fl_l": "rotor_fl_l",
+    "motor_fl_l_axis": "drone_root",
+    "motor_fl_l_shaft": "rotor_fl_l",
+    "motor_fl_u": "rotor_fl_u",
+    "motor_fl_u_axis": "drone_root",
+    "motor_fl_u_shaft": "rotor_fl_u",
+    "motor_fr_l": "rotor_fr_l",
+    "motor_fr_l_axis": "drone_root",
+    "motor_fr_l_shaft": "rotor_fr_l",
+    "motor_fr_u": "rotor_fr_u",
+    "motor_fr_u_axis": "drone_root",
+    "motor_fr_u_shaft": "rotor_fr_u",
+    "motor_mount_fl_l": "rotor_fl_l",
+    "motor_mount_fl_u": "rotor_fl_u",
+    "motor_mount_fr_l": "rotor_fr_l",
+    "motor_mount_fr_u": "rotor_fr_u",
+    "motor_mount_rl_l": "rotor_rl_l",
+    "motor_mount_rl_u": "rotor_rl_u",
+    "motor_mount_rr_l": "rotor_rr_l",
+    "motor_mount_rr_u": "rotor_rr_u",
+    "motor_rl_l": "rotor_rl_l",
+    "motor_rl_l_axis": "drone_root",
+    "motor_rl_l_shaft": "rotor_rl_l",
+    "motor_rl_u": "rotor_rl_u",
+    "motor_rl_u_axis": "drone_root",
+    "motor_rl_u_shaft": "rotor_rl_u",
+    "motor_rr_l": "rotor_rr_l",
+    "motor_rr_l_axis": "drone_root",
+    "motor_rr_l_shaft": "rotor_rr_l",
+    "motor_rr_u": "rotor_rr_u",
+    "motor_rr_u_axis": "drone_root",
+    "motor_rr_u_shaft": "rotor_rr_u",
+    "rotor_fl_l": "drone_root",
+    "rotor_fl_l_blades": "rotor_fl_l_spin",
+    "rotor_fl_l_hub": "rotor_fl_l_spin",
+    "rotor_fl_l_spin": "rotor_fl_l",
+    "rotor_fl_u": "drone_root",
+    "rotor_fl_u_blades": "rotor_fl_u_spin",
+    "rotor_fl_u_hub": "rotor_fl_u_spin",
+    "rotor_fl_u_spin": "rotor_fl_u",
+    "rotor_fr_l": "drone_root",
+    "rotor_fr_l_blades": "rotor_fr_l_spin",
+    "rotor_fr_l_hub": "rotor_fr_l_spin",
+    "rotor_fr_l_spin": "rotor_fr_l",
+    "rotor_fr_u": "drone_root",
+    "rotor_fr_u_blades": "rotor_fr_u_spin",
+    "rotor_fr_u_hub": "rotor_fr_u_spin",
+    "rotor_fr_u_spin": "rotor_fr_u",
+    "rotor_rl_l": "drone_root",
+    "rotor_rl_l_blades": "rotor_rl_l_spin",
+    "rotor_rl_l_hub": "rotor_rl_l_spin",
+    "rotor_rl_l_spin": "rotor_rl_l",
+    "rotor_rl_u": "drone_root",
+    "rotor_rl_u_blades": "rotor_rl_u_spin",
+    "rotor_rl_u_hub": "rotor_rl_u_spin",
+    "rotor_rl_u_spin": "rotor_rl_u",
+    "rotor_rr_l": "drone_root",
+    "rotor_rr_l_blades": "rotor_rr_l_spin",
+    "rotor_rr_l_hub": "rotor_rr_l_spin",
+    "rotor_rr_l_spin": "rotor_rr_l",
+    "rotor_rr_u": "drone_root",
+    "rotor_rr_u_blades": "rotor_rr_u_spin",
+    "rotor_rr_u_hub": "rotor_rr_u_spin",
+    "rotor_rr_u_spin": "rotor_rr_u",
+    "sensor_hga_barrel": "drone_root",
+    "sensor_hga_bezel": "drone_root",
+    "sensor_hga_face": "drone_root",
+    "sensor_lidar_barrel": "drone_root",
+    "sensor_lidar_bezel": "drone_root",
+    "sensor_lidar_face": "drone_root",
+    "sensor_nav_cam_left_barrel": "drone_root",
+    "sensor_nav_cam_left_bezel": "drone_root",
+    "sensor_nav_cam_left_face": "drone_root",
+    "sensor_nav_cam_right_barrel": "drone_root",
+    "sensor_nav_cam_right_bezel": "drone_root",
+    "sensor_nav_cam_right_face": "drone_root"
+  },
+  "sensor_masts": {},
+  "arm_members": {
+    "fl_u": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    },
+    "fl_l": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    },
+    "fr_u": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    },
+    "fr_l": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    },
+    "rl_u": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    },
+    "rl_l": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    },
+    "rr_u": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    },
+    "rr_l": {
+      "outer": {
+        "measured_length_mm": 0.0,
+        "vertical_roles": [
+          ""
+        ]
+      }
+    }
+  },
+  "guard_mounts": {},
+  "guard_modules": {},
+  "camera_modules": {},
+  "missing_required_names": [],
+  "duplicate_suffix_names": [],
+  "duplicate_suffix_collection_names": [],
+  "collections": {
+    "MODEL_VISUAL": 112,
+    "ANCHORS": 9,
+    "COLLISION": 16,
+    "CAMERAS": 0,
+    "REF_PHOTOS": 0
+  },
+  "collection_hierarchy": {
+    "MODEL_VISUAL": {
+      "direct_objects": 1,
+      "all_objects": 112,
+      "children": {
+        "VIS_BODY": {
+          "direct_objects": 16,
+          "all_objects": 16,
+          "children": {}
+        },
+        "VIS_EQUIPMENT": {
+          "direct_objects": 2,
+          "all_objects": 20,
+          "children": {
+            "VIS_FLIGHT_ELECTRONICS": {
+              "direct_objects": 2,
+              "all_objects": 2,
+              "children": {}
+            },
+            "VIS_POWER": {
+              "direct_objects": 4,
+              "all_objects": 4,
+              "children": {}
+            },
+            "VIS_SENSORS": {
+              "direct_objects": 12,
+              "all_objects": 12,
+              "children": {}
+            }
+          }
+        },
+        "VIS_PROPULSION": {
+          "direct_objects": 0,
+          "all_objects": 56,
+          "children": {
+            "VIS_ROTOR_fl_l": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            },
+            "VIS_ROTOR_fl_u": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            },
+            "VIS_ROTOR_fr_l": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            },
+            "VIS_ROTOR_fr_u": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            },
+            "VIS_ROTOR_rl_l": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            },
+            "VIS_ROTOR_rl_u": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            },
+            "VIS_ROTOR_rr_l": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            },
+            "VIS_ROTOR_rr_u": {
+              "direct_objects": 7,
+              "all_objects": 7,
+              "children": {}
+            }
+          }
+        },
+        "VIS_STRUCTURE": {
+          "direct_objects": 0,
+          "all_objects": 19,
+          "children": {
+            "VIS_ARMS": {
+              "direct_objects": 8,
+              "all_objects": 8,
+              "children": {}
+            },
+            "VIS_FRAME": {
+              "direct_objects": 5,
+              "all_objects": 5,
+              "children": {}
+            },
+            "VIS_LANDING_GEAR": {
+              "direct_objects": 6,
+              "all_objects": 6,
+              "children": {}
+            }
+          }
+        }
+      }
+    },
+    "ANCHORS": {
+      "direct_objects": 0,
+      "all_objects": 9,
+      "children": {
+        "ANCHOR_CENTER_OF_MASS": {
+          "direct_objects": 1,
+          "all_objects": 1,
+          "children": {}
+        },
+        "ANCHOR_MOTOR_AXES": {
+          "direct_objects": 8,
+          "all_objects": 8,
+          "children": {}
+        }
+      }
+    },
+    "COLLISION": {
+      "direct_objects": 0,
+      "all_objects": 16,
+      "children": {
+        "COLLISION_BODY": {
+          "direct_objects": 1,
+          "all_objects": 1,
+          "children": {}
+        },
+        "COLLISION_LANDING_GEAR": {
+          "direct_objects": 2,
+          "all_objects": 2,
+          "children": {}
+        },
+        "COLLISION_STRUCTURE": {
+          "direct_objects": 13,
+          "all_objects": 13,
+          "children": {}
+        }
+      }
+    },
+    "CAMERAS": {
+      "direct_objects": 0,
+      "all_objects": 0,
+      "children": {}
+    },
+    "REF_PHOTOS": {
+      "direct_objects": 0,
+      "all_objects": 0,
+      "children": {}
+    }
+  }
+}

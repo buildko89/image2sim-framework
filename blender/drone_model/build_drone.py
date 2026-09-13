@@ -2552,6 +2552,12 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             body_material,
             root,
         )
+    elif body_shape == "faceted":
+        # ★ 2026-09-13: 角ばった多面体の胴体（origin-01 系の意匠）。**別ファイル**に置いてあり、
+        #   この分岐を通るとき以外は読み込まない（既存の機体の生成物は変わらない）。
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from faceted_shell import create_faceted_body
+        body_obj = create_faceted_body("body_core", body, collections.body, body_material, root, material_lookup)
     else:
         raise ValueError(f"未対応のbody.shapeです: {body_shape}")
     body_obj["part_type"] = "body"

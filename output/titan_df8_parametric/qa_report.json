@@ -1,0 +1,544 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-09-13T06:10:51.037257+00:00",
+  "status": "PASS",
+  "dimensions_provisional": true,
+  "checks": {
+    "build_report_schema": {
+      "expected": "1.3",
+      "actual": "1.3",
+      "pass": true
+    },
+    "world_coordinate_metadata": {
+      "reported_transform_space": "world",
+      "record_count": 33,
+      "pass": true
+    },
+    "motor_count": {
+      "expected": 8,
+      "actual": 8,
+      "pass": true
+    },
+    "required_names": {
+      "missing": [],
+      "pass": true
+    },
+    "duplicate_suffix_names": {
+      "names": [],
+      "pass": true
+    },
+    "duplicate_suffix_collection_names": {
+      "names": [],
+      "pass": true
+    },
+    "top_level_collections": {
+      "expected": [
+        "ANCHORS",
+        "CAMERAS",
+        "COLLISION",
+        "MODEL_VISUAL",
+        "REF_PHOTOS"
+      ],
+      "actual": [
+        "ANCHORS",
+        "CAMERAS",
+        "COLLISION",
+        "MODEL_VISUAL",
+        "REF_PHOTOS"
+      ],
+      "pass": true
+    },
+    "rotor_collections": {
+      "expected": [
+        "VIS_ROTOR_fl_l",
+        "VIS_ROTOR_fl_u",
+        "VIS_ROTOR_fr_l",
+        "VIS_ROTOR_fr_u",
+        "VIS_ROTOR_rl_l",
+        "VIS_ROTOR_rl_u",
+        "VIS_ROTOR_rr_l",
+        "VIS_ROTOR_rr_u"
+      ],
+      "actual": [
+        "VIS_ROTOR_fl_l",
+        "VIS_ROTOR_fl_u",
+        "VIS_ROTOR_fr_l",
+        "VIS_ROTOR_fr_u",
+        "VIS_ROTOR_rl_l",
+        "VIS_ROTOR_rl_u",
+        "VIS_ROTOR_rr_l",
+        "VIS_ROTOR_rr_u"
+      ],
+      "pass": true
+    },
+    "collection_recursive_counts": {
+      "expected": {
+        "MODEL_VISUAL": 112,
+        "ANCHORS": 9,
+        "COLLISION": 16,
+        "CAMERAS": 0,
+        "REF_PHOTOS": 0
+      },
+      "actual": {
+        "ANCHORS": 9,
+        "MODEL_VISUAL": 112,
+        "CAMERAS": 0,
+        "COLLISION": 16,
+        "REF_PHOTOS": 0
+      },
+      "pass": true
+    },
+    "groove_parents": {
+      "errors": {},
+      "pass": true
+    },
+    "rotor_fixed_children": {
+      "expected": {
+        "fl_u": [
+          "motor_fl_u",
+          "motor_fl_u_shaft",
+          "motor_mount_fl_u"
+        ],
+        "fl_l": [
+          "motor_fl_l",
+          "motor_fl_l_shaft",
+          "motor_mount_fl_l"
+        ],
+        "fr_u": [
+          "motor_fr_u",
+          "motor_fr_u_shaft",
+          "motor_mount_fr_u"
+        ],
+        "fr_l": [
+          "motor_fr_l",
+          "motor_fr_l_shaft",
+          "motor_mount_fr_l"
+        ],
+        "rl_u": [
+          "motor_mount_rl_u",
+          "motor_rl_u",
+          "motor_rl_u_shaft"
+        ],
+        "rl_l": [
+          "motor_mount_rl_l",
+          "motor_rl_l",
+          "motor_rl_l_shaft"
+        ],
+        "rr_u": [
+          "motor_mount_rr_u",
+          "motor_rr_u",
+          "motor_rr_u_shaft"
+        ],
+        "rr_l": [
+          "motor_mount_rr_l",
+          "motor_rr_l",
+          "motor_rr_l_shaft"
+        ]
+      },
+      "actual": {
+        "fl_u": [
+          "motor_fl_u",
+          "motor_fl_u_shaft",
+          "motor_mount_fl_u"
+        ],
+        "fl_l": [
+          "motor_fl_l",
+          "motor_fl_l_shaft",
+          "motor_mount_fl_l"
+        ],
+        "fr_u": [
+          "motor_fr_u",
+          "motor_fr_u_shaft",
+          "motor_mount_fr_u"
+        ],
+        "fr_l": [
+          "motor_fr_l",
+          "motor_fr_l_shaft",
+          "motor_mount_fr_l"
+        ],
+        "rl_u": [
+          "motor_mount_rl_u",
+          "motor_rl_u",
+          "motor_rl_u_shaft"
+        ],
+        "rl_l": [
+          "motor_mount_rl_l",
+          "motor_rl_l",
+          "motor_rl_l_shaft"
+        ],
+        "rr_u": [
+          "motor_mount_rr_u",
+          "motor_rr_u",
+          "motor_rr_u_shaft"
+        ],
+        "rr_l": [
+          "motor_mount_rr_l",
+          "motor_rr_l",
+          "motor_rr_l_shaft"
+        ]
+      },
+      "pass": true
+    },
+    "rotor_spinning_children": {
+      "expected": {
+        "fl_u": [
+          "rotor_fl_u_blades",
+          "rotor_fl_u_hub"
+        ],
+        "fl_l": [
+          "rotor_fl_l_blades",
+          "rotor_fl_l_hub"
+        ],
+        "fr_u": [
+          "rotor_fr_u_blades",
+          "rotor_fr_u_hub"
+        ],
+        "fr_l": [
+          "rotor_fr_l_blades",
+          "rotor_fr_l_hub"
+        ],
+        "rl_u": [
+          "rotor_rl_u_blades",
+          "rotor_rl_u_hub"
+        ],
+        "rl_l": [
+          "rotor_rl_l_blades",
+          "rotor_rl_l_hub"
+        ],
+        "rr_u": [
+          "rotor_rr_u_blades",
+          "rotor_rr_u_hub"
+        ],
+        "rr_l": [
+          "rotor_rr_l_blades",
+          "rotor_rr_l_hub"
+        ]
+      },
+      "actual": {
+        "fl_u": [
+          "rotor_fl_u_blades",
+          "rotor_fl_u_hub"
+        ],
+        "fl_l": [
+          "rotor_fl_l_blades",
+          "rotor_fl_l_hub"
+        ],
+        "fr_u": [
+          "rotor_fr_u_blades",
+          "rotor_fr_u_hub"
+        ],
+        "fr_l": [
+          "rotor_fr_l_blades",
+          "rotor_fr_l_hub"
+        ],
+        "rl_u": [
+          "rotor_rl_u_blades",
+          "rotor_rl_u_hub"
+        ],
+        "rl_l": [
+          "rotor_rl_l_blades",
+          "rotor_rl_l_hub"
+        ],
+        "rr_u": [
+          "rotor_rr_u_blades",
+          "rotor_rr_u_hub"
+        ],
+        "rr_l": [
+          "rotor_rr_l_blades",
+          "rotor_rr_l_hub"
+        ]
+      },
+      "pass": true
+    },
+    "rotor_spin_origins": {
+      "maximum_error_mm": 0.0,
+      "pass": true
+    },
+    "world_thrust_axes": {
+      "expected": {
+        "fl_u": [
+          0.10950151724386253,
+          0.13477137802637026,
+          0.9848076428349677
+        ],
+        "fl_l": [
+          -0.10950151724386253,
+          -0.13477137802637026,
+          0.9848076428349677
+        ],
+        "fr_u": [
+          -0.10950151724386253,
+          0.13477137802637026,
+          0.9848076428349677
+        ],
+        "fr_l": [
+          0.10950151724386253,
+          -0.13477137802637026,
+          0.9848076428349677
+        ],
+        "rl_u": [
+          0.10950151724386253,
+          -0.13477137802637026,
+          0.9848076428349677
+        ],
+        "rl_l": [
+          -0.10950151724386253,
+          0.13477137802637026,
+          0.9848076428349677
+        ],
+        "rr_u": [
+          -0.10950151724386253,
+          -0.13477137802637026,
+          0.9848076428349677
+        ],
+        "rr_l": [
+          0.10950151724386253,
+          0.13477137802637026,
+          0.9848076428349677
+        ]
+      },
+      "actual": {
+        "fl_u": [
+          0.109501518,
+          0.134771392,
+          0.98480767
+        ],
+        "fl_l": [
+          -0.109501518,
+          -0.134771392,
+          0.98480767
+        ],
+        "fr_u": [
+          -0.109501518,
+          0.134771392,
+          0.98480767
+        ],
+        "fr_l": [
+          0.109501518,
+          -0.134771392,
+          0.98480767
+        ],
+        "rl_u": [
+          0.109501518,
+          -0.134771392,
+          0.98480767
+        ],
+        "rl_l": [
+          -0.109501518,
+          0.134771392,
+          0.98480767
+        ],
+        "rr_u": [
+          -0.109501518,
+          -0.134771392,
+          0.98480767
+        ],
+        "rr_l": [
+          0.109501518,
+          0.134771392,
+          0.98480767
+        ]
+      },
+      "pass": true
+    },
+    "motor_axis_world_positions": {
+      "expected_mm": {
+        "fl_u": [
+          -800.0,
+          650.0,
+          540.0
+        ],
+        "fl_l": [
+          -800.0,
+          650.0,
+          290.0
+        ],
+        "fr_u": [
+          800.0,
+          650.0,
+          540.0
+        ],
+        "fr_l": [
+          800.0,
+          650.0,
+          290.0
+        ],
+        "rl_u": [
+          -800.0,
+          -650.0,
+          540.0
+        ],
+        "rl_l": [
+          -800.0,
+          -650.0,
+          290.0
+        ],
+        "rr_u": [
+          800.0,
+          -650.0,
+          540.0
+        ],
+        "rr_l": [
+          800.0,
+          -650.0,
+          290.0
+        ]
+      },
+      "actual_mm": {
+        "fl_u": [
+          -800.000012,
+          649.999976,
+          540.000021
+        ],
+        "fl_l": [
+          -800.000012,
+          649.999976,
+          289.999992
+        ],
+        "fr_u": [
+          800.000012,
+          649.999976,
+          540.000021
+        ],
+        "fr_l": [
+          800.000012,
+          649.999976,
+          289.999992
+        ],
+        "rl_u": [
+          -800.000012,
+          -649.999976,
+          540.000021
+        ],
+        "rl_l": [
+          -800.000012,
+          -649.999976,
+          289.999992
+        ],
+        "rr_u": [
+          800.000012,
+          -649.999976,
+          540.000021
+        ],
+        "rr_l": [
+          800.000012,
+          -649.999976,
+          289.999992
+        ]
+      },
+      "pass": true
+    },
+    "motor_world_positions": {
+      "expected_mm": {
+        "fl_u": [
+          -807.6651062070704,
+          640.5660035381541,
+          471.06346500155223
+        ],
+        "fl_l": [
+          -807.6651062070704,
+          640.5660035381541,
+          358.93653499844777
+        ],
+        "fr_u": [
+          807.6651062070704,
+          640.5660035381541,
+          471.06346500155223
+        ],
+        "fr_l": [
+          807.6651062070704,
+          640.5660035381541,
+          358.93653499844777
+        ],
+        "rl_u": [
+          -807.6651062070704,
+          -640.5660035381541,
+          471.06346500155223
+        ],
+        "rl_l": [
+          -807.6651062070704,
+          -640.5660035381541,
+          358.93653499844777
+        ],
+        "rr_u": [
+          807.6651062070704,
+          -640.5660035381541,
+          471.06346500155223
+        ],
+        "rr_l": [
+          807.6651062070704,
+          -640.5660035381541,
+          358.93653499844777
+        ]
+      },
+      "actual_mm": {
+        "fl_u": [
+          -807.66511,
+          640.565991,
+          471.063465
+        ],
+        "fl_l": [
+          -807.66511,
+          640.565991,
+          358.936548
+        ],
+        "fr_u": [
+          807.66511,
+          640.565991,
+          471.063465
+        ],
+        "fr_l": [
+          807.66511,
+          640.565991,
+          358.936548
+        ],
+        "rl_u": [
+          -807.66511,
+          -640.565991,
+          471.063465
+        ],
+        "rl_l": [
+          -807.66511,
+          -640.565991,
+          358.936548
+        ],
+        "rr_u": [
+          807.66511,
+          -640.565991,
+          471.063465
+        ],
+        "rr_l": [
+          807.66511,
+          -640.565991,
+          358.936548
+        ]
+      },
+      "pass": true
+    },
+    "anchor_matrix_world_consistency": {
+      "pass": true
+    },
+    "center_of_mass_world_position": {
+      "expected_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "actual_mm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass": true
+    },
+    "collision_proxy_world_records": {
+      "expected_count": 16,
+      "actual_count": 16,
+      "pass": true
+    }
+  },
+  "notes": [
+    "写真から判別できない小部品形状は代表形状でモデル化しています。",
+    "質量、重心、慣性、実機ローター回転方向は実測・確認後に更新してください。"
+  ]
+}

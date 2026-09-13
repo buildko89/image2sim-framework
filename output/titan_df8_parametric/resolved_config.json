@@ -1,0 +1,664 @@
+{
+  "schema_version": "1.1",
+  "template_id": "multirotor_base",
+  "units": "mm",
+  "dimensions_provisional": true,
+  "coordinate_system": {
+    "right_axis": "+X",
+    "front_axis": "+Y",
+    "up_axis": "+Z",
+    "root_origin": "estimated_center_of_mass"
+  },
+  "layout": {
+    "mode": "explicit",
+    "rotor_count": 4,
+    "radius_mm": 50.0,
+    "start_angle_deg": -45.0,
+    "id_prefix": "r",
+    "motor_axis_z_mm": 540.0,
+    "motor_positions_mm": {
+      "fl_u": [
+        -800.0,
+        650.0,
+        540.0
+      ],
+      "fl_l": [
+        -800.0,
+        650.0,
+        290.0
+      ],
+      "fr_u": [
+        800.0,
+        650.0,
+        540.0
+      ],
+      "fr_l": [
+        800.0,
+        650.0,
+        290.0
+      ],
+      "rl_u": [
+        -800.0,
+        -650.0,
+        540.0
+      ],
+      "rl_l": [
+        -800.0,
+        -650.0,
+        290.0
+      ],
+      "rr_u": [
+        800.0,
+        -650.0,
+        540.0
+      ],
+      "rr_l": [
+        800.0,
+        -650.0,
+        290.0
+      ]
+    },
+    "rotor_roles": {
+      "fl_u": "lift",
+      "fl_l": "lift",
+      "fr_u": "lift",
+      "fr_l": "lift",
+      "rl_u": "lift",
+      "rl_l": "lift",
+      "rr_u": "lift",
+      "rr_l": "lift"
+    },
+    "rotor_orientation_deg": {
+      "fl_u": [
+        -7.7454,
+        6.3447,
+        0.0
+      ],
+      "fl_l": [
+        7.7454,
+        -6.3447,
+        0.0
+      ],
+      "fr_u": [
+        -7.7454,
+        -6.3447,
+        0.0
+      ],
+      "fr_l": [
+        7.7454,
+        6.3447,
+        0.0
+      ],
+      "rl_u": [
+        7.7454,
+        6.3447,
+        0.0
+      ],
+      "rl_l": [
+        -7.7454,
+        -6.3447,
+        0.0
+      ],
+      "rr_u": [
+        7.7454,
+        -6.3447,
+        0.0
+      ],
+      "rr_l": [
+        -7.7454,
+        6.3447,
+        0.0
+      ]
+    }
+  },
+  "body": {
+    "shape": "faceted",
+    "width_mm": 900.0,
+    "length_mm": 1560.0,
+    "height_mm": 420.0,
+    "center_z_mm": 0.0,
+    "bevel_mm": 5.0,
+    "material": "black",
+    "faceted": {
+      "chamfer_w": 0.16,
+      "chamfer_h": 0.32,
+      "stations": [
+        {
+          "t": -1.0,
+          "scale_w": 0.74,
+          "scale_h": 0.66,
+          "z_offset": 0.05
+        },
+        {
+          "t": -0.82,
+          "scale_w": 0.96,
+          "scale_h": 0.94,
+          "z_offset": 0.0
+        },
+        {
+          "t": 0.3,
+          "scale_w": 1.0,
+          "scale_h": 1.0,
+          "z_offset": 0.0
+        },
+        {
+          "t": 0.76,
+          "scale_w": 0.93,
+          "scale_h": 0.84,
+          "z_offset": -0.04
+        },
+        {
+          "t": 1.0,
+          "scale_w": 0.56,
+          "scale_h": 0.46,
+          "z_offset": -0.12
+        }
+      ],
+      "details": {
+        "accent_material": "led_green",
+        "panel_material": "aluminum",
+        "trim_material": "dark",
+        "visor_material": "lens",
+        "top_panel": true,
+        "accent_stripes": true,
+        "side_panels": true,
+        "vents": true,
+        "vent_count": 5,
+        "visor": true
+      }
+    }
+  },
+  "arm": {
+    "enabled": true,
+    "root_width_mm": 110.0,
+    "tip_width_mm": 80.0,
+    "thickness_mm": 70.0,
+    "root_fraction": 0.42,
+    "center_z_mm": 415.0,
+    "style": "solid"
+  },
+  "motor": {
+    "housing_diameter_mm": 120.0,
+    "housing_height_mm": 100.0,
+    "center_z_mm": 470.0,
+    "shaft_diameter_mm": 22.0,
+    "shaft_height_mm": 30.0,
+    "center_z_by_rotor_mm": {
+      "fl_u": 470.0,
+      "fl_l": 360.0,
+      "fr_u": 470.0,
+      "fr_l": 360.0,
+      "rl_u": 470.0,
+      "rl_l": 360.0,
+      "rr_u": 470.0,
+      "rr_l": 360.0
+    },
+    "material": "aluminum"
+  },
+  "propeller": {
+    "diameter_mm": 1066.0,
+    "hub_diameter_mm": 90.0,
+    "hub_height_mm": 30.0,
+    "blade_count": 2,
+    "blade_root_width_mm": 95.0,
+    "blade_tip_width_mm": 45.0,
+    "blade_thickness_mm": 10.0,
+    "blade_root_radius_mm": 55.0,
+    "center_z_mm": 540.0,
+    "direction_pattern": [
+      "ccw",
+      "cw"
+    ],
+    "direction_source": "design",
+    "blade_shape": "tapered_pointed",
+    "center_z_by_rotor_mm": {
+      "fl_u": 540.0,
+      "fl_l": 290.0,
+      "fr_u": 540.0,
+      "fr_l": 290.0,
+      "rl_u": 540.0,
+      "rl_l": 290.0,
+      "rr_u": 540.0,
+      "rr_l": 290.0
+    },
+    "directions": {
+      "fl_u": "ccw",
+      "fl_l": "cw",
+      "fr_u": "cw",
+      "fr_l": "ccw",
+      "rl_u": "cw",
+      "rl_l": "ccw",
+      "rr_u": "ccw",
+      "rr_l": "cw"
+    },
+    "display_angles_deg": {
+      "fl_u": 45.0,
+      "fl_l": -45.0,
+      "fr_u": -45.0,
+      "fr_l": 45.0,
+      "rl_u": -45.0,
+      "rl_l": 45.0,
+      "rr_u": 45.0,
+      "rr_l": -45.0
+    }
+  },
+  "guard": {
+    "enabled": false,
+    "size_mode": "explicit",
+    "outer_diameter_mm": 44.0,
+    "tube_diameter_mm": 2.0,
+    "center_z_mm": 6.0,
+    "inner_gap_deg": 80.0,
+    "major_segments": 40,
+    "minor_segments": 8,
+    "strut_count": 3,
+    "strut_radius_mm": 0.65
+  },
+  "landing": {
+    "enabled": true,
+    "leg_diameter_mm": 3.0,
+    "leg_height_mm": 8.0,
+    "leg_center_z_mm": -6.0,
+    "foot_diameter_mm": 4.5,
+    "foot_height_mm": 3.0,
+    "foot_center_z_mm": -10.0,
+    "style": "skid",
+    "material": "dark",
+    "skid": {
+      "offset_x_mm": 430.0,
+      "center_y_mm": 0.0,
+      "length_mm": 1700.0,
+      "width_mm": 60.0,
+      "height_mm": 50.0,
+      "center_z_mm": -505.0,
+      "bevel_mm": 15.0
+    },
+    "struts": {
+      "width_mm": 50.0,
+      "depth_mm": 70.0,
+      "top_z_mm": -150.0,
+      "bottom_z_mm": -530.0,
+      "y_mm": [
+        520.0,
+        -520.0
+      ],
+      "bevel_mm": 12.0
+    }
+  },
+  "physics": {
+    "center_of_mass_mm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "center_of_mass_source": "placeholder",
+    "mass_g": 30000.0,
+    "inertia_kg_m2": null,
+    "inertia_source": "pending"
+  },
+  "references": {},
+  "output": {
+    "blend": "titan_df8.blend",
+    "glb": "titan_df8.glb",
+    "resolved_config": "resolved_config.json",
+    "build_report": "build_report.json",
+    "qa_report": "qa_report.json",
+    "render_resolution": 900,
+    "directory": "/data/buildman/drone/image2sim-framework/output/titan_df8_parametric"
+  },
+  "template_file": "config/drone_templates/multirotor_base.yaml",
+  "subject_id": "titan_df8",
+  "measurements": {
+    "propeller_diameter_mm": {
+      "value": 1066.0,
+      "source": "design",
+      "note": "42 インチ（タイタン機の設計値・翼端マッハ 0.6 以下）"
+    },
+    "mass_g": {
+      "value": 30000.0,
+      "source": "design",
+      "note": "全備の目安。正は hakoniwa-mujoco-drone の質量表"
+    }
+  },
+  "motor_mount": {
+    "enabled": true,
+    "material": "dark",
+    "dimensions_mm": [
+      150.0,
+      150.0,
+      90.0
+    ],
+    "center_z_mm": 415.0,
+    "bevel_mm": 12.0
+  },
+  "structure": {
+    "enabled": true,
+    "show_grooves": false,
+    "members": [
+      {
+        "id": "pylon_fl",
+        "shape": "cylinder",
+        "profile": "tube",
+        "material": "dark",
+        "dimensions_mm": [
+          70.0,
+          70.0,
+          230.0
+        ],
+        "location_mm": [
+          -336.0,
+          273.0,
+          300.0
+        ]
+      },
+      {
+        "id": "pylon_fr",
+        "shape": "cylinder",
+        "profile": "tube",
+        "material": "dark",
+        "dimensions_mm": [
+          70.0,
+          70.0,
+          230.0
+        ],
+        "location_mm": [
+          336.0,
+          273.0,
+          300.0
+        ]
+      },
+      {
+        "id": "pylon_rl",
+        "shape": "cylinder",
+        "profile": "tube",
+        "material": "dark",
+        "dimensions_mm": [
+          70.0,
+          70.0,
+          230.0
+        ],
+        "location_mm": [
+          -336.0,
+          -273.0,
+          300.0
+        ]
+      },
+      {
+        "id": "pylon_rr",
+        "shape": "cylinder",
+        "profile": "tube",
+        "material": "dark",
+        "dimensions_mm": [
+          70.0,
+          70.0,
+          230.0
+        ],
+        "location_mm": [
+          336.0,
+          -273.0,
+          300.0
+        ]
+      },
+      {
+        "id": "rtg",
+        "shape": "cylinder",
+        "profile": "rtg",
+        "material": "aluminum",
+        "dimensions_mm": [
+          260.0,
+          420.0,
+          260.0
+        ],
+        "location_mm": [
+          0.0,
+          -800.0,
+          40.0
+        ]
+      }
+    ]
+  },
+  "equipment": {
+    "boxes": [
+      {
+        "id": "battery",
+        "part_type": "battery",
+        "dimensions_mm": [
+          520.0,
+          700.0,
+          150.0
+        ],
+        "location_mm": [
+          0.0,
+          0.0,
+          -90.0
+        ],
+        "material": "battery"
+      },
+      {
+        "id": "flight_computer",
+        "part_type": "flight_computer",
+        "dimensions_mm": [
+          300.0,
+          300.0,
+          100.0
+        ],
+        "location_mm": [
+          0.0,
+          150.0,
+          80.0
+        ],
+        "material": "electronics"
+      },
+      {
+        "id": "drill_left",
+        "part_type": "sampler",
+        "dimensions_mm": [
+          90.0,
+          160.0,
+          220.0
+        ],
+        "location_mm": [
+          -430.0,
+          250.0,
+          -390.0
+        ],
+        "material": "dark"
+      },
+      {
+        "id": "drill_right",
+        "part_type": "sampler",
+        "dimensions_mm": [
+          90.0,
+          160.0,
+          220.0
+        ],
+        "location_mm": [
+          430.0,
+          250.0,
+          -390.0
+        ],
+        "material": "dark"
+      }
+    ],
+    "round_sensors": [
+      {
+        "id": "hga",
+        "part_type": "high_gain_antenna",
+        "location_mm": [
+          0.0,
+          -150.0,
+          215.0
+        ],
+        "aim_vector": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "diameter_mm": 520.0,
+        "face_diameter_mm": 470.0,
+        "depth_mm": 60.0
+      },
+      {
+        "id": "nav_cam_left",
+        "part_type": "camera",
+        "location_mm": [
+          -160.0,
+          755.0,
+          60.0
+        ],
+        "aim_vector": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "diameter_mm": 70.0,
+        "face_diameter_mm": 50.0,
+        "depth_mm": 40.0
+      },
+      {
+        "id": "nav_cam_right",
+        "part_type": "camera",
+        "location_mm": [
+          160.0,
+          755.0,
+          60.0
+        ],
+        "aim_vector": [
+          0.0,
+          1.0,
+          0.0
+        ],
+        "diameter_mm": 70.0,
+        "face_diameter_mm": 50.0,
+        "depth_mm": 40.0
+      },
+      {
+        "id": "lidar",
+        "part_type": "lidar",
+        "location_mm": [
+          0.0,
+          750.0,
+          -120.0
+        ],
+        "aim_vector": [
+          0.0,
+          0.7,
+          -0.7
+        ],
+        "diameter_mm": 110.0,
+        "face_diameter_mm": 90.0,
+        "depth_mm": 60.0
+      }
+    ]
+  },
+  "lights": [
+    {
+      "id": "nav_left",
+      "part_type": "led_eye",
+      "material": "led_green",
+      "size_mm": [
+        30.0,
+        20.0,
+        20.0
+      ],
+      "location_mm": [
+        -455.0,
+        600.0,
+        120.0
+      ]
+    },
+    {
+      "id": "nav_right",
+      "part_type": "led_eye",
+      "material": "led_red",
+      "size_mm": [
+        30.0,
+        20.0,
+        20.0
+      ],
+      "location_mm": [
+        455.0,
+        600.0,
+        120.0
+      ]
+    }
+  ],
+  "template_metadata": {
+    "template_file": "/data/buildman/drone/image2sim-framework/config/drone_templates/multirotor_base.yaml",
+    "template_id": "multirotor_base",
+    "subject_config": "/data/buildman/drone/image2sim-framework/config/titan_df8_model.yaml"
+  },
+  "derived": {
+    "layout_mode": "explicit",
+    "rotor_ids": [
+      "fl_u",
+      "fl_l",
+      "fr_u",
+      "fr_l",
+      "rl_u",
+      "rl_l",
+      "rr_u",
+      "rr_l"
+    ],
+    "rotor_count": 8,
+    "rotor_directions": {
+      "fl_u": "ccw",
+      "fl_l": "cw",
+      "fr_u": "cw",
+      "fr_l": "ccw",
+      "rl_u": "cw",
+      "rl_l": "ccw",
+      "rr_u": "ccw",
+      "rr_l": "cw"
+    },
+    "motor_center_spacing_x_mm": null,
+    "motor_center_spacing_y_mm": null,
+    "guard_outer_diameter_mm": null,
+    "guard_outer_width_mm": null,
+    "guard_outer_length_mm": null,
+    "guard_inner_diameter_mm": null,
+    "propeller_radial_clearance_mm": null,
+    "motor_positions_mm": {
+      "fl_u": [
+        -800.0,
+        650.0,
+        540.0
+      ],
+      "fl_l": [
+        -800.0,
+        650.0,
+        290.0
+      ],
+      "fr_u": [
+        800.0,
+        650.0,
+        540.0
+      ],
+      "fr_l": [
+        800.0,
+        650.0,
+        290.0
+      ],
+      "rl_u": [
+        -800.0,
+        -650.0,
+        540.0
+      ],
+      "rl_l": [
+        -800.0,
+        -650.0,
+        290.0
+      ],
+      "rr_u": [
+        800.0,
+        -650.0,
+        540.0
+      ],
+      "rr_l": [
+        800.0,
+        -650.0,
+        290.0
+      ]
+    }
+  }
+}

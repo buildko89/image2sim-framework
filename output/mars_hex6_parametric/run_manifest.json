@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-09-13T06:10:23.137302+00:00",
+  "config": "/data/buildman/drone/image2sim-framework/config/mars_hex6_model.yaml",
+  "config_sha256": "5cbc0531b7ef7cd56d7f48a6542281ed355b8ec01e445abb6b5fab99413caedf",
+  "resolved_config": "/data/buildman/drone/image2sim-framework/output/mars_hex6_parametric/resolved_config.json",
+  "blend": "/data/buildman/drone/image2sim-framework/output/mars_hex6_parametric/mars_hex6.blend",
+  "glb": "/data/buildman/drone/image2sim-framework/output/mars_hex6_parametric/mars_hex6.glb",
+  "glb_sha256": "1477bb3c9aa4c4e1399abfbc08f319413ff355d8252c7c3454e79dad0387ad05",
+  "qa": "/data/buildman/drone/image2sim-framework/output/mars_hex6_parametric/qa_report.json",
+  "qa_status": "PASS"
+}
