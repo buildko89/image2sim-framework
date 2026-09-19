@@ -1539,33 +1539,87 @@ def create_side_integrated_guard(
     collection: bpy.types.Collection,
     material: bpy.types.Material,
     parent: bpy.types.Object,
+    motor_pos_front: tuple[float, float] | None = None,
+    motor_pos_rear: tuple[float, float] | None = None,
     major_segments: int = 48,
 ) -> tuple[bpy.types.Object, float, tuple[float, float]]:
-    wall_thickness = mm(1.4)
+    wall_thickness = tube_diameter if tube_diameter > 0.0 else mm(1.4)
     wall_height = mm(4.8)
     half_w = outer_width / 2.0 - wall_thickness / 2.0
     half_l = outer_length / 2.0 - wall_thickness / 2.0
-    gap_x = mm(18.0) * side_sign
 
+    if motor_pos_front is not None and motor_pos_rear is not None:
+        mx = abs(motor_pos_front[0])
+        my_f = abs(motor_pos_front[1])
+        my_r = abs(motor_pos_rear[1])
+    else:
+        mx = half_w * 0.505
+        my_f = half_l * 0.505
+        my_r = half_l * 0.505
+
+    # Guard radius around each motor center to centerline
+    guard_r = max(mm(10.0), half_w - mx)
+
+    # Generate centerline in left-side space (x < 0), then mirror for right-side
     centerline_points: list[Vector] = []
-    for i in range(major_segments + 1):
-        t = i / major_segments
-        y = -half_l + (2.0 * half_l) * t
-        rel_y = y / half_l
-        waist_dip = 0.25 * math.exp(-6.0 * rel_y * rel_y)
-        profile = (1.0 - waist_dip) * (math.sin(math.pi * t) ** 0.45)
-        rx = half_w * profile
-        cx = side_sign * rx + (1.0 - math.sin(math.pi * t)) * gap_x
-        centerline_points.append(Vector((cx, y, center_z)))
+
+    # 1. Front arc: from inner-front (+35 deg from -Y) to outer-rear transition (126 deg)
+    # Local polar angle phi: 0 deg is -Y (front), 90 deg is -X (outer/left), 126 deg is outer-rear
+    num_arc = 20
+    phi_start = -35.0
+    phi_end = 126.0
+    for i in range(num_arc + 1):
+        t = i / num_arc
+        phi = math.radians(phi_start + (phi_end - phi_start) * t)
+        lx = -mx - guard_r * math.sin(phi)
+        ly = -my_f - guard_r * math.cos(phi)
+        centerline_points.append(Vector((side_sign * abs(lx), ly, center_z)))
+
+    # 2. Waist transition between front arc and rear arc (smooth cubic curve)
+    # Waist midpoint at Y = 0
+    waist_x = mx + guard_r * 0.44
+    pt_f_end = centerline_points[-1]
+    
+    # Rear arc start point
+    rear_phi_start = 126.0
+    rear_phi_end = -35.0
+    lx_r_start = -mx - guard_r * math.sin(math.radians(rear_phi_start))
+    ly_r_start = my_r + guard_r * math.cos(math.radians(rear_phi_start))
+    pt_r_start = Vector((side_sign * abs(lx_r_start), ly_r_start, center_z))
+
+    num_waist = 12
+    for i in range(1, num_waist):
+        t = i / num_waist
+        if t <= 0.5:
+            u = t * 2.0
+            mid_ctrl = Vector((side_sign * waist_x, pt_f_end.y * 0.35, center_z))
+            waist_mid = Vector((side_sign * waist_x, 0.0, center_z))
+            p = (1.0 - u) ** 2 * pt_f_end + 2.0 * (1.0 - u) * u * mid_ctrl + u ** 2 * waist_mid
+        else:
+            u = (t - 0.5) * 2.0
+            waist_mid = Vector((side_sign * waist_x, 0.0, center_z))
+            mid_ctrl = Vector((side_sign * waist_x, pt_r_start.y * 0.35, center_z))
+            p = (1.0 - u) ** 2 * waist_mid + 2.0 * (1.0 - u) * u * mid_ctrl + u ** 2 * pt_r_start
+        centerline_points.append(p)
+
+    # 3. Rear arc: from outer-front transition (126 deg) to inner-rear (+35 deg from +Y)
+    # Local polar angle phi: 0 deg is +Y (rear), 90 deg is -X (outer/left), 126 deg is outer-front
+    for i in range(num_arc + 1):
+        t = i / num_arc
+        phi = math.radians(rear_phi_start + (rear_phi_end - rear_phi_start) * t)
+        lx = -mx - guard_r * math.sin(phi)
+        ly = my_r + guard_r * math.cos(phi)
+        centerline_points.append(Vector((side_sign * abs(lx), ly, center_z)))
 
     verts: list[tuple[float, float, float]] = []
     faces: list[tuple[int, ...]] = []
 
+    total_pts = len(centerline_points)
     for i, pt in enumerate(centerline_points):
         if i == 0:
             tangent = (centerline_points[1] - pt).normalized()
-        elif i == len(centerline_points) - 1:
-            tangent = (pt - centerline_points[-1]).normalized()
+        elif i == total_pts - 1:
+            tangent = (pt - centerline_points[-2]).normalized()
         else:
             tangent = (centerline_points[i + 1] - centerline_points[i - 1]).normalized()
         normal = Vector((-tangent.y, tangent.x, 0.0)).normalized()
@@ -1578,7 +1632,7 @@ def create_side_integrated_guard(
 
         verts.extend([tuple(v0), tuple(v1), tuple(v2), tuple(v3)])
 
-    for i in range(major_segments):
+    for i in range(total_pts - 1):
         base1 = i * 4
         base2 = (i + 1) * 4
         faces.append((base1 + 0, base1 + 1, base2 + 1, base2 + 0))
@@ -3140,12 +3194,16 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
                 full_l = mm(config["measurements"]["overall_length_mm"]["value"])
                 existing = bpy.data.objects.get(f"guard_side_{'left' if side_sign < 0 else 'right'}")
                 if existing is None:
+                    f_rotor_id = f"f{'l' if side_sign < 0 else 'r'}"
+                    r_rotor_id = f"r{'l' if side_sign < 0 else 'r'}"
+                    pos_f = tuple(mm(v) for v in positions[f_rotor_id][:2]) if f_rotor_id in positions else None
+                    pos_r = tuple(mm(v) for v in positions[r_rotor_id][:2]) if r_rotor_id in positions else None
                     guard_obj, _, _ = create_side_integrated_guard(
                         f"guard_side_{'left' if side_sign < 0 else 'right'}", side_sign, full_w, full_l,
                         mm(guard["tube_diameter_mm"]), mm(guard["center_z_mm"]),
                         require_collection(collections.guards, "guards"), black, root,
+                        motor_pos_front=pos_f, motor_pos_rear=pos_r,
                     )
-                    guard_obj.location.x = -0.0073 if side_sign < 0 else 0.0073
                 # Create a placeholder guard object with required QA name linked to the side guard
                 guard_obj = create_empty(
                     f"guard_{rotor_id}",
@@ -3170,25 +3228,35 @@ def build(config: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             if guard_style in ("side_integrated", "figure_eight", "codrone"):
                 side_sign = -1.0 if "l" in rotor_id else 1.0
                 y_sign = -1.0 if "f" in rotor_id else 1.0
-                start_pt = Vector((motor_xy.x, motor_xy.y, mm(-3.5)))
+                wall_thickness = mm(guard.get("tube_diameter_mm", 1.4))
+                guard_r = abs(full_w / 2.0 - wall_thickness / 2.0 - abs(motor_xy.x))
 
-                end_pt_1 = Vector((side_sign * mm(65.4), motor_xy.y, mm(11.5)))
-                knee_pt_1 = Vector(((motor_xy.x + side_sign * mm(65.4)) / 2.0, motor_xy.y, mm(3.5)))
+                strut_start_z = mm(guard.get("strut_start_z_mm", -2.0))
+                strut_end_z = mm(guard.get("strut_end_z_mm", guard["center_z_mm"]))
+                motor_r = mm(motor.get("housing_diameter_mm", 11.0)) / 2.0
+                knee_r_offset = mm(guard.get("strut_knee_radius_mm", 16.0))
+                knee_z = mm(guard.get("strut_knee_z_mm", -1.5))
+                strut_thickness = mm(guard.get("strut_radius_mm", 0.8))
+
+                start_pt_1 = Vector((motor_xy.x + side_sign * motor_r, motor_xy.y, strut_start_z))
+                knee_pt_1 = Vector((motor_xy.x + side_sign * knee_r_offset, motor_xy.y, knee_z))
+                end_pt_1 = Vector((side_sign * (abs(motor_xy.x) + guard_r), motor_xy.y, strut_end_z))
                 strut1 = create_bent_strut(
-                    f"guard_{rotor_id}_strut_01", start_pt, knee_pt_1, end_pt_1,
-                    mm(0.8), require_collection(collections.guards, "guards"), black, root
+                    f"guard_{rotor_id}_strut_01", start_pt_1, knee_pt_1, end_pt_1,
+                    strut_thickness, require_collection(collections.guards, "guards"), black, root
                 )
-                strut1["horizontal_projection_mm"] = round(math.hypot(end_pt_1.x - start_pt.x, end_pt_1.y - start_pt.y) * 1000.0, 3)
-                strut1["vertical_rise_mm"] = round((end_pt_1.z - start_pt.z) * 1000.0, 3)
+                strut1["horizontal_projection_mm"] = round(math.hypot(end_pt_1.x - start_pt_1.x, end_pt_1.y - start_pt_1.y) * 1000.0, 3)
+                strut1["vertical_rise_mm"] = round((end_pt_1.z - start_pt_1.z) * 1000.0, 3)
 
-                end_pt_2 = Vector((motor_xy.x, y_sign * mm(65.4), mm(11.5)))
-                knee_pt_2 = Vector((motor_xy.x, (motor_xy.y + y_sign * mm(65.4)) / 2.0, mm(3.5)))
+                start_pt_2 = Vector((motor_xy.x, motor_xy.y + y_sign * motor_r, strut_start_z))
+                knee_pt_2 = Vector((motor_xy.x, motor_xy.y + y_sign * knee_r_offset, knee_z))
+                end_pt_2 = Vector((motor_xy.x, y_sign * (abs(motor_xy.y) + guard_r), strut_end_z))
                 strut2 = create_bent_strut(
-                    f"guard_{rotor_id}_strut_02", start_pt, knee_pt_2, end_pt_2,
-                    mm(0.8), require_collection(collections.guards, "guards"), black, root
+                    f"guard_{rotor_id}_strut_02", start_pt_2, knee_pt_2, end_pt_2,
+                    strut_thickness, require_collection(collections.guards, "guards"), black, root
                 )
-                strut2["horizontal_projection_mm"] = round(math.hypot(end_pt_2.x - start_pt.x, end_pt_2.y - start_pt.y) * 1000.0, 3)
-                strut2["vertical_rise_mm"] = round((end_pt_2.z - start_pt.z) * 1000.0, 3)
+                strut2["horizontal_projection_mm"] = round(math.hypot(end_pt_2.x - start_pt_2.x, end_pt_2.y - start_pt_2.y) * 1000.0, 3)
+                strut2["vertical_rise_mm"] = round((end_pt_2.z - start_pt_2.z) * 1000.0, 3)
             else:
                 legacy_strut_z = mm(guard.get("strut_center_z_mm", guard["center_z_mm"] - 2.2))
                 strut_start_z = mm(guard["strut_start_z_mm"]) if guard.get("strut_start_z_mm") is not None else legacy_strut_z

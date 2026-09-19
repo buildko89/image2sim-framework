@@ -116,17 +116,23 @@ propeller:
 
 guard:
   enabled: true
+  style: side_integrated
   size_mode: fit_overall
   outer_diameter_mm:
     value: 65.824856
     source: derived
     formula: overall_width_mm - motor_center_x_mm
-  tube_diameter_mm: 2.4
-  center_z_mm: 8.0
+  tube_diameter_mm: 1.4
+  center_z_mm: 11.5
   inner_gap_deg: 84.0
   major_segments: 48
   minor_segments: 8
-  strut_count: 3
+  strut_count: 2
+  strut_start_z_mm: -2.0
+  strut_end_z_mm: 11.5
+  strut_knee_radius_mm: 16.0
+  strut_knee_z_mm: -1.5
+  strut_radius_mm: 0.8
   source: derived_and_photo_estimated
 
 landing:
@@ -140,11 +146,29 @@ landing:
   source: photo_estimated
 
 physics:
-  center_of_mass_mm: [0.0, 0.0, 0.0]
-  center_of_mass_source: placeholder
-  mass_g: null
-  inertia_kg_m2: null
-  inertia_source: pending
+  enabled: true
+  mass_g: 48.5
+  mass_source: estimated
+  center_of_mass_mm: [0.0, 0.0, 3.5]
+  center_of_mass_source: photo_estimated
+  inertia_kg_m2:
+    ixx: 2.1e-5
+    iyy: 2.3e-5
+    izz: 3.8e-5
+  inertia_source: estimated
+  collision:
+    enabled: true
+    default_approximation: convexHull
+  rotors:
+    joint_type: revolute
+    axis: Z
+    max_rpm: 35000
+    free_spin: true
+    damping: 1.0e-6
+    friction: 1.0e-5
+  scene:
+    gravity_magnitude: 9.81
+    gravity_direction: [0.0, -1.0, 0.0]
 
 references:
   top: input/raw_photos/drone2/上.jpg

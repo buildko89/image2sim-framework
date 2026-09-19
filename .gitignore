@@ -18,9 +18,15 @@ third_party/
 /unity/
 /unreal/
 
-# v1 期の設計・タスク文書（ローカル専用。公開しない。2026-07-16 に GitHub から削除。
-# README 用プレビュー画像は images/ へ移設済み）
-/docs/
+/docs/*
+!/docs/openusd_integration_plan.md
+!/docs/usd_physics_schema_spec.md
+!/docs/usd_variants_sensors_spec.md
+!/docs/game_engine_export_policy.md
+!/docs/isaac_sim_setup_guide.md
+!/docs/usd_pipeline_guide.md
+!/docs/progress_openusd_phase1.md
+/docs/debug/
 
 # Python cache and test cache
 __pycache__/

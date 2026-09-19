@@ -6,3 +6,4 @@ onnxruntime<2
 pooch
 requests
 opencv-python
+usd-core>=26.0

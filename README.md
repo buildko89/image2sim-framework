@@ -171,17 +171,44 @@ python -m compileall scripts\drone_model blender\drone_model
 ## リポジトリ構成
 
 ```text
-pipeline_v2/   v2 パイプライン本体（現在の主戦場）
+pipeline_v2/   v2 パイプライン本体（USD自動ビルドランナー・猫モデル生成）
+docs/          OpenUSDパイプライン手順書、物理・センサー仕様書、Isaac Sim導入ガイド
 newplan/       v2 の経緯・結果ドキュメント（P0仕様、各段の結果、セッションログ）
 newplan2/      パラメトリックドローンの設計・採寸・テンプレート利用方法
 blender/       猫モデルおよびドローン部品生成用のBlenderスクリプト群
-scripts/       画像処理、検証、ドローン生成ランナー
+scripts/       画像処理、検証、ドローン生成、USD/GLBエクスポートランナー
 config/        猫用パレット、ドローン機体設定、ドローンテンプレート
-output_v2/     生成物（p3_koha9face の glb/blend/テクスチャのみコミット。他はローカル再生成）
+output_v2/     生成物（p3_koha9face の glb/blend/テクスチャ、USDマスター、派生GLB）
+output/        ドローン生成物（パラメトリックUSDマスター、USDZ、派生GLB）
 output_v2/godot/Godot3dcat/   Godot 4.6 プロジェクト（猫コントローラ+ビューア。下記）
 images/        README 用プレビュー画像
 FACE_TUNING_GUIDE.md   顔の数値調整ガイド
 ```
+
+## OpenUSD パイプライン（SimReady & マルチエンジン配信）
+
+本フレームワークは、**OpenUSD（Universal Scene Description）をマスターアセット（Single Source of Truth: SSoT）** とする新パイプラインに対応しています。
+
+- **SimReady 物理統合（UsdPhysics）**: ドローンの回転ジョイント（`PhysicsRevoluteJoint`）、剛体・質量・慣性、凸包コライダ、猫の尻尾ジョイントおよび足裏接触球コライダを標準搭載。
+- **VariantSets（バリアント）**: プロペラガード着脱、バッテリー交換、毛柄切り替え、LOD切り替えを非破壊で動的に変更可能。
+- **センサー & BOM**: FPVカメラ（`UsdGeomCamera`）、6軸IMUセンサー、部品台帳（BOM）メタデータを Prim に統合。
+- **マルチエンジン自動派生**: マスター USD から、自己完結型 SimReady パッケージ（`.usdz`）と Godot 4.x 向け最適化 GLB（`.glb`）をワンコマンドで自動一括生成。
+
+### USD ビルドと確認コマンド
+
+```powershell
+# ドローンおよび猫アセットの USD / USDZ / 派生GLB を一括生成
+python pipeline_v2\run_usd_build.py --asset all
+
+# 生成されたモデルを Blender GUI でマテリアル表示・目視確認
+python scripts\usd\open_in_blender_gui.py --asset drone
+python scripts\usd\open_in_blender_gui.py --asset cat
+
+# USD 物理・バリアント・CI/CD パイプラインの全テストを実行
+python -m pytest tests/test_usd_physics.py tests/test_usd_variants_sensors.py tests/test_usd_pipeline_phase4.py -v
+```
+
+詳しい仕様と操作手順は **[OpenUSD パイプライン利用手順書 (docs/usd_pipeline_guide.md)](docs/usd_pipeline_guide.md)**、NVIDIA Isaac Sim 環境の導入手順は **[docs/isaac_sim_setup_guide.md](docs/isaac_sim_setup_guide.md)** を参照してください。
 
 ## Godot で動かす
 
