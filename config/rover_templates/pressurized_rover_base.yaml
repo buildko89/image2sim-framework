@@ -46,7 +46,14 @@ body:
   # 側面の帯（収納した太陽電池パネルの高さ）
   side_band: {z_bottom_mm: 1500.0, z_top_mm: 1950.0}
   # 上部（前＝白いキャビン、後ろ＝荷室の箱）
-  upper: {z_top_mm: 3650.0, cabin_length_ratio: 0.36, roof_bevel_mm: 220.0}
+  upper:
+    z_top_mm: 3650.0
+    cabin_length_ratio: 0.36
+    roof_bevel_mm: 220.0
+    # キャビン（白）：肩の面取り・前端で絞る（前の角の大きな面取り）
+    cabin: {roof_drop_mm: 140.0, shoulder_chamfer_mm: 650.0, front_width_ratio: 0.80, front_top_drop_mm: 320.0, front_taper_mm: 450.0}
+    # 荷室（灰色）：角の丸い箱・前側はキャビンから続く弧状のカバー
+    cargo: {corner_radius_mm: 380.0, front_arch_mm: 180.0, arch_length_ratio: 0.42}
   # 前面の張り出し（中央のバンパー・下部）
   nose: {bumper_protrusion_mm: 250.0, bumper_width_ratio: 0.55, bumper_z_mm: [700.0, 1350.0]}
   # 前輪の上の張り出し（懸架アームの覆い）
@@ -63,6 +70,8 @@ equipment:
   whip_antennas: [{x_mm: -1550.0, y_ratio: 0.30, height_mm: 700.0}, {x_mm: 1550.0, y_ratio: 0.30, height_mm: 700.0}]
   rear_hatch: {width_mm: 1300.0, height_mm: 1700.0, z_bottom_mm: 1650.0}
   rear_deck: {depth_mm: 600.0, z_mm: 1450.0}
+  rear_storage: {boxes: 3, width_mm: 650.0, height_mm: 500.0, depth_mm: 350.0}
+  rear_tanks: {count: 2, radius_mm: 180.0, height_mm: 1050.0}
   rear_stairs: {steps: 4, width_mm: 1000.0, pitch_mm: 170.0}
 
 # --- 取付点（センサ・照明。MJCF の site・エンジンのカメラ / ライトへ） ------------

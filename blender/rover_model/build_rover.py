@@ -244,6 +244,79 @@ def build_wheel(name: str, cfg: dict, coll, parent, outer_sign: float) -> bpy.ty
     return tire
 
 
+# --- 断面をつないで作る形（ロフト）・角の丸い枠 -------------------------------------
+
+def profile(w: float, zb: float, zt: float, corner: float = 0.0, style: str = "round", arch: float = 0.0,
+            seg: int = 6, top_samples: int = 8) -> list[tuple[float, float]]:
+    """XZ 平面の閉じた断面（下辺 → 右辺 → 右上の角 → 上辺 → 左上の角 → 左辺）。点の数は引数だけで決まる。
+    corner：上の角の大きさ、style：round（円弧）/ chamfer（面取り）、arch：上辺の中央の盛り上がり。"""
+    hw = w / 2.0
+    c = max(1e-4, min(corner, hw * 0.95, (zt - zb) * 0.95))
+    pts = [(-hw, zb), (hw, zb)]
+
+    def corner_pts(cx, cz, a0, a1, p0, p1):
+        out = []
+        for i in range(seg + 1):
+            t = i / seg
+            if style == "round":
+                a = a0 + (a1 - a0) * t
+                out.append((cx + c * math.cos(a), cz + c * math.sin(a)))
+            else:
+                out.append((p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t))
+        return out
+
+    pts += corner_pts(hw - c, zt - c, 0.0, math.pi / 2, (hw, zt - c), (hw - c, zt))
+    for i in range(1, top_samples + 1):
+        x = (hw - c) - 2 * (hw - c) * i / (top_samples + 1)
+        u = x / max(hw - c, 1e-6)
+        pts.append((x, zt + arch * (1.0 - u * u)))
+    pts += corner_pts(-hw + c, zt - c, math.pi / 2, math.pi, (-hw + c, zt), (-hw, zt - c))
+    return pts
+
+
+def loft(name, sections: list[tuple[float, list[tuple[float, float]]]], coll, mat, parent=None,
+         part_type="") -> bpy.types.Object:
+    """Y 方向に並べた断面 [(y, [(x, z), ...]), ...] を面でつなぐ（両端は蓋）。"""
+    bm = bmesh.new()
+    rings = [[bm.verts.new((x, y, z)) for (x, z) in pts] for y, pts in sections]
+    n = len(rings[0])
+    for a, b in zip(rings[:-1], rings[1:]):
+        for i in range(n):
+            j = (i + 1) % n
+            bm.faces.new((a[i], a[j], b[j], b[i]))
+    bm.faces.new(rings[0])
+    bm.faces.new(list(reversed(rings[-1])))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return _obj_from_bm(name, bm, coll, mat, parent, part_type=part_type)
+
+
+def rounded_frame(name, w, h, r, band, depth, loc, coll, mat, parent=None, part_type="") -> bpy.types.Object:
+    """XZ 平面の角の丸い枠（ハッチの枠など）。loc は枠の中心、depth は Y 方向の厚み。"""
+    def rr(wi, hi, ri, k=8):
+        pts = []
+        for (cx, cz, a0) in ((wi / 2 - ri, -hi / 2 + ri, -math.pi / 2), (wi / 2 - ri, hi / 2 - ri, 0.0),
+                             (-wi / 2 + ri, hi / 2 - ri, math.pi / 2), (-wi / 2 + ri, -hi / 2 + ri, math.pi)):
+            for i in range(k + 1):
+                a = a0 + math.pi / 2 * i / k
+                pts.append((cx + ri * math.cos(a), cz + ri * math.sin(a)))
+        return pts
+    outer, inner = rr(w, h, r), rr(w - 2 * band, h - 2 * band, max(r - band, 0.02))
+    bm = bmesh.new()
+    n = len(outer)
+    layers = []
+    for y in (depth / 2, -depth / 2):
+        layers.append(([bm.verts.new((x, y, z)) for x, z in outer], [bm.verts.new((x, y, z)) for x, z in inner]))
+    (of, inf), (ob, inb) = layers
+    for i in range(n):
+        j = (i + 1) % n
+        bm.faces.new((of[i], of[j], inf[j], inf[i]))
+        bm.faces.new((ob[i], inb[i], inb[j], ob[j]))
+        bm.faces.new((of[i], ob[i], ob[j], of[j]))
+        bm.faces.new((inf[i], inf[j], inb[j], inb[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return _obj_from_bm(name, bm, coll, mat, parent, loc, part_type)
+
+
 # --- 車体 -------------------------------------------------------------------------
 
 def build_body(cfg: dict, coll, coll_col, root) -> dict[str, Any]:
@@ -253,7 +326,8 @@ def build_body(cfg: dict, coll, coll_col, root) -> dict[str, Any]:
     z_tb, z_tt = mm(tub["z_bottom_mm"]), mm(tub["z_top_mm"])
     z_bb, z_bt = mm(band["z_bottom_mm"]), mm(band["z_top_mm"])
     z_top = mm(up["z_top_mm"])
-    bev = mm(up["roof_bevel_mm"])
+    cab = up.get("cabin", {})
+    cg = up.get("cargo", {})
 
     # 下部の胴（車輪の間）
     tub_len = L * float(tub["length_ratio"])
@@ -262,21 +336,37 @@ def build_body(cfg: dict, coll, coll_col, root) -> dict[str, Any]:
     # 側面の帯（全幅・収納した太陽電池パネルの高さ）
     box("body_side_band", (W * 0.98, L * 0.94, z_bt - z_bb), (0, -L * 0.02, (z_bb + z_bt) / 2), coll,
         "panel_gray", root, bevel=0.04, part_type="body_side_band")
-    # 上部：前の白いキャビンと後ろの荷室の箱
+
+    # キャビン（白）：肩を面取りした断面を前へつなぎ、前端で幅と高さを絞る（前の角の大きな面取り）
     cab_len = L * float(up["cabin_length_ratio"])
-    box_len = L - cab_len
-    cab_y = L / 2 - cab_len / 2
-    box_y = -L / 2 + box_len / 2
-    box("body_cabin", (W, cab_len, z_top - 0.08 - z_bt), (0, cab_y, (z_bt + z_top - 0.08) / 2), coll, "white",
-        root, bevel=bev, part_type="body_cabin")
-    box("body_cargo", (W * 0.96, box_len, z_top - z_bt), (0, box_y, (z_bt + z_top) / 2), coll, "panel_gray",
-        root, bevel=bev * 0.6, part_type="body_cargo")
+    y_front, y_back = L / 2, L / 2 - cab_len
+    zc = z_top - mm(cab.get("roof_drop_mm", 140.0))
+    sh = mm(cab.get("shoulder_chamfer_mm", 650.0))
+    fw = float(cab.get("front_width_ratio", 0.80))
+    fdrop = mm(cab.get("front_top_drop_mm", 320.0))
+    taper = mm(cab.get("front_taper_mm", 450.0))
+    sec = lambda w, zt, c: profile(w, z_bt - 0.02, zt, corner=c, style="chamfer", seg=1, top_samples=4)
+    loft("body_cabin", [(y_back - 0.05, sec(W * 0.97, zc, sh)), (y_front - taper, sec(W, zc, sh)),
+                        (y_front, sec(W * fw, zc - fdrop, sh * 1.05))], coll, "white", root, part_type="body_cabin")
+
+    # 荷室（灰色）：前側はキャビンから続く弧状のカバー、後ろは角の丸い箱
+    rc = mm(cg.get("corner_radius_mm", 380.0))
+    arch = mm(cg.get("front_arch_mm", 180.0))
+    cargo_front = y_back
+    split = cargo_front - (cargo_front + L / 2) * float(cg.get("arch_length_ratio", 0.42))
+    cw = W * 0.96
+    csec = lambda zt, a: profile(cw, z_bt - 0.02, zt, corner=rc, style="round", arch=a, seg=6, top_samples=10)
+    loft("body_cargo_arch", [(cargo_front + 0.02, csec(zc - 0.05, arch * 0.4)), (split, csec(z_top - arch, arch))],
+         coll, "panel_gray", root, part_type="body_cargo")
+    loft("body_cargo", [(split, csec(z_top - 0.02, 0.0)), (-L / 2, csec(z_top - 0.02, 0.0))], coll,
+         "panel_gray", root, part_type="body_cargo")
+
     # 前面の張り出し（中央のバンパー）
     zb0, zb1 = (mm(v) for v in nose["bumper_z_mm"])
     pr = mm(nose["bumper_protrusion_mm"])
     box("body_bumper", (W * float(nose["bumper_width_ratio"]), pr + 0.3, zb1 - zb0),
         (0, L / 2 + pr / 2 - 0.15, (zb0 + zb1) / 2), coll, "white", root, bevel=0.05, part_type="body_bumper")
-    # 前輪の上の張り出し（左右）
+    # 前輪の上の張り出し（懸架アームの覆い・左右）
     fp = bd["fender_pods"]
     front_y = max(a["y_mm"] for a in cfg["wheels"]["axles"])
     for side, sx in (("L", -1.0), ("R", 1.0)):
@@ -288,18 +378,19 @@ def build_body(cfg: dict, coll, coll_col, root) -> dict[str, Any]:
         "dark", root, part_type="collision")
     box("collision_upper", (W, L, z_top - z_bb), (0, 0, (z_bb + z_top) / 2), coll_col, "dark", root,
         part_type="collision")
-    return {"L": L, "W": W, "z_top": z_top, "z_bt": z_bt, "cab_y": cab_y, "cab_len": cab_len}
+    return {"L": L, "W": W, "z_top": z_top, "z_bt": z_bt, "cab_y": (y_front + y_back) / 2, "cab_len": cab_len,
+            "front_w": W * fw, "cab_top": zc, "front_top": zc - fdrop}
 
 
 def build_equipment(cfg: dict, geo: dict, coll, root) -> None:
     eq = cfg["equipment"]
     L, W, z_top = geo["L"], geo["W"], geo["z_top"]
-    front = L / 2
-    # 前の窓（2 段 × 2 枚）
+    front, fw = L / 2, geo["front_w"]
+    # 前の窓（2 段 × 2 枚。前面の幅に合わせる）
     win = eq["windows"]
     z0, z1 = (mm(v) for v in win["z_mm"])
     rows, cols = int(win["rows"]), int(win["cols"])
-    ww = W * float(win["width_ratio"])
+    ww = fw * float(win["width_ratio"])
     for i in range(rows):
         for j in range(cols):
             h = (z1 - z0) / rows
@@ -307,38 +398,59 @@ def build_equipment(cfg: dict, geo: dict, coll, root) -> None:
             box(f"equip_window_{i}{j}", (w * 0.94, 0.04, h * 0.86),
                 (-ww / 2 + w * (j + 0.5), front + 0.005, z0 + h * (i + 0.5)), coll, "glass", root,
                 part_type="window")
-    # 前照灯（上段 左右 3 灯ずつ・下段 2 灯）
+    # 前照灯（上段は窓の上の左右に 3 灯ずつ・下段 2 灯はバンパー）
     hu = eq["headlights_upper"]
+    rad = mm(hu["radius_mm"])
     for side, sx in (("L", -1.0), ("R", 1.0)):
         for k in range(int(hu["count_per_side"])):
-            x = sx * (W / 2 - 0.35 - k * 0.42)
-            cylinder(f"equip_headlight_{side}{k}", mm(hu["radius_mm"]), 0.2, (x, front + 0.08, mm(hu["z_mm"])),
+            x = sx * (fw / 2 - rad * 1.6 - k * rad * 2.6)
+            cylinder(f"equip_headlight_{side}{k}", rad, 0.22, (x, front + 0.06, mm(hu["z_mm"])),
                      coll, "light", axis="Y", parent=root, segments=24, part_type="headlight")
     hl = eq["headlights_lower"]
     for k, sx in enumerate((-1.0, 1.0)):
         cylinder(f"equip_lowlight_{k}", mm(hl["radius_mm"]), 0.12,
                  (sx * W * 0.22, front + mm(cfg["body"]["nose"]["bumper_protrusion_mm"]) + 0.02, mm(hl["z_mm"])),
                  coll, "light", axis="Y", parent=root, segments=20, part_type="headlight")
-    # 屋根：センサ筐体・パラボラ（展開物として関節つき）・排熱の筒・ホイップアンテナ
-    box("equip_roof_sensor_housing", (1.1, 0.7, 0.28), (0, geo["cab_y"] + 0.2, z_top + 0.06), coll, "white",
-        root, bevel=0.06, part_type="sensor_housing")
+    # 屋根：センサ筐体・排熱の筒・ホイップアンテナ（パラボラは展開物）
+    box("equip_roof_sensor_housing", (1.1, 0.7, 0.28), (0, geo["cab_y"] + 0.1, geo["cab_top"] + 0.12), coll,
+        "white", root, bevel=0.06, part_type="sensor_housing")
     for k, st in enumerate(eq["roof_stacks"]):
         cylinder(f"equip_stack_{k}", mm(st["radius_mm"]), mm(st["height_mm"]),
                  (mm(st["x_mm"]), L / 2 * float(st["y_ratio"]), z_top + mm(st["height_mm"]) / 2), coll, "white",
                  parent=root, segments=24, part_type="stack")
     for k, an in enumerate(eq["whip_antennas"]):
         cylinder(f"equip_whip_{k}", 0.02, mm(an["height_mm"]),
-                 (mm(an["x_mm"]), L / 2 * float(an["y_ratio"]), z_top + mm(an["height_mm"]) / 2 - 0.25),
+                 (mm(an["x_mm"]) * fw / W, L / 2 * float(an["y_ratio"]), geo["cab_top"] + mm(an["height_mm"]) / 2),
                  coll, "metal", parent=root, segments=12, part_type="antenna")
-    # 後面：ハッチの枠・デッキ
+    # 後面：角の丸いハッチの枠と扉・デッキ・収納箱（左）・タンク（右）・下部の円筒
     hat = eq["rear_hatch"]
-    box("equip_rear_hatch", (mm(hat["width_mm"]), 0.12, mm(hat["height_mm"])),
-        (0, -L / 2 - 0.05, mm(hat["z_bottom_mm"]) + mm(hat["height_mm"]) / 2), coll, "metal", root, bevel=0.08,
-        part_type="hatch")
+    hw_, hh = mm(hat["width_mm"]), mm(hat["height_mm"])
+    hz = mm(hat["z_bottom_mm"]) + hh / 2
+    rounded_frame("equip_rear_hatch_frame", hw_, hh, 0.32, 0.14, 0.18, (0, -L / 2 - 0.08, hz), coll, "metal",
+                  root, part_type="hatch")
+    box("equip_rear_hatch_door", (hw_ - 0.3, 0.06, hh - 0.3), (0, -L / 2 - 0.02, hz), coll, "panel_gray", root,
+        bevel=0.08, part_type="hatch")
+    cylinder("equip_rear_hatch_wheel", 0.14, 0.08, (0, -L / 2 - 0.09, hz), coll, "metal", axis="Y", parent=root,
+             segments=24, part_type="hatch")
+    sb = eq.get("rear_storage", {"boxes": 3, "width_mm": 650.0, "height_mm": 500.0, "depth_mm": 350.0})
+    bw, bh, bdp = mm(sb["width_mm"]), mm(sb["height_mm"]), mm(sb["depth_mm"])
+    for k in range(int(sb["boxes"])):
+        box(f"equip_rear_storage_{k}", (bw, bdp, bh * 0.94),
+            (-(hw_ / 2 + 0.15 + bw / 2), -L / 2 - bdp / 2, mm(hat["z_bottom_mm"]) + bh * (k + 0.5)), coll, "dark",
+            root, bevel=0.03, part_type="storage")
+    tk = eq.get("rear_tanks", {"count": 2, "radius_mm": 180.0, "height_mm": 1050.0})
+    for k in range(int(tk["count"])):
+        x = hw_ / 2 + 0.2 + mm(tk["radius_mm"]) * (1 + 2.1 * k)
+        cylinder(f"equip_rear_tank_{k}", mm(tk["radius_mm"]), mm(tk["height_mm"]),
+                 (x, -L / 2 - mm(tk["radius_mm"]) - 0.02, mm(hat["z_bottom_mm"]) + mm(tk["height_mm"]) / 2 + 0.1),
+                 coll, "metal", parent=root, segments=28, part_type="tank")
     dk = eq["rear_deck"]
     box("equip_rear_deck", (W * 0.7, mm(dk["depth_mm"]), 0.06), (0, -L / 2 - mm(dk["depth_mm"]) / 2,
                                                                   mm(dk["z_mm"])), coll, "metal", root,
         part_type="deck")
+    for k in range(4):
+        cylinder(f"equip_rear_bumper_{k}", 0.13, 0.25, ((k - 1.5) * 0.32, -L / 2 - 0.08, mm(dk["z_mm"]) - 0.35),
+                 coll, "metal", axis="Y", parent=root, segments=20, part_type="rear_bumper")
 
 
 def build_deployables(cfg: dict, geo: dict, coll, root) -> list[dict]:
@@ -376,6 +488,14 @@ def build_deployables(cfg: dict, geo: dict, coll, root) -> list[dict]:
                 z = -(k + 1) * mm(dk["z_mm"]) / (n + 1)
                 box(f"{did}_step{k}", (mm(st["width_mm"]), 0.28, 0.04), (0, -mm(st.get("pitch_mm", 220.0)) * (k + 1), z), coll, "metal", node,
                     part_type="step")
+            run = mm(st.get("pitch_mm", 220.0)) * (n + 1)
+            drop = mm(dk["z_mm"])
+            length = math.hypot(run, drop)
+            for sx in (-1.0, 1.0):
+                rail = cylinder(f"{did}_rail_{'L' if sx < 0 else 'R'}", 0.022, length,
+                                (sx * mm(st["width_mm"]) / 2, -run / 2, -drop / 2 + 0.45), coll, "metal", axis="Y",
+                                parent=node, segments=10, part_type="handrail")
+                rail.rotation_euler = Euler((math.atan2(drop, run), 0, 0))
         else:
             continue
         out.append({"id": did, "type": d["type"], "joint": d.get("joint", "")})
