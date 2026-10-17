@@ -238,6 +238,12 @@ godot --path output_v2/godot/Godot3dcat res://scenes/PlayTest.tscn
 
 **アセットの利用について**: コミットされている `p3_koha9face.*`（GLB/blend/テクスチャ）は、プレビュー・学習目的での閲覧を想定しており、**素材としての再配布・再利用はできません**。
 
+## ライセンス
+
+ソースコード（スクリプト・Blender 生成コード・設定 YAML・ドキュメント）は [MIT License](LICENSE) で公開します。
+
+ただし、上記「アセットの利用について」に書いた猫のモデル資産（`p3_koha9face.*` とその派生物、市販ベースモデル由来のデータ）および実物の写真は MIT License の対象外です。
+
 ## 再生成のしかた（ローカル）
 
 前提: Windows / Blender 5.2 / Python 3.x / `input/` に素材と写真がある環境。

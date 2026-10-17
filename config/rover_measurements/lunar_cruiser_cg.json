@@ -1,0 +1,66 @@
+{
+  "_comment": [
+    "ルナクルーザー公式 CG（2025-03・4 枚）から読み取った画像座標（フル解像度 px）。",
+    "画像そのものは input/raw_photos/lunar_cruiser/（git 管理外。公式 CG は再配布しない）。",
+    "読み取りは格子つきの拡大画像で目視（±10 px 程度）。消失点は LSD＋RANSAC で求めた値。",
+    "車輪の観測は外側の面（サイドウォール外周）の楕円の [左端 l, 右端 r, 上端 t, 下端 b] とハブ中心。",
+    "wheels は前→後の順。座標系はツール側で決める（X は前軸から後ろ向き、単位は車輪半径）。"
+  ],
+  "subject": "lunar_cruiser",
+  "images_dir": "input/raw_photos/lunar_cruiser",
+  "baseline_anchors": ["astronaut", "body_height"],
+  "_baseline_comment": "全長は角から角（前面・バンパーの張り出しを含まない）、全幅は窓の高さの幅なので、どちらも r を大きめに出す。確認用に回す",
+  "anchors": {
+    "astronaut_height_m": { "value": 1.90, "note": "宇宙服・ヘルメット込みの身長（仮定。±0.1 m）" },
+    "body_length_m": { "value": 6.0, "note": "2019 年発表の全長（Wikipedia）。2025 年の CG と版が違う可能性（K3）" },
+    "body_height_m": { "value": 3.8, "note": "2019 年発表の全高。アンテナ・パラボラを含むかは不明" },
+    "body_width_m": { "value": 5.2, "note": "2019 年発表の全幅" }
+  },
+  "images": {
+    "02": {
+      "file": "20250331_02.jpg",
+      "view": "左前方（左側面と前面）",
+      "size": [7441, 4185],
+      "vp_x": [28367.0, 1799.0],
+      "vp_z": [858.0, -774330.0],
+      "wheels_front_to_rear": [
+        { "l": 3359, "r": 3914, "t": 3125, "b": 3778, "hub": [3622, 3466] },
+        { "l": 4273, "r": 4797, "t": 3094, "b": 3700, "hub": [4508, 3411] },
+        { "l": 5047, "r": 5547, "t": 3067, "b": 3645, "hub": [5289, 3356] }
+      ],
+      "side_points": {
+        "_comment": "左側面の点。車輪の外側の面と同じ平面にあると仮定して測る（奥行きのずれは誤差に含める）",
+        "front_corner_mid": [3240, 2600],
+        "front_corner_low": [3245, 2880],
+        "rear_box_top": [5515, 1700],
+        "rear_box_mid": [5528, 2300],
+        "rear_lower_end": [5620, 2780],
+        "panel_top_rear": [5300, 2613],
+        "panel_bottom_rear": [5300, 2857]
+      }
+    },
+    "03": {
+      "file": "20250331_03.jpg",
+      "view": "右後方（右側面と後面・宇宙飛行士）",
+      "size": [7492, 4214],
+      "vp_x": [-2104.0, 2691.0],
+      "vp_z": [3521.0, -93624.0],
+      "wheels_front_to_rear": [
+        { "l": 345, "r": 527, "t": 2743, "b": 3440, "hub": [431, 3097] },
+        { "l": 647, "r": 874, "t": 2753, "b": 3533, "hub": [767, 3141] },
+        { "l": 1001, "r": 1297, "t": 2708, "b": 3660, "hub": [1145, 3193] }
+      ],
+      "tread_inner_extreme_x_rear": 1707,
+      "ground_points": { "astronaut_feet": [6122, 4049] },
+      "vertical_tops": { "astronaut_head": { "base": "astronaut_feet", "uv": [6013, 1790] } }
+    },
+    "04": {
+      "file": "20250331_04.jpg",
+      "view": "ほぼ正面（太陽電池パネル展開）",
+      "size": [7538, 4240],
+      "_comment": "前輪の上側は車体に隠れるのでタイヤの高さは測れない。同じ奥行きどうしの横方向の比だけ使う",
+      "front_tread_x": { "right_wheel": [4602, 4763], "left_wheel": [5513, 5667] },
+      "cabin_width_x": [4497, 5674]
+    }
+  }
+}

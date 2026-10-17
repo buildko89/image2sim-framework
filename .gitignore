@@ -159,3 +159,5 @@ drone3_parametric.zip
 
 newplan2/*
 newplan3/*.png
+# ローバの採寸の出力（scripts/rover_model/cg_measure.py が再生成。重ね合わせ画像は公式 CG を含むので入れない）
+output/rover_measure/
