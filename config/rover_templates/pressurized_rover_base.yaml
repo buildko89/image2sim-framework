@@ -1,0 +1,82 @@
+# ==============================================================================
+# 与圧ローバの基本テンプレート（vehicle_type: rover）
+#
+#   機体固有の YAML（例: config/lunar_cruiser_model.yaml）から template_file で継承し、差分だけ書く。
+#   ★ 座標系はドローンと同じ：+Y が前・+X が右・+Z が上（blend2mjcf 系の下流がこれを前提にする）。
+#   ★ 原点は「車体の前後左右の中央・地面の高さ」。
+#   ★ 寸法は mm。値ごとの出典（public / photo_estimated / provisional）は機体固有の YAML に書く。
+# ==============================================================================
+template_id: pressurized_rover_base
+schema_version: '1.0'
+vehicle_type: rover
+units: mm
+coordinate_system:
+  right_axis: +X
+  front_axis: +Y
+  up_axis: +Z
+  root_origin: ground_below_body_center
+
+# --- 車輪と足回り ---------------------------------------------------------------
+wheels:
+  # 車軸の前後位置（Y）と、操舵するか。id は前から F / M / R、左右は L / R
+  axles:
+    - {id: F, y_mm: 1500.0, steer: true}
+    - {id: M, y_mm: 0.0, steer: true}
+    - {id: R, y_mm: -1500.0, steer: false}
+  track_mm: 2800.0            # 左右の車輪の中心間
+  radius_mm: 550.0
+  width_mm: 500.0
+  tire:
+    tread_blocks: 36          # 分割トレッドのブロック数（周方向）
+    tread_height_mm: 30.0
+    tread_fill: 0.62          # 周方向にブロックが占める割合
+    hub_radius_ratio: 0.32
+    rim_radius_ratio: 0.86    # 外側の面の明るいリング（サイドウォール）の内径
+    spokes: 16                # 外側の面に見える金属スポーク
+  suspension:
+    type: independent_slide
+    travel_mm: 250.0
+
+# --- 車体 -------------------------------------------------------------------------
+body:
+  length_mm: 5000.0           # 前の角〜後端（前面の張り出しは nose で足す）
+  width_mm: 3700.0
+  # 下部の箱（車輪の間に収まる幅の狭い胴）
+  tub: {width_mm: 2200.0, z_bottom_mm: 750.0, z_top_mm: 1500.0, length_ratio: 0.88}
+  # 側面の帯（収納した太陽電池パネルの高さ）
+  side_band: {z_bottom_mm: 1500.0, z_top_mm: 1950.0}
+  # 上部（前＝白いキャビン、後ろ＝荷室の箱）
+  upper: {z_top_mm: 3650.0, cabin_length_ratio: 0.36, roof_bevel_mm: 220.0}
+  # 前面の張り出し（中央のバンパー・下部）
+  nose: {bumper_protrusion_mm: 250.0, bumper_width_ratio: 0.55, bumper_z_mm: [700.0, 1350.0]}
+  # 前輪の上の張り出し（懸架アームの覆い）
+  fender_pods: {length_mm: 900.0, height_mm: 380.0, z_bottom_mm: 1150.0}
+
+# --- 外装・装備 -----------------------------------------------------------------
+equipment:
+  windows: {rows: 2, cols: 2, z_mm: [2000.0, 2850.0], width_ratio: 0.78}
+  headlights_upper: {count_per_side: 3, radius_mm: 110.0, z_mm: 3050.0}
+  headlights_lower: {count: 2, radius_mm: 80.0, z_mm: 1250.0}
+  roof_dish: {diameter_mm: 650.0, mast_height_mm: 300.0, y_ratio: 0.32}
+  roof_stacks: [{x_mm: 300.0, y_ratio: -0.10, height_mm: 450.0, radius_mm: 120.0},
+                {x_mm: 900.0, y_ratio: -0.45, height_mm: 700.0, radius_mm: 160.0}]
+  whip_antennas: [{x_mm: -1550.0, y_ratio: 0.30, height_mm: 700.0}, {x_mm: 1550.0, y_ratio: 0.30, height_mm: 700.0}]
+  rear_hatch: {width_mm: 1300.0, height_mm: 1700.0, z_bottom_mm: 1650.0}
+  rear_deck: {depth_mm: 600.0, z_mm: 1450.0}
+  rear_stairs: {steps: 4, width_mm: 1000.0, pitch_mm: 170.0}
+
+# --- 取付点（センサ・照明。MJCF の site・エンジンのカメラ / ライトへ） ------------
+mounts: []
+
+# --- 動く外装（関節として出す） -------------------------------------------------
+deployables: []
+
+output:
+  directory: output/rover_parametric
+  blend: rover.blend
+  glb: rover.glb
+  build_report: build_report.json
+  qa_report: qa_report.json
+  resolved_config: resolved_config.json
+  report_markdown: BUILD_REPORT.md
+  render_resolution: 900

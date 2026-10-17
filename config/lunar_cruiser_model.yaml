@@ -1,0 +1,69 @@
+# ==============================================================================
+# lunar_cruiser —— 月面の与圧ローバ（ルナクルーザー）の形の正本（PoC）
+#
+#   値の出典：
+#     public          … 公開情報（Wikipedia・公式サイト・報道）
+#     photo_estimated … 公式 CG（2025-03）のカメラ合わせ（scripts/rover_model/cg_measure.py、
+#                       読み取り値は config/rover_measurements/lunar_cruiser_cg.json）。
+#                       車輪半径の物差しは宇宙飛行士の身長と全高の平均（r = 0.562 m）
+#     provisional     … 根拠の弱い仮置き（CG を見て形を合わせた値）
+#   ★ ロゴ（メーカー・機関）は再現しない。
+#   ★ 物理モデル（MJCF）は hakoniwa-mujoco-rover 側で、この .blend から作る（ROV-13）。
+# ==============================================================================
+template_file: config/rover_templates/pressurized_rover_base.yaml
+subject_id: lunar_cruiser
+dimensions_provisional: true
+
+measurements:
+  wheel_count: {value: 6, source: public}
+  wheel_radius_mm: {value: 562.0, source: photo_estimated, tolerance_pct: 6}
+  wheel_width_mm: {value: 506.0, source: photo_estimated, tolerance_pct: 15}
+  axle_spacing_front_mid_mm: {value: 1833.0, source: photo_estimated, tolerance_pct: 4}
+  axle_spacing_mid_rear_mm: {value: 1684.0, source: photo_estimated, tolerance_pct: 1}
+  track_mm: {value: 2916.0, source: photo_estimated, tolerance_pct: 10}
+  body_length_mm: {value: 5073.0, source: photo_estimated, tolerance_pct: 10, note: "前の角〜後端。前面の張り出しは含まない"}
+  body_width_mm: {value: 3782.0, source: photo_estimated, tolerance_pct: 10, note: "窓の高さの幅。2019 年の公開値 5.2 m とは合わない（K3）"}
+  body_height_mm: {value: 3690.0, source: photo_estimated, tolerance_pct: 6, note: "荷室の箱の上端。2019 年の公開値 3.8 m と整合"}
+  side_band_mm: {value: [1503.0, 1964.0], source: photo_estimated, tolerance_pct: 8, note: "収納した太陽電池パネルの下端・上端"}
+
+wheels:
+  # 車体の前後の中央を Y = 0 とする：前の角 +2537、後端 −2537（長さ 5073）
+  #   前軸 = 前の角 − 0.781 m、中軸 = 前軸 − 1.833 m、後軸 = 中軸 − 1.684 m
+  axles:
+    - {id: F, y_mm: 1756.0, steer: true}    # 操舵は「前輪 2 対」の仮の解釈（K2）
+    - {id: M, y_mm: -77.0, steer: true}
+    - {id: R, y_mm: -1761.0, steer: false}
+  track_mm: 2916.0
+  radius_mm: 562.0
+  width_mm: 506.0
+
+body:
+  length_mm: 5073.0
+  width_mm: 3782.0
+  side_band: {z_bottom_mm: 1503.0, z_top_mm: 1964.0}
+  upper: {z_top_mm: 3690.0}
+
+mounts:   # 位置は CG を見た仮置き（provisional）
+  - {id: cam_front_top, type: camera, location_mm: [0.0, 2600.0, 3350.0], euler_deg: [-10.0, 0.0, 0.0], hfov_deg: 90.0}
+  - {id: cam_rear, type: camera, location_mm: [0.0, -2600.0, 3300.0], euler_deg: [-10.0, 0.0, 180.0], hfov_deg: 90.0}
+  - {id: cam_left, type: camera, location_mm: [-1950.0, 1200.0, 3000.0], euler_deg: [-10.0, 0.0, 90.0], hfov_deg: 90.0}
+  - {id: cam_right, type: camera, location_mm: [1950.0, 1200.0, 3000.0], euler_deg: [-10.0, 0.0, -90.0], hfov_deg: 90.0}
+  - {id: lidar_top, type: lidar, location_mm: [0.0, 2200.0, 3750.0]}
+  - {id: sun_sensor, type: sun_sensor, location_mm: [0.0, 0.0, 3720.0]}
+  - {id: imu, type: imu, location_mm: [0.0, 0.0, 1600.0]}
+
+deployables:
+  - {id: solar_array_L, side: L, type: panel, joint: slide_z, stroke_mm: 6000.0, note: "側面の帯から上へ展開（CG 04）"}
+  - {id: solar_array_R, side: R, type: panel, joint: slide_z, stroke_mm: 6000.0}
+  - {id: hga_dish, type: antenna, joint: hinge_z}
+  - {id: rear_stairs, type: stairs, joint: hinge_x}
+
+output:
+  directory: output/lunar_cruiser_parametric
+  blend: lunar_cruiser.blend
+  glb: lunar_cruiser.glb
+  # 公式 CG と並べる比較用の透視レンダ（向き・画角は cg_measure の当てはめの結果に合わせた目安）
+  comparison_views:
+    - {name: cg02, cg_file: 20250331_02.jpg, azimuth_deg: 65.0, elevation_deg: 2.0, hfov_deg: 28.0, fill: 0.55}
+    - {name: cg03, cg_file: 20250331_03.jpg, azimuth_deg: 140.0, elevation_deg: 5.0, hfov_deg: 49.0, fill: 0.75}
+    - {name: cg04, cg_file: 20250331_04.jpg, azimuth_deg: 0.0, elevation_deg: 4.0, hfov_deg: 30.0, fill: 0.5}
