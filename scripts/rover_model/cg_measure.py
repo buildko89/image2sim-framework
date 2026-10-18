@@ -163,6 +163,9 @@ def main() -> int:
             "axle_x_r": [round(abs(v), 3) for v in xs],
             "spacing_front_mid_r": round(abs(xs[1] - xs[0]), 3),
             "spacing_mid_rear_r": round(abs(xs[2] - xs[1]), 3),
+            # 解いたカメラそのもの（ビューアで同じ構図を作るため）。世界は Camera の約束（単位 r・Z 上・y = 0 が見えている側の車輪の外側の面）
+            "camera": {"R": cam.R.tolist(), "t": [float(v) for v in cam.t], "focal_px": float(cam.f),
+                       "size": list(imgs[key]["size"]), "axle_x_raw_r": [float(v) for v in xs]},
         }
 
     sp_fm = np.mean([result["images"][k]["spacing_front_mid_r"] for k in ("02", "03")])
