@@ -162,5 +162,5 @@ newplan3/*.png
 # ローバの採寸の出力（scripts/rover_model/cg_measure.py が再生成。重ね合わせ画像は公式 CG を含むので入れない）
 output/rover_measure/
 # ローバの生成物（scripts/rover_model/run_build.py で再生成する）
-output/lunar_cruiser_parametric/
+output/lunar_rover_parametric/
 output/rover_parametric/

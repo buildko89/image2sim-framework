@@ -9,8 +9,8 @@
   物差し      ：宇宙飛行士の身長・全長・全高・全幅（anchors）から r [m] を出し、ばらつきも示す
 
 使い方（リポジトリ直下で）:
-  python scripts/rover_model/cg_measure.py config/rover_measurements/lunar_cruiser_cg.json \
-      --out output/rover_measure/lunar_cruiser [--overlay]
+  python scripts/rover_model/cg_measure.py config/rover_measurements/lunar_rover_cg.json \
+      --out output/rover_measure/lunar_rover [--overlay]
 
 出力: <out>/measurements.json（数値）と、--overlay のとき <out>/overlay_<画像>.jpg（当てはめの確認用。
 CG を含むので git 管理外。再配布しない）。
@@ -142,7 +142,7 @@ def tread_width(cam: Camera, x_wheel: float, extreme_x: float) -> float:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("config")
-    ap.add_argument("--out", default="output/rover_measure/lunar_cruiser")
+    ap.add_argument("--out", default="output/rover_measure/lunar_rover")
     ap.add_argument("--overlay", action="store_true", help="当てはめを CG に重ねた確認画像を出す")
     a = ap.parse_args()
     cfg = json.loads(Path(a.config).read_text(encoding="utf-8"))

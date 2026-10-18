@@ -1,13 +1,13 @@
 {
   "_comment": [
-    "ルナクルーザー公式 CG（2025-03・4 枚）から読み取った画像座標（フル解像度 px）。",
-    "画像そのものは input/raw_photos/lunar_cruiser/（git 管理外。公式 CG は再配布しない）。",
+    "公式 CG（2025-03・4 枚）から読み取った画像座標（フル解像度 px）。",
+    "画像そのものは input/raw_photos/lunar_rover/（git 管理外。公式 CG は再配布しない）。",
     "読み取りは格子つきの拡大画像で目視（±10 px 程度）。消失点は LSD＋RANSAC で求めた値。",
     "車輪の観測は外側の面（サイドウォール外周）の楕円の [左端 l, 右端 r, 上端 t, 下端 b] とハブ中心。",
     "wheels は前→後の順。座標系はツール側で決める（X は前軸から後ろ向き、単位は車輪半径）。"
   ],
-  "subject": "lunar_cruiser",
-  "images_dir": "input/raw_photos/lunar_cruiser",
+  "subject": "lunar_rover",
+  "images_dir": "input/raw_photos/lunar_rover",
   "baseline_anchors": ["astronaut", "body_height"],
   "_baseline_comment": "全長は角から角（前面・バンパーの張り出しを含まない）、全幅は窓の高さの幅なので、どちらも r を大きめに出す。確認用に回す",
   "anchors": {

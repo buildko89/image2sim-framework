@@ -1,6 +1,6 @@
 """パラメトリックローバモデルを生成する（vehicle_type: rover）。
 
-    python scripts/rover_model/run_build.py --config config/lunar_cruiser_model.yaml --overwrite
+    python scripts/rover_model/run_build.py --config config/lunar_rover_model.yaml --overwrite
 
 1. 機体 YAML をテンプレートと合成（scripts/drone_model/run_build.py と同じ継承の仕組み）
 2. Blender（blender/rover_model/build_rover.py）で .blend / .glb / 6 方向レンダ / build_report.json
@@ -28,7 +28,7 @@ VIEWS = ("front", "back", "left", "right", "top", "bottom")
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="パラメトリックローバモデルを生成します。")
-    p.add_argument("--config", default=str(REPO / "config" / "lunar_cruiser_model.yaml"))
+    p.add_argument("--config", default=str(REPO / "config" / "lunar_rover_model.yaml"))
     p.add_argument("--blender", default=str(DEFAULT_BLENDER))
     p.add_argument("--overwrite", action="store_true")
     return p.parse_args()

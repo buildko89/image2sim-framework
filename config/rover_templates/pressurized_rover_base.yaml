@@ -1,7 +1,7 @@
 # ==============================================================================
 # 与圧ローバの基本テンプレート（vehicle_type: rover）
 #
-#   機体固有の YAML（例: config/lunar_cruiser_model.yaml）から template_file で継承し、差分だけ書く。
+#   機体固有の YAML（例: config/lunar_rover_model.yaml）から template_file で継承し、差分だけ書く。
 #   ★ 座標系はドローンと同じ：+Y が前・+X が右・+Z が上（blend2mjcf 系の下流がこれを前提にする）。
 #   ★ 原点は「車体の前後左右の中央・地面の高さ」。
 #   ★ 寸法は mm。値ごとの出典（public / photo_estimated / provisional）は機体固有の YAML に書く。

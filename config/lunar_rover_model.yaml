@@ -1,17 +1,17 @@
 # ==============================================================================
-# lunar_cruiser —— 月面の与圧ローバ（ルナクルーザー）の形の正本（PoC）
+# lunar_rover —— 月面の与圧ローバ（LunarRover）の形の正本（PoC）
 #
 #   値の出典：
 #     public          … 公開情報（Wikipedia・公式サイト・報道）
 #     photo_estimated … 公式 CG（2025-03）のカメラ合わせ（scripts/rover_model/cg_measure.py、
-#                       読み取り値は config/rover_measurements/lunar_cruiser_cg.json）。
+#                       読み取り値は config/rover_measurements/lunar_rover_cg.json）。
 #                       車輪半径の物差しは宇宙飛行士の身長と全高の平均（r = 0.562 m）
 #     provisional     … 根拠の弱い仮置き（CG を見て形を合わせた値）
 #   ★ ロゴ（メーカー・機関）は再現しない。
 #   ★ 物理モデル（MJCF）は hakoniwa-mujoco-rover 側で、この .blend から作る（ROV-13）。
 # ==============================================================================
 template_file: config/rover_templates/pressurized_rover_base.yaml
-subject_id: lunar_cruiser
+subject_id: lunar_rover
 dimensions_provisional: true
 
 measurements:
@@ -59,9 +59,9 @@ deployables:
   - {id: rear_stairs, type: stairs, joint: hinge_x}
 
 output:
-  directory: output/lunar_cruiser_parametric
-  blend: lunar_cruiser.blend
-  glb: lunar_cruiser.glb
+  directory: output/lunar_rover_parametric
+  blend: lunar_rover.blend
+  glb: lunar_rover.glb
   # 公式 CG と並べる比較用の透視レンダ（向き・画角は cg_measure の当てはめの結果に合わせた目安）
   comparison_views:
     - {name: cg02, cg_file: 20250331_02.jpg, azimuth_deg: 65.0, elevation_deg: 2.0, hfov_deg: 28.0, fill: 0.55}
