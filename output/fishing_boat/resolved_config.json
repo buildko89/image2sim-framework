@@ -1,0 +1,217 @@
+{
+  "template_id": "fishing_boat",
+  "schema_version": "1.0",
+  "vehicle_type": "vessel",
+  "units": "m",
+  "coordinate_system": {
+    "right_axis": "+X",
+    "front_axis": "+Y",
+    "up_axis": "+Z",
+    "root_origin": "waterline_at_midship"
+  },
+  "dimensions": {
+    "length_oa_m": 12.0,
+    "length_pp_m": 10.5,
+    "beam_m": 3.2,
+    "depth_m": 1.8,
+    "draft_m": 1.1,
+    "block_coefficient": 0.42,
+    "water_density_kg_m3": 1025.0,
+    "gross_tonnage_gt": 9.9,
+    "displacement_tonnes": 15.5,
+    "service_speed_kt": 10.0,
+    "max_speed_kt": 18.0
+  },
+  "hull": {
+    "transom_width_ratio": 0.82,
+    "transom_depth_ratio": 0.75,
+    "flare_angle_deg": 35.0,
+    "bulbous_bow": {
+      "enabled": false,
+      "protrusion_m": 2.2,
+      "radius_m": 1.2,
+      "center_z_m": -2.0
+    },
+    "sections": {
+      "count": 21,
+      "bilge_radius_ratio": 0.12,
+      "sheer_fore_m": 1.8,
+      "sheer_aft_m": 0.6
+    },
+    "sheer_fore_m": 0.85,
+    "sheer_aft_m": 0.2,
+    "working_deck": {
+      "type": "aft_aft_deck",
+      "net_winch": true,
+      "fish_hold": true
+    }
+  },
+  "superstructure": {
+    "enabled": true,
+    "type": "forward_wheelhouse",
+    "length_m": 3.5,
+    "width_m": 2.2,
+    "height_m": 2.2,
+    "decks": 1,
+    "bridge_wing_width_m": 2.4,
+    "bridge_view_height_m": 3.2,
+    "mast": {
+      "height_m": 3.8,
+      "radar_platforms": 1,
+      "fishing_lights": true
+    }
+  },
+  "actuators": {
+    "propellers": [
+      {
+        "id": "main_prop",
+        "type": "FPP",
+        "diameter_m": 0.85,
+        "pitch_ratio": 0.95,
+        "blades": 3,
+        "shaft_pos_m": [
+          0.0,
+          -4.8,
+          -0.85
+        ],
+        "max_rpm": 900.0,
+        "rated_power_kw": 320.0
+      }
+    ],
+    "rudders": [
+      {
+        "id": "main_rudder",
+        "type": "flap_or_spade",
+        "area_m2": 0.65,
+        "aspect_ratio": 1.5,
+        "pos_m": [
+          0.0,
+          -5.3,
+          -0.75
+        ],
+        "max_angle_deg": 35.0,
+        "turn_rate_deg_s": 10.0
+      }
+    ],
+    "thrusters": []
+  },
+  "buoyancy": {
+    "stations_count": 20,
+    "points_per_station": 2,
+    "total_sites": 40,
+    "transverse_offset_ratio": 0.7
+  },
+  "signatures": {
+    "radar_cross_section_m2": 5.0,
+    "has_ais": false,
+    "ais_class": "NONE",
+    "mmsi": 0,
+    "callsign": "",
+    "ship_type_code": 30
+  },
+  "mounts": [
+    {
+      "id": "radar_reflector",
+      "type": "passive_radar_reflector",
+      "pos_m": [
+        0.0,
+        0.5,
+        4.2
+      ]
+    },
+    {
+      "id": "gps_antenna",
+      "type": "gnss_antenna",
+      "pos_m": [
+        0.0,
+        0.5,
+        3.8
+      ]
+    }
+  ],
+  "nav_lights": [
+    {
+      "id": "masthead_light",
+      "color": "white",
+      "arc_deg": 225.0,
+      "range_nm": 2.0,
+      "pos_m": [
+        0.0,
+        0.5,
+        4.0
+      ]
+    },
+    {
+      "id": "port_light",
+      "color": "red",
+      "arc_deg": 112.5,
+      "range_nm": 1.0,
+      "pos_m": [
+        -1.1,
+        0.8,
+        2.5
+      ]
+    },
+    {
+      "id": "starboard_light",
+      "color": "green",
+      "arc_deg": 112.5,
+      "range_nm": 1.0,
+      "pos_m": [
+        1.1,
+        0.8,
+        2.5
+      ]
+    },
+    {
+      "id": "stern_light",
+      "color": "white",
+      "arc_deg": 135.0,
+      "range_nm": 2.0,
+      "pos_m": [
+        0.0,
+        -5.4,
+        1.2
+      ]
+    },
+    {
+      "id": "fishing_light_top",
+      "color": "red",
+      "arc_deg": 360.0,
+      "range_nm": 2.0,
+      "pos_m": [
+        0.0,
+        0.5,
+        4.6
+      ]
+    },
+    {
+      "id": "fishing_light_bottom",
+      "color": "white",
+      "arc_deg": 360.0,
+      "range_nm": 2.0,
+      "pos_m": [
+        0.0,
+        0.5,
+        3.4
+      ]
+    }
+  ],
+  "output": {
+    "directory": "output/fishing_boat",
+    "blend": "fishing_boat.blend",
+    "glb": "fishing_boat.glb",
+    "mjcf": "fishing_boat.xml",
+    "hydro_json": "hydro_mmg.json",
+    "profile_json": "ship_sync.profile.json",
+    "report_markdown": "BUILD_REPORT.md"
+  },
+  "template_file": "vessel_base.yaml",
+  "ship_class": "coastal_fishing_boat",
+  "name": "Small Coastal Fishing Boat (Non-AIS Target Vessel)",
+  "provenance": {
+    "principal_dimensions": "public (Standard Japanese 19GT coastal fishing boat hulls)",
+    "hydro_coefficients": "estimated (Empirical formula for small high-speed fishing vessel)",
+    "radar_rcs": "measured/benchmark (Small FRP fishing boat with radar reflector ~5.0 m^2)"
+  }
+}

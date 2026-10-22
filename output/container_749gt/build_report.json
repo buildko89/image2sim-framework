@@ -1,0 +1,16 @@
+{
+  "subject": "container_749gt",
+  "blend_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\container_749gt.blend",
+  "glb_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\container_749gt.glb",
+  "renders": {
+    "front": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\front.png",
+    "back": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\back.png",
+    "port": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\port.png",
+    "starboard": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\starboard.png",
+    "top": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\top.png",
+    "iso": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\iso.png"
+  },
+  "buoyancy_sites_count": 40,
+  "total_objects": 110,
+  "total_meshes": 58
+}

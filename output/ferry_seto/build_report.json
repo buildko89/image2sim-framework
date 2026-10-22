@@ -1,0 +1,16 @@
+{
+  "subject": "ferry_seto",
+  "blend_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\ferry_seto.blend",
+  "glb_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\ferry_seto.glb",
+  "renders": {
+    "front": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\renders\\front.png",
+    "back": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\renders\\back.png",
+    "port": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\renders\\port.png",
+    "starboard": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\renders\\starboard.png",
+    "top": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\renders\\top.png",
+    "iso": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\ferry_seto\\renders\\iso.png"
+  },
+  "buoyancy_sites_count": 40,
+  "total_objects": 77,
+  "total_meshes": 26
+}

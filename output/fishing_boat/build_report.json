@@ -1,0 +1,16 @@
+{
+  "subject": "fishing_boat",
+  "blend_file": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\fishing_boat.blend",
+  "glb_file": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\fishing_boat.glb",
+  "renders": {
+    "front": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\front.png",
+    "back": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\back.png",
+    "port": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\port.png",
+    "starboard": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\starboard.png",
+    "top": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\top.png",
+    "iso": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\iso.png"
+  },
+  "buoyancy_sites_count": 40,
+  "total_objects": 63,
+  "total_meshes": 19
+}

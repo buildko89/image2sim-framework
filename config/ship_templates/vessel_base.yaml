@@ -1,0 +1,180 @@
+# ==============================================================================
+# 船舶モデルの基本テンプレート（vehicle_type: vessel）
+#
+#   個別船舶の YAML（例: container_749gt.yaml）から template_file で継承し、差分を定義する。
+#   ★ 座標系:
+#       +Y: 前方（Bow, 船首）
+#       +X: 右舷（Starboard）
+#       +Z: 上方（Up, 上甲板・マスト方向）
+#   ★ 原点:
+#       前後(Y): 船体中央（Midship, L_PP / 2）
+#       左右(X): 船体中心線（Centerline, 0）
+#       上下(Z): 計画水線面（Design Waterline, WL = 0.0 m）
+#       ※ 竜骨（Keel）下面は z = -draft_m となる。
+#   ★ 単位:
+#       長さ: m
+#       質量: kg（排水量 Δ [t] は × 1000 kg）
+#       角度: deg（入出力時）
+# ==============================================================================
+template_id: vessel_base
+schema_version: '1.0'
+vehicle_type: vessel
+units: m
+
+coordinate_system:
+  right_axis: +X
+  front_axis: +Y
+  up_axis: +Z
+  root_origin: waterline_at_midship
+
+# --- 船体主要目（Principal Dimensions）デフォルト構造 --------------------------
+dimensions:
+  length_oa_m: 100.0          # 全長 (Length Overall)
+  length_pp_m: 90.0           # 垂線間長 (Length Between Perpendiculars)
+  beam_m: 14.0                # 全幅 (Beam / Breadth molded)
+  depth_m: 7.5                # 型深さ (Depth molded)
+  draft_m: 3.8                # 計画喫水 (Design Draft molded)
+  block_coefficient: 0.67     # 方形肥大係数 Cb = Δ / (ρ * Lpp * B * d)
+  water_density_kg_m3: 1025.0 # 海水密度
+  gross_tonnage_gt: 749.0     # 総トン数
+
+# --- 船殻形状パラメータ（Hull Geometry & Loft Stations） -----------------------
+# Station 0 (Aft Perpendicular, AP: -Lpp/2) 〜 Station 20 (Fore Perpendicular, FP: +Lpp/2)
+hull:
+  transom_width_ratio: 0.72   # 船尾トランサム幅 / B
+  transom_depth_ratio: 0.85   # 船尾トランサム深さ / d
+  flare_angle_deg: 25.0       # 船首フレア角
+  bulbous_bow:
+    enabled: true
+    protrusion_m: 2.2         # FPからの前方突き出し長
+    radius_m: 1.2             # バルブ球体半径
+    center_z_m: -2.0          # バルブ中心Z（水面下）
+  sections:
+    count: 21                 # Station 0..20 の 21断面
+    bilge_radius_ratio: 0.12  # ビルジ円弧半径 / B
+    sheer_fore_m: 1.8         # 船首シアー（甲板上がり）
+    sheer_aft_m: 0.6          # 船尾シアー
+
+# --- 上部構造物・船橋（Superstructure & Bridge） ------------------------------
+superstructure:
+  enabled: true
+  type: aft_bridge            # aft_bridge | midship | forward_bridge
+  length_m: 14.0
+  width_m: 12.0
+  height_m: 11.0
+  decks: 4
+  bridge_wing_width_m: 14.0   # 船幅いっぱいのブリッジウイング
+  bridge_view_height_m: 14.5  # 水面からの船橋視高
+  mast:
+    height_m: 8.0
+    radar_platforms: 2
+
+# --- 推進・操舵アクチュエータ（Propulsion & Steering） -------------------------
+actuators:
+  propellers:
+    - id: main_prop
+      type: FPP               # FPP (固定ピッチ) | CPP (可変ピッチ)
+      diameter_m: 3.2
+      pitch_ratio: 0.85
+      blades: 4
+      shaft_pos_m: [0.0, -42.0, -2.4]  # [x, y, z] (Midship基準)
+      max_rpm: 250.0
+      rated_power_kw: 2000.0
+  rudders:
+    - id: main_rudder
+      type: flap_or_spade
+      area_m2: 7.0
+      aspect_ratio: 1.6
+      pos_m: [0.0, -44.5, -2.0]        # プロペラ直後
+      max_angle_deg: 35.0
+      turn_rate_deg_s: 4.0
+  thrusters:
+    - id: bow_thruster
+      type: tunnel_thruster
+      pos_m: [0.0, 38.0, -2.2]
+      diameter_m: 1.2
+      thrust_kn: 50.0
+      rated_power_kw: 350.0
+
+# --- 物理・浮力計算サイト（40-Station Wave Buoyancy Sites） -------------------
+buoyancy:
+  stations_count: 20          # 船長方向分割数 (Station 0..19)
+  points_per_station: 2       # 左右舷 (Port: -y_FLU = +x_Blender, Stbd: +y_FLU = -x_Blender)
+  total_sites: 40
+  transverse_offset_ratio: 0.70  # 断面半幅に対する左右サイト位置比率
+
+# --- レーダ反射・AIS・センサ属性 ----------------------------------------------
+signatures:
+  radar_cross_section_m2: 2500.0  # RCS σ [m^2]
+  has_ais: true
+  ais_class: A                    # Class A (SOLAS/内航大型) | Class B (小型船)
+  mmsi: 431000001
+  callsign: "7KAA"
+  ship_type_code: 70              # Cargo vessel
+
+# --- センサ取付点マウント（MOUNTS） -------------------------------------------
+mounts:
+  - id: radar_xband
+    type: marine_radar
+    pos_m: [0.0, -36.0, 19.5]     # マスト上部
+    rpm: 24.0
+    band: X_BAND
+  - id: lidar_bow
+    type: lidar_3d
+    pos_m: [0.0, 44.0, 6.5]       # 船首フェアリーダー付近
+  - id: lidar_port_wing
+    type: lidar_2d
+    pos_m: [-7.0, -35.0, 14.5]    # 左舷ウイング
+  - id: lidar_stbd_wing
+    type: lidar_2d
+    pos_m: [7.0, -35.0, 14.5]     # 右舷ウイング
+  - id: camera_bow
+    type: camera_rgb
+    pos_m: [0.0, 43.5, 7.0]
+    fov_deg: 90.0
+  - id: camera_bridge_center
+    type: camera_rgb
+    pos_m: [0.0, -34.5, 15.0]
+    fov_deg: 110.0
+  - id: gnss_primary
+    type: gnss_antenna
+    pos_m: [0.0, -36.0, 20.0]
+  - id: gyro_compass
+    type: gyro_compass
+    pos_m: [0.0, -35.0, 4.0]      # 船橋直下デッキ
+  - id: echo_sounder
+    type: echo_sounder
+    pos_m: [0.0, 30.0, -3.8]      # 船底前部
+
+# --- 航海灯（COLREG Navigation Lights） ----------------------------------------
+nav_lights:
+  - id: masthead_light
+    color: white
+    arc_deg: 225.0                # 正面中心に225度
+    range_nm: 6.0
+    pos_m: [0.0, -36.0, 20.5]
+  - id: port_light
+    color: red
+    arc_deg: 112.5                # 左舷正横後22.5度まで
+    range_nm: 3.0
+    pos_m: [-7.1, -34.5, 14.5]
+  - id: starboard_light
+    color: green
+    arc_deg: 112.5                # 右舷正横後22.5度まで
+    range_nm: 3.0
+    pos_m: [7.1, -34.5, 14.5]
+  - id: stern_light
+    color: white
+    arc_deg: 135.0                # 真後ろ中心に135度
+    range_nm: 3.0
+    pos_m: [0.0, -45.5, 5.5]
+
+# --- 出力設定 -----------------------------------------------------------------
+output:
+  directory: output/ship_parametric
+  blend: vessel.blend
+  glb: vessel.glb
+  mjcf: vessel.xml
+  hydro_json: hydro_mmg.json
+  profile_json: ship_sync.profile.json
+  report_markdown: BUILD_REPORT.md

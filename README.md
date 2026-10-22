@@ -8,7 +8,9 @@ Idle×2 / Walk / Walkback / Run / ネコパンチ×2 / Jump / 香箱座り / お
 このリポジトリには、その生成パイプライン一式と経緯ドキュメントが入っている。
 
 加えて、実測寸法と複数方向の写真を基に、Blender Pythonでドローンを部品単位に
-組み立てる**パラメトリックドローン生成機能**を収録している。ローカル3D生成AIは使用しない。
+組み立てる**パラメトリックドローン生成機能**、および自動運航船（MASS / MEGURI2040）向けの
+船体ロフト・40点浮力サイト・MJCF変換・貴島操縦微係数・箱庭Viewer同期プロファイルを自動生成する
+**パラメトリック船舶生成機能**を収録している。ローカル3D生成AIは使用しない。
 
 | 顔（正面, 1440px キャプチャ） | 全アニメ × 4方向 |
 |---|---|
@@ -160,6 +162,69 @@ python scripts\drone_model\run_build.py `
 
 ```powershell
 python -m unittest tests.test_drone_model_templates -v
+```
+
+---
+
+## パラメトリック船舶生成（MASS / MEGURI2040 向け）
+
+### 概要
+
+日本財団 MEGURI2040 / DFFAS+ および IMO MASS（海上自律航行船）シミュレータ向けに、公開主要目（$L_{PP}, B, d, C_b$）やテンプレートから、Blender 3D モデル、40点波面浮力サイト、マルチボディ MJCF（MuJoCo 物理モデル）、貴島（1990）推定式による MMG 操縦流体微係数、および箱庭 Viewer（Godot / Unreal Engine）同期プロファイルを決定論的に一括生成する。
+
+- **40点マルチステーション波面浮力サイト**: Station 0〜19 の両舷に浮力計測サイト（`<site>`）を自動配置。
+- **航海センサマウント & 航海灯**: 航海レーダ（スピン関節）、AIS、LiDAR、船首カメラ、航海灯（紅・緑・白）。
+- **レーダ反射断面積 (RCS)**: 船体凸コライダの `geom user` 属性へ RCS $\sigma$ [$\text{m}^2$] を埋め込み。
+- **MMG操縦運動流体微係数**: 貴島（1990）推定式により初期 MMG 係数 `hydro_mmg.json` を主要目から自動算出。
+- **Viewer同期プロファイル**: Godot 4.7.1 / Unreal Engine 5.8 共通の関節階層定義 `ship_sync.profile.json` を出力。
+
+### 定義済み船舶テンプレート
+
+テンプレートは [`config/ship_templates/`](config/ship_templates/) に収録：
+
+| テンプレートID | 船種・代表船 | 主要目 ($L_{PP} \times B \times d$) | RCS $\sigma$ | AIS |
+|---|---|---|---|---|
+| `container_749gt` | 749GT型内航コンテナ船（「みかげ」「すざく」級） | $90.0\text{ m} \times 14.0\text{ m} \times 3.8\text{ m}$ | $2,500\text{ m}^2$ | Class A |
+| `container_700teu` | 700TEU型コンテナ船（「げんぶ」級） | $124.0\text{ m} \times 21.0\text{ m} \times 6.5\text{ m}$ | $8,000\text{ m}^2$ | Class A |
+| `ferry_seto` | 瀬戸内旅客フェリー（「それいゆ」級） | $60.0\text{ m} \times 14.0\text{ m} \times 3.2\text{ m}$ | $1,200\text{ m}^2$ | Class A |
+| `fishing_boat` | 小型沿岸漁船（非AIS / 低RCS） | $10.5\text{ m} \times 3.2\text{ m} \times 0.9\text{ m}$ | $5\text{ m}^2$ | なし |
+
+### 船舶モデルを生成する
+
+全4隻を一括生成する場合：
+
+```powershell
+python scripts\ship_model\run_build.py all
+```
+
+特定船（例: 749GTコンテナ船）のみを生成する場合：
+
+```powershell
+python scripts\ship_model\run_build.py container_749gt
+```
+
+PowerShell ラッパー経由で実行する場合（UTF-8 BOM 対応）：
+
+```powershell
+.\scripts\ship_model\run_build.ps1 -Target container_749gt
+```
+
+主な出力先は `output/<ship_id>/`（例: `output/container_749gt/`）である。
+
+| 成果物 | 内容 |
+|---|---|
+| `<ship>.blend` | 船殻ロフト・構造物・マウント・航海灯を含むBlenderファイル |
+| `<ship>.glb` | Godot / Unreal Engine 向け glTF 2.0 モデル（PBRマテリアル） |
+| `<ship>.xml` | 40点浮力サイト・RCS属性・関節ツリーを含む MuJoCo MJCF モデル |
+| `hydro_mmg.json` | 貴島（1990）推定式による MMG 操縦流体微係数・付加質量・プロペラ舵干渉係数 |
+| `ship_sync.profile.json` | 箱庭 Viewer（Godot / Unreal）向けロボット・関節同期プロファイル |
+| `renders/*.png` | 6方向正投影（front, back, port, starboard, top, iso）レンダリング画像 |
+| `BUILD_REPORT.md` | 主要目・署名・成果物リンクを含む日本語ビルドレポート |
+
+### 船舶パイプラインの検証
+
+```powershell
+pytest tests\test_ship_templates.py tests\test_ship_kijima_mmg.py tests\test_ship_build.py -v
 ```
 
 Blender生成コードの構文確認：

@@ -164,3 +164,5 @@ output/rover_measure/
 # ローバの生成物（scripts/rover_model/run_build.py で再生成する）
 output/lunar_rover_parametric/
 output/rover_parametric/
+# Blender のバックアップ
+*.blend1

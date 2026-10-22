@@ -1,0 +1,26 @@
+{
+  "robot_name": "fishing_boat",
+  "root_body": "vessel",
+  "coordinate_conversion": {
+    "source": "FLU",
+    "target": "Unreal_and_Godot",
+    "scale": 1.0
+  },
+  "joints": [
+    {
+      "name": "joint_rudder_main_rudder",
+      "type": "hinge",
+      "axis": "Z",
+      "node_name": "rudder_main_rudder"
+    },
+    {
+      "name": "joint_propeller_main_prop",
+      "type": "spin",
+      "axis": "X_FLU_Y_BLENDER",
+      "node_name": "propeller_main_prop"
+    }
+  ],
+  "buoyancy_sites_prefix": "buoyancy_st",
+  "mounts_prefix": "mount_",
+  "nav_lights_prefix": "navlight_"
+}

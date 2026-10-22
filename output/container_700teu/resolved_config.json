@@ -1,0 +1,309 @@
+{
+  "template_id": "container_700teu",
+  "schema_version": "1.0",
+  "vehicle_type": "vessel",
+  "units": "m",
+  "coordinate_system": {
+    "right_axis": "+X",
+    "front_axis": "+Y",
+    "up_axis": "+Z",
+    "root_origin": "waterline_at_midship"
+  },
+  "dimensions": {
+    "length_oa_m": 134.0,
+    "length_pp_m": 124.0,
+    "beam_m": 21.0,
+    "depth_m": 10.5,
+    "draft_m": 6.0,
+    "block_coefficient": 0.705,
+    "water_density_kg_m3": 1025.0,
+    "gross_tonnage_gt": 4999.0,
+    "displacement_tonnes": 11500.0,
+    "service_speed_kt": 15.5,
+    "max_speed_kt": 17.5,
+    "container_capacity_teu": 700
+  },
+  "hull": {
+    "transom_width_ratio": 0.78,
+    "transom_depth_ratio": 0.85,
+    "flare_angle_deg": 32.0,
+    "bulbous_bow": {
+      "enabled": true,
+      "protrusion_m": 3.5,
+      "radius_m": 2.0,
+      "center_z_m": -3.2
+    },
+    "sections": {
+      "count": 21,
+      "bilge_radius_ratio": 0.12,
+      "sheer_fore_m": 1.8,
+      "sheer_aft_m": 0.6
+    },
+    "sheer_fore_m": 2.8,
+    "sheer_aft_m": 1.0,
+    "cargo_hold": {
+      "type": "container_bays",
+      "bays": 6,
+      "stacks": 7,
+      "tiers": 4,
+      "container_color": "assorted"
+    }
+  },
+  "superstructure": {
+    "enabled": true,
+    "type": "aft_bridge",
+    "length_m": 18.0,
+    "width_m": 17.0,
+    "height_m": 16.0,
+    "decks": 5,
+    "bridge_wing_width_m": 21.2,
+    "bridge_view_height_m": 20.5,
+    "mast": {
+      "height_m": 11.0,
+      "radar_platforms": 2
+    },
+    "funnel": {
+      "height_m": 6.0,
+      "diameter_m": 2.4,
+      "pos_m": [
+        0.0,
+        -53.0,
+        19.0
+      ]
+    }
+  },
+  "actuators": {
+    "propellers": [
+      {
+        "id": "main_prop",
+        "type": "CPP",
+        "diameter_m": 4.2,
+        "pitch_ratio": 0.9,
+        "blades": 4,
+        "shaft_pos_m": [
+          0.0,
+          -58.0,
+          -3.5
+        ],
+        "max_rpm": 200.0,
+        "rated_power_kw": 4500.0
+      }
+    ],
+    "rudders": [
+      {
+        "id": "main_rudder",
+        "type": "flap_or_spade",
+        "area_m2": 12.5,
+        "aspect_ratio": 1.7,
+        "pos_m": [
+          0.0,
+          -61.2,
+          -3.0
+        ],
+        "max_angle_deg": 35.0,
+        "turn_rate_deg_s": 4.0
+      }
+    ],
+    "thrusters": [
+      {
+        "id": "bow_thruster",
+        "type": "tunnel_thruster",
+        "pos_m": [
+          0.0,
+          54.0,
+          -3.2
+        ],
+        "diameter_m": 1.6,
+        "thrust_kn": 120.0,
+        "rated_power_kw": 850.0
+      },
+      {
+        "id": "stern_thruster",
+        "type": "tunnel_thruster",
+        "pos_m": [
+          0.0,
+          -50.0,
+          -3.2
+        ],
+        "diameter_m": 1.35,
+        "thrust_kn": 80.0,
+        "rated_power_kw": 550.0
+      }
+    ]
+  },
+  "buoyancy": {
+    "stations_count": 20,
+    "points_per_station": 2,
+    "total_sites": 40,
+    "transverse_offset_ratio": 0.7
+  },
+  "signatures": {
+    "radar_cross_section_m2": 8000.0,
+    "has_ais": true,
+    "ais_class": "A",
+    "mmsi": 431002700,
+    "callsign": "7K700",
+    "ship_type_code": 70
+  },
+  "mounts": [
+    {
+      "id": "radar_xband",
+      "type": "marine_radar",
+      "pos_m": [
+        0.0,
+        -49.0,
+        27.0
+      ],
+      "rpm": 24.0,
+      "band": "X_BAND"
+    },
+    {
+      "id": "radar_sband",
+      "type": "marine_radar",
+      "pos_m": [
+        0.0,
+        -49.0,
+        24.0
+      ],
+      "rpm": 24.0,
+      "band": "S_BAND"
+    },
+    {
+      "id": "lidar_bow",
+      "type": "lidar_3d",
+      "pos_m": [
+        0.0,
+        62.0,
+        9.5
+      ]
+    },
+    {
+      "id": "lidar_port_wing",
+      "type": "lidar_2d",
+      "pos_m": [
+        -10.6,
+        -46.0,
+        20.0
+      ]
+    },
+    {
+      "id": "lidar_stbd_wing",
+      "type": "lidar_2d",
+      "pos_m": [
+        10.6,
+        -46.0,
+        20.0
+      ]
+    },
+    {
+      "id": "camera_bow_center",
+      "type": "camera_rgb",
+      "pos_m": [
+        0.0,
+        61.5,
+        10.0
+      ],
+      "fov_deg": 90.0
+    },
+    {
+      "id": "camera_bridge_front",
+      "type": "camera_rgb",
+      "pos_m": [
+        0.0,
+        -45.0,
+        20.5
+      ],
+      "fov_deg": 110.0
+    },
+    {
+      "id": "gnss_antenna",
+      "type": "gnss_antenna",
+      "pos_m": [
+        0.0,
+        -49.0,
+        27.5
+      ]
+    },
+    {
+      "id": "gyro_compass",
+      "type": "gyro_compass",
+      "pos_m": [
+        0.0,
+        -48.0,
+        5.0
+      ]
+    },
+    {
+      "id": "echo_sounder",
+      "type": "echo_sounder",
+      "pos_m": [
+        0.0,
+        45.0,
+        -6.0
+      ]
+    }
+  ],
+  "nav_lights": [
+    {
+      "id": "masthead_light",
+      "color": "white",
+      "arc_deg": 225.0,
+      "range_nm": 6.0,
+      "pos_m": [
+        0.0,
+        -36.0,
+        20.5
+      ]
+    },
+    {
+      "id": "port_light",
+      "color": "red",
+      "arc_deg": 112.5,
+      "range_nm": 3.0,
+      "pos_m": [
+        -7.1,
+        -34.5,
+        14.5
+      ]
+    },
+    {
+      "id": "starboard_light",
+      "color": "green",
+      "arc_deg": 112.5,
+      "range_nm": 3.0,
+      "pos_m": [
+        7.1,
+        -34.5,
+        14.5
+      ]
+    },
+    {
+      "id": "stern_light",
+      "color": "white",
+      "arc_deg": 135.0,
+      "range_nm": 3.0,
+      "pos_m": [
+        0.0,
+        -45.5,
+        5.5
+      ]
+    }
+  ],
+  "output": {
+    "directory": "output/container_700teu",
+    "blend": "container_700teu.blend",
+    "glb": "container_700teu.glb",
+    "mjcf": "container_700teu.xml",
+    "hydro_json": "hydro_mmg.json",
+    "profile_json": "ship_sync.profile.json",
+    "report_markdown": "BUILD_REPORT.md"
+  },
+  "template_file": "vessel_base.yaml",
+  "ship_class": "nextgen_container_700teu",
+  "name": "Genbu Class 700TEU Next-Generation Container Ship",
+  "provenance": {
+    "principal_dimensions": "public (Nippon Foundation MEGURI2040 Phase 2 announcements)",
+    "hydro_coefficients": "estimated (Kijima 1990 standard formula for 130m container)",
+    "radar_rcs": "estimated (Large coastal container ~8,000 m^2)"
+  }
+}

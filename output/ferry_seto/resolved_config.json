@@ -1,0 +1,317 @@
+{
+  "template_id": "ferry_seto",
+  "schema_version": "1.0",
+  "vehicle_type": "vessel",
+  "units": "m",
+  "coordinate_system": {
+    "right_axis": "+X",
+    "front_axis": "+Y",
+    "up_axis": "+Z",
+    "root_origin": "waterline_at_midship"
+  },
+  "dimensions": {
+    "length_oa_m": 65.86,
+    "length_pp_m": 60.0,
+    "beam_m": 14.0,
+    "depth_m": 4.8,
+    "draft_m": 3.1,
+    "block_coefficient": 0.635,
+    "water_density_kg_m3": 1025.0,
+    "gross_tonnage_gt": 942.0,
+    "displacement_tonnes": 1680.0,
+    "service_speed_kt": 13.0,
+    "max_speed_kt": 14.5,
+    "passenger_capacity": 500
+  },
+  "hull": {
+    "transom_width_ratio": 0.88,
+    "transom_depth_ratio": 0.7,
+    "flare_angle_deg": 20.0,
+    "bulbous_bow": {
+      "enabled": true,
+      "protrusion_m": 1.8,
+      "radius_m": 1.1,
+      "center_z_m": -1.5
+    },
+    "sections": {
+      "count": 21,
+      "bilge_radius_ratio": 0.12,
+      "sheer_fore_m": 1.8,
+      "sheer_aft_m": 0.6
+    },
+    "sheer_fore_m": 1.4,
+    "sheer_aft_m": 0.4,
+    "vehicle_deck": {
+      "enabled": true,
+      "bow_ramp": true,
+      "stern_ramp": true,
+      "deck_height_m": 4.5
+    }
+  },
+  "superstructure": {
+    "enabled": true,
+    "type": "passenger_decks",
+    "length_m": 42.0,
+    "width_m": 13.5,
+    "height_m": 8.5,
+    "decks": 3,
+    "bridge_wing_width_m": 14.2,
+    "bridge_view_height_m": 12.0,
+    "mast": {
+      "height_m": 6.5,
+      "radar_platforms": 1
+    },
+    "twin_funnel": {
+      "height_m": 3.5,
+      "diameter_m": 1.2,
+      "port_pos_m": [
+        -4.5,
+        -12.0,
+        11.5
+      ],
+      "stbd_pos_m": [
+        4.5,
+        -12.0,
+        11.5
+      ]
+    }
+  },
+  "actuators": {
+    "propellers": [
+      {
+        "id": "port_prop",
+        "type": "FPP",
+        "diameter_m": 2.3,
+        "pitch_ratio": 0.82,
+        "blades": 4,
+        "shaft_pos_m": [
+          -3.2,
+          -28.0,
+          -1.8
+        ],
+        "max_rpm": 320.0,
+        "rated_power_kw": 1500.0
+      },
+      {
+        "id": "stbd_prop",
+        "type": "FPP",
+        "diameter_m": 2.3,
+        "pitch_ratio": 0.82,
+        "blades": 4,
+        "shaft_pos_m": [
+          3.2,
+          -28.0,
+          -1.8
+        ],
+        "max_rpm": 320.0,
+        "rated_power_kw": 1500.0
+      }
+    ],
+    "rudders": [
+      {
+        "id": "port_rudder",
+        "type": "flap_or_spade",
+        "area_m2": 3.8,
+        "aspect_ratio": 1.6,
+        "pos_m": [
+          -3.2,
+          -29.8,
+          -1.6
+        ],
+        "max_angle_deg": 35.0,
+        "turn_rate_deg_s": 5.0
+      },
+      {
+        "id": "stbd_rudder",
+        "type": "flap_or_spade",
+        "area_m2": 3.8,
+        "aspect_ratio": 1.6,
+        "pos_m": [
+          3.2,
+          -29.8,
+          -1.6
+        ],
+        "max_angle_deg": 35.0,
+        "turn_rate_deg_s": 5.0
+      }
+    ],
+    "thrusters": [
+      {
+        "id": "bow_thruster",
+        "type": "tunnel_thruster",
+        "pos_m": [
+          0.0,
+          26.0,
+          -1.6
+        ],
+        "diameter_m": 1.1,
+        "thrust_kn": 45.0,
+        "rated_power_kw": 300.0
+      }
+    ]
+  },
+  "buoyancy": {
+    "stations_count": 20,
+    "points_per_station": 2,
+    "total_sites": 40,
+    "transverse_offset_ratio": 0.7
+  },
+  "signatures": {
+    "radar_cross_section_m2": 1200.0,
+    "has_ais": true,
+    "ais_class": "A",
+    "mmsi": 431003942,
+    "callsign": "7K942",
+    "ship_type_code": 60
+  },
+  "mounts": [
+    {
+      "id": "radar_xband",
+      "type": "marine_radar",
+      "pos_m": [
+        0.0,
+        8.0,
+        16.5
+      ],
+      "rpm": 24.0,
+      "band": "X_BAND"
+    },
+    {
+      "id": "lidar_bow",
+      "type": "lidar_3d",
+      "pos_m": [
+        0.0,
+        29.5,
+        5.8
+      ]
+    },
+    {
+      "id": "lidar_port_wing",
+      "type": "lidar_2d",
+      "pos_m": [
+        -7.1,
+        10.0,
+        12.0
+      ]
+    },
+    {
+      "id": "lidar_stbd_wing",
+      "type": "lidar_2d",
+      "pos_m": [
+        7.1,
+        10.0,
+        12.0
+      ]
+    },
+    {
+      "id": "camera_bow_center",
+      "type": "camera_rgb",
+      "pos_m": [
+        0.0,
+        29.0,
+        6.0
+      ],
+      "fov_deg": 90.0
+    },
+    {
+      "id": "camera_bridge_front",
+      "type": "camera_rgb",
+      "pos_m": [
+        0.0,
+        9.5,
+        12.2
+      ],
+      "fov_deg": 110.0
+    },
+    {
+      "id": "gnss_antenna",
+      "type": "gnss_antenna",
+      "pos_m": [
+        0.0,
+        7.5,
+        17.0
+      ]
+    },
+    {
+      "id": "gyro_compass",
+      "type": "gyro_compass",
+      "pos_m": [
+        0.0,
+        5.0,
+        4.0
+      ]
+    },
+    {
+      "id": "echo_sounder",
+      "type": "echo_sounder",
+      "pos_m": [
+        0.0,
+        20.0,
+        -3.1
+      ]
+    }
+  ],
+  "nav_lights": [
+    {
+      "id": "masthead_light",
+      "color": "white",
+      "arc_deg": 225.0,
+      "range_nm": 6.0,
+      "pos_m": [
+        0.0,
+        -36.0,
+        20.5
+      ]
+    },
+    {
+      "id": "port_light",
+      "color": "red",
+      "arc_deg": 112.5,
+      "range_nm": 3.0,
+      "pos_m": [
+        -7.1,
+        -34.5,
+        14.5
+      ]
+    },
+    {
+      "id": "starboard_light",
+      "color": "green",
+      "arc_deg": 112.5,
+      "range_nm": 3.0,
+      "pos_m": [
+        7.1,
+        -34.5,
+        14.5
+      ]
+    },
+    {
+      "id": "stern_light",
+      "color": "white",
+      "arc_deg": 135.0,
+      "range_nm": 3.0,
+      "pos_m": [
+        0.0,
+        -45.5,
+        5.5
+      ]
+    }
+  ],
+  "output": {
+    "directory": "output/ferry_seto",
+    "blend": "ferry_seto.blend",
+    "glb": "ferry_seto.glb",
+    "mjcf": "ferry_seto.xml",
+    "hydro_json": "hydro_mmg.json",
+    "profile_json": "ship_sync.profile.json",
+    "report_markdown": "BUILD_REPORT.md"
+  },
+  "template_file": "vessel_base.yaml",
+  "ship_class": "coastal_passenger_ferry",
+  "name": "Seto Inland Sea Passenger Car Ferry",
+  "provenance": {
+    "principal_dimensions": "public (Ryobi Ferry public fleet specifications)",
+    "hydro_coefficients": "estimated (Twin-screw twin-rudder ferry empirical formula)",
+    "radar_rcs": "estimated (~1,200 m^2 with vehicle deck and passenger cabin)"
+  }
+}

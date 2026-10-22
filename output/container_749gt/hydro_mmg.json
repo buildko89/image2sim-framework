@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "model_type": "MMG_3DOF_Hybrid",
+    "estimation_source": "Kijima 1990 & Kato-Motora",
+    "units": "SI_metric"
+  },
+  "dimensions": {
+    "length_pp_m": 90.0,
+    "beam_m": 14.0,
+    "draft_m": 3.8,
+    "block_coefficient": 0.672,
+    "displacement_kg": 3297974.4000000004,
+    "rudder_area_m2": 7.2,
+    "propeller_dia_m": 3.2,
+    "water_density_kg_m3": 1025.0
+  },
+  "mass_and_inertia": {
+    "mass_kg": 3297974.4000000004,
+    "mass_prime": 0.20906666666666668,
+    "Izz_kgm2": 1669599540.0000002,
+    "Izz_prime": 0.01306666666666667,
+    "added_mass_x_kg": 164898.72000000003,
+    "added_mass_x_prime": 0.010453333333333335,
+    "added_mass_y_kg": 2123064.271305103,
+    "added_mass_y_prime": 0.1345862388503845,
+    "added_inertia_zz_kgm2": 1074801287.3482084,
+    "added_inertia_zz_prime": 0.008411639928149032
+  },
+  "hull_derivatives_prime": {
+    "X_vv": -0.23709204678362572,
+    "X_vr": 0.10444334502923976,
+    "X_rr": -0.0517033918128655,
+    "X_vvvv": 0.0,
+    "Y_v": -0.2789916898182357,
+    "Y_r": 0.06632251157578452,
+    "Y_vvv": -3.521052631578947,
+    "Y_vvr": -2.0126315789473685,
+    "Y_vrr": -0.47294736842105256,
+    "Y_rrr": -0.023126315789473682,
+    "N_v": -0.08444444444444445,
+    "N_r": -0.038469135802469134,
+    "N_vvv": -1.296442105263158,
+    "N_vvr": -0.8165263157894737,
+    "N_vrr": -0.18806315789473685,
+    "N_rrr": -0.08908
+  },
+  "propeller_and_rudder": {
+    "thrust_deduction_t_P": 0.09784,
+    "wake_fraction_w_P0": 0.28600000000000003,
+    "rudder_force_deduction_t_R": 0.26183999999999996,
+    "induced_lateral_force_a_H": 0.378384,
+    "induced_moment_lever_x_H_prime": -0.45,
+    "rudder_area_ratio": 0.021052631578947368,
+    "propeller_kt_coefficients": [
+      0.38,
+      -0.32,
+      -0.12
+    ]
+  },
+  "low_speed_cross_flow": {
+    "cross_flow_drag_coefficient_cd": 1.15,
+    "blending_speed_threshold_m_s": 1.5
+  }
+}

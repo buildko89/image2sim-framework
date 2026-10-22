@@ -1,0 +1,16 @@
+{
+  "subject": "container_700teu",
+  "blend_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\container_700teu.blend",
+  "glb_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\container_700teu.glb",
+  "renders": {
+    "front": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\renders\\front.png",
+    "back": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\renders\\back.png",
+    "port": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\renders\\port.png",
+    "starboard": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\renders\\starboard.png",
+    "top": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\renders\\top.png",
+    "iso": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_700teu\\renders\\iso.png"
+  },
+  "buoyancy_sites_count": 40,
+  "total_objects": 242,
+  "total_meshes": 190
+}

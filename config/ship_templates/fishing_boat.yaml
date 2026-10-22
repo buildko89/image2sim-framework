@@ -1,0 +1,143 @@
+# ==============================================================================
+# 小型漁船（沿岸一本釣り・底引き網船）テンプレート（非AIS Target Ship）
+#
+#   シミュレータでの役割:
+#     - AIS非搭載（has_ais: false）によるレーダ/カメラ認識単体での検知・追尾検証
+#     - 低RCS（σ = 5.0 m^2）による波浪シークラッタ・降雨減衰下の検知限界検証
+#     - 不規則な操業挙動（漂泊・急変針・横切り）エージェントの物理・描画モデル
+# ==============================================================================
+template_id: fishing_boat
+template_file: vessel_base.yaml
+schema_version: '1.0'
+vehicle_type: vessel
+ship_class: coastal_fishing_boat
+name: "Small Coastal Fishing Boat (Non-AIS Target Vessel)"
+
+provenance:
+  principal_dimensions: "public (Standard Japanese 19GT coastal fishing boat hulls)"
+  hydro_coefficients: "estimated (Empirical formula for small high-speed fishing vessel)"
+  radar_rcs: "measured/benchmark (Small FRP fishing boat with radar reflector ~5.0 m^2)"
+
+# --- 主要目 -------------------------------------------------------------------
+dimensions:
+  length_oa_m: 12.00          # 全長
+  length_pp_m: 10.50          # 垂線間長
+  beam_m: 3.20                # 全幅
+  depth_m: 1.80               # 型深さ
+  draft_m: 1.10               # 計画喫水
+  block_coefficient: 0.420    # Cb (V型細長船型)
+  displacement_tonnes: 15.5   # 排水量 Δ
+  gross_tonnage_gt: 9.9       # 総トン数 (19GT未満小型船舶)
+  service_speed_kt: 10.0      # 航海速力 (約 5.14 m/s)
+  max_speed_kt: 18.0          # 最大速力 (約 9.26 m/s)
+
+# --- 船体形状（V型高速船型・FRP船） -------------------------------------------
+hull:
+  transom_width_ratio: 0.82
+  transom_depth_ratio: 0.75
+  flare_angle_deg: 35.0       # 大きな船首フレア（耐波性・波返し）
+  sheer_fore_m: 0.85
+  sheer_aft_m: 0.20
+  bulbous_bow:
+    enabled: false            # 小型漁船にはバルバスバウなし
+  working_deck:
+    type: aft_aft_deck        # 後部作業甲板
+    net_winch: true
+    fish_hold: true
+
+# --- 上部構造物（小型操舵室 Wheelhouse） --------------------------------------
+superstructure:
+  enabled: true
+  type: forward_wheelhouse    # 前部〜中央寄りの操舵室
+  length_m: 3.5
+  width_m: 2.2
+  height_m: 2.2
+  decks: 1
+  bridge_wing_width_m: 2.4
+  bridge_view_height_m: 3.2
+  mast:
+    height_m: 3.8
+    radar_platforms: 1
+    fishing_lights: true      # 集魚灯・作業灯マウント
+
+# --- アクチュエータ -----------------------------------------------------------
+actuators:
+  propellers:
+    - id: main_prop
+      type: FPP
+      diameter_m: 0.85
+      pitch_ratio: 0.95
+      blades: 3
+      shaft_pos_m: [0.0, -4.8, -0.85]
+      max_rpm: 900.0
+      rated_power_kw: 320.0
+  rudders:
+    - id: main_rudder
+      type: flap_or_spade
+      area_m2: 0.65
+      aspect_ratio: 1.50
+      pos_m: [0.0, -5.3, -0.75]
+      max_angle_deg: 35.0
+      turn_rate_deg_s: 10.0
+  thrusters: []               # スラスタなし（舵とプロペラのみ）
+
+# --- レーダ・通信・識別（非AIS・低RCSの重要属性） ----------------------------
+signatures:
+  radar_cross_section_m2: 5.0 # 小型FRP船低RCS
+  has_ais: false              # ★ 非AIS船（レーダ・カメラでのみ識別可能）
+  ais_class: NONE
+  mmsi: 0
+  callsign: ""
+  ship_type_code: 30          # Fishing vessel
+
+# --- センサマウント -----------------------------------------------------------
+mounts:
+  - id: radar_reflector
+    type: passive_radar_reflector
+    pos_m: [0.0, 0.5, 4.2]    # マスト頂部のレーダ反射器
+  - id: gps_antenna
+    type: gnss_antenna
+    pos_m: [0.0, 0.5, 3.8]
+
+# --- 航海灯（漁ろう灯・COLREG小型船基準） -------------------------------------
+nav_lights:
+  - id: masthead_light
+    color: white
+    arc_deg: 225.0
+    range_nm: 2.0
+    pos_m: [0.0, 0.5, 4.0]
+  - id: port_light
+    color: red
+    arc_deg: 112.5
+    range_nm: 1.0
+    pos_m: [-1.1, 0.8, 2.5]
+  - id: starboard_light
+    color: green
+    arc_deg: 112.5
+    range_nm: 1.0
+    pos_m: [1.1, 0.8, 2.5]
+  - id: stern_light
+    color: white
+    arc_deg: 135.0
+    range_nm: 2.0
+    pos_m: [0.0, -5.4, 1.2]
+  - id: fishing_light_top
+    color: red                # 漁ろう中（上が赤・下が白）
+    arc_deg: 360.0
+    range_nm: 2.0
+    pos_m: [0.0, 0.5, 4.6]
+  - id: fishing_light_bottom
+    color: white
+    arc_deg: 360.0
+    range_nm: 2.0
+    pos_m: [0.0, 0.5, 3.4]
+
+# --- 出力設定 -----------------------------------------------------------------
+output:
+  directory: output/fishing_boat
+  blend: fishing_boat.blend
+  glb: fishing_boat.glb
+  mjcf: fishing_boat.xml
+  hydro_json: hydro_mmg.json
+  profile_json: ship_sync.profile.json
+  report_markdown: BUILD_REPORT.md

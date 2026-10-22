@@ -1,0 +1,297 @@
+{
+  "template_id": "container_749gt",
+  "schema_version": "1.0",
+  "vehicle_type": "vessel",
+  "units": "m",
+  "coordinate_system": {
+    "right_axis": "+X",
+    "front_axis": "+Y",
+    "up_axis": "+Z",
+    "root_origin": "waterline_at_midship"
+  },
+  "dimensions": {
+    "length_oa_m": 96.81,
+    "length_pp_m": 90.0,
+    "beam_m": 14.0,
+    "depth_m": 7.5,
+    "draft_m": 3.8,
+    "block_coefficient": 0.672,
+    "water_density_kg_m3": 1025.0,
+    "gross_tonnage_gt": 749.0,
+    "displacement_tonnes": 3280.0,
+    "service_speed_kt": 14.5,
+    "max_speed_kt": 16.0,
+    "container_capacity_teu": 245
+  },
+  "hull": {
+    "transom_width_ratio": 0.75,
+    "transom_depth_ratio": 0.82,
+    "flare_angle_deg": 28.0,
+    "bulbous_bow": {
+      "enabled": true,
+      "protrusion_m": 2.4,
+      "radius_m": 1.35,
+      "center_z_m": -1.9
+    },
+    "sections": {
+      "count": 21,
+      "bilge_radius_ratio": 0.12,
+      "sheer_fore_m": 1.8,
+      "sheer_aft_m": 0.6
+    },
+    "sheer_fore_m": 2.2,
+    "sheer_aft_m": 0.8,
+    "cargo_hold": {
+      "type": "container_bays",
+      "bays": 4,
+      "stacks": 5,
+      "tiers": 3,
+      "container_color": "assorted"
+    }
+  },
+  "superstructure": {
+    "enabled": true,
+    "type": "aft_bridge",
+    "length_m": 15.0,
+    "width_m": 12.5,
+    "height_m": 12.0,
+    "decks": 4,
+    "bridge_wing_width_m": 14.2,
+    "bridge_view_height_m": 15.5,
+    "mast": {
+      "height_m": 9.0,
+      "radar_platforms": 2
+    },
+    "funnel": {
+      "height_m": 4.5,
+      "diameter_m": 1.8,
+      "pos_m": [
+        0.0,
+        -39.0,
+        14.0
+      ]
+    }
+  },
+  "actuators": {
+    "propellers": [
+      {
+        "id": "main_prop",
+        "type": "FPP",
+        "diameter_m": 3.2,
+        "pitch_ratio": 0.86,
+        "blades": 4,
+        "shaft_pos_m": [
+          0.0,
+          -42.5,
+          -2.2
+        ],
+        "max_rpm": 240.0,
+        "rated_power_kw": 2200.0
+      }
+    ],
+    "rudders": [
+      {
+        "id": "main_rudder",
+        "type": "flap_or_spade",
+        "area_m2": 7.2,
+        "aspect_ratio": 1.65,
+        "pos_m": [
+          0.0,
+          -44.8,
+          -1.9
+        ],
+        "max_angle_deg": 35.0,
+        "turn_rate_deg_s": 4.5
+      }
+    ],
+    "thrusters": [
+      {
+        "id": "bow_thruster",
+        "type": "tunnel_thruster",
+        "pos_m": [
+          0.0,
+          39.0,
+          -2.0
+        ],
+        "diameter_m": 1.25,
+        "thrust_kn": 55.0,
+        "rated_power_kw": 380.0
+      }
+    ]
+  },
+  "buoyancy": {
+    "stations_count": 20,
+    "points_per_station": 2,
+    "total_sites": 40,
+    "transverse_offset_ratio": 0.7
+  },
+  "signatures": {
+    "radar_cross_section_m2": 2500.0,
+    "has_ais": true,
+    "ais_class": "A",
+    "mmsi": 431001749,
+    "callsign": "7K749",
+    "ship_type_code": 70
+  },
+  "mounts": [
+    {
+      "id": "radar_xband",
+      "type": "marine_radar",
+      "pos_m": [
+        0.0,
+        -36.0,
+        20.5
+      ],
+      "rpm": 24.0,
+      "band": "X_BAND"
+    },
+    {
+      "id": "radar_sband",
+      "type": "marine_radar",
+      "pos_m": [
+        0.0,
+        -36.0,
+        18.0
+      ],
+      "rpm": 24.0,
+      "band": "S_BAND"
+    },
+    {
+      "id": "lidar_bow",
+      "type": "lidar_3d",
+      "pos_m": [
+        0.0,
+        44.5,
+        6.8
+      ]
+    },
+    {
+      "id": "lidar_port_wing",
+      "type": "lidar_2d",
+      "pos_m": [
+        -7.1,
+        -34.0,
+        15.2
+      ]
+    },
+    {
+      "id": "lidar_stbd_wing",
+      "type": "lidar_2d",
+      "pos_m": [
+        7.1,
+        -34.0,
+        15.2
+      ]
+    },
+    {
+      "id": "camera_bow_center",
+      "type": "camera_rgb",
+      "pos_m": [
+        0.0,
+        44.0,
+        7.2
+      ],
+      "fov_deg": 90.0
+    },
+    {
+      "id": "camera_bridge_front",
+      "type": "camera_rgb",
+      "pos_m": [
+        0.0,
+        -33.5,
+        15.5
+      ],
+      "fov_deg": 110.0
+    },
+    {
+      "id": "gnss_antenna",
+      "type": "gnss_antenna",
+      "pos_m": [
+        0.0,
+        -36.0,
+        21.0
+      ]
+    },
+    {
+      "id": "gyro_compass",
+      "type": "gyro_compass",
+      "pos_m": [
+        0.0,
+        -35.0,
+        4.0
+      ]
+    },
+    {
+      "id": "echo_sounder",
+      "type": "echo_sounder",
+      "pos_m": [
+        0.0,
+        32.0,
+        -3.8
+      ]
+    }
+  ],
+  "nav_lights": [
+    {
+      "id": "masthead_light",
+      "color": "white",
+      "arc_deg": 225.0,
+      "range_nm": 6.0,
+      "pos_m": [
+        0.0,
+        -36.0,
+        20.5
+      ]
+    },
+    {
+      "id": "port_light",
+      "color": "red",
+      "arc_deg": 112.5,
+      "range_nm": 3.0,
+      "pos_m": [
+        -7.1,
+        -34.5,
+        14.5
+      ]
+    },
+    {
+      "id": "starboard_light",
+      "color": "green",
+      "arc_deg": 112.5,
+      "range_nm": 3.0,
+      "pos_m": [
+        7.1,
+        -34.5,
+        14.5
+      ]
+    },
+    {
+      "id": "stern_light",
+      "color": "white",
+      "arc_deg": 135.0,
+      "range_nm": 3.0,
+      "pos_m": [
+        0.0,
+        -45.5,
+        5.5
+      ]
+    }
+  ],
+  "output": {
+    "directory": "output/container_749gt",
+    "blend": "container_749gt.blend",
+    "glb": "container_749gt.glb",
+    "mjcf": "container_749gt.xml",
+    "hydro_json": "hydro_mmg.json",
+    "profile_json": "ship_sync.profile.json",
+    "report_markdown": "BUILD_REPORT.md"
+  },
+  "template_file": "vessel_base.yaml",
+  "ship_class": "coastal_container_749gt",
+  "name": "Mikage / Suzaku Class 749GT Coastal Container Ship",
+  "provenance": {
+    "principal_dimensions": "public (Nippon Foundation MEGURI2040 WG reports)",
+    "hydro_coefficients": "estimated (Kijima 1990 standard formula for coastal container)",
+    "radar_rcs": "estimated (IHO / ITU marine radar RCS benchmark for 100m cargo)"
+  }
+}
