@@ -55,10 +55,17 @@
       0.38,
       -0.32,
       -0.12
-    ]
+    ],
+    "propeller_count": 1,
+    "rudder_count": 1
   },
   "low_speed_cross_flow": {
     "cross_flow_drag_coefficient_cd": 1.15,
     "blending_speed_threshold_m_s": 1.5
+  },
+  "design_point": {
+    "service_speed_kt": 15.5,
+    "service_speed_mps": 7.973882000000001,
+    "service_rpm": 193.09787692112593
   }
 }

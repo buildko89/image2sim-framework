@@ -326,6 +326,18 @@ def main() -> int:
         water_density_kg_m3=float(dim.get("water_density_kg_m3", 1025.0)),
     )
 
+    # 自航平衡の設計点（航海速力・常用回転数 = 最大回転数 × 0.9^(1/3)、出力 90 % MCR 相当）と推進器・舵の基数。
+    # MmgModel はこの点で直進抵抗を較正する（無いと全船 14 kt・210 rpm とみなし、小型船で K_T < 0 になる）
+    service_speed_kt = float(dim.get("service_speed_kt", 14.0))
+    max_rpm = float(propellers[0].get("max_rpm", 250.0))
+    hydro["design_point"] = {
+        "service_speed_kt": service_speed_kt,
+        "service_speed_mps": service_speed_kt * 0.514444,
+        "service_rpm": max_rpm * 0.9 ** (1.0 / 3.0),
+    }
+    hydro["propeller_and_rudder"]["propeller_count"] = len(act.get("propellers", [])) or 1
+    hydro["propeller_and_rudder"]["rudder_count"] = len(act.get("rudders", [])) or 1
+
     # 2. hydro_mmg.json 出力
     out_hydro = Path(args.out_hydro)
     out_hydro.parent.mkdir(parents=True, exist_ok=True)
