@@ -49,10 +49,21 @@ hull:
     stern_ramp: true
     deck_height_m: 4.5
 
+# --- 外観（一般的な瀬戸内カーフェリーの配色。実船の塗装の再現ではない）-------
+paint:
+  hull_topside: [0.92, 0.93, 0.93]
+  boot_top: [0.10, 0.20, 0.45]
+  boot_top_band_m: [-0.30, 0.45]
+  deck: [0.40, 0.45, 0.42]
+  funnel: [0.92, 0.93, 0.93]
+  funnel_band: [0.10, 0.30, 0.65]
+  stripe: {z_m: [0.70, 1.20], color: [0.10, 0.30, 0.65]}
+
 # --- 上部構造物（旅客デッキ・全通展望デッキ） ---------------------------------
 superstructure:
   enabled: true
   type: passenger_decks
+  pos_y_m: -9.0               # 中心の前後位置（前端 y = +12 m に船橋）
   length_m: 42.0
   width_m: 13.5
   height_m: 8.5
@@ -152,6 +163,29 @@ mounts:
   - id: echo_sounder
     type: echo_sounder
     pos_m: [0.0, 20.0, -3.1]
+
+# --- 航海灯（COLREG。マスト頂部・船橋翼端・トランサム）---------------------------
+nav_lights:
+  - id: masthead_light
+    color: white
+    arc_deg: 225.0
+    range_nm: 6.0
+    pos_m: [0.0, 8.0, 17.4]
+  - id: port_light
+    color: red
+    arc_deg: 112.5
+    range_nm: 3.0
+    pos_m: [-7.1, 9.7, 10.8]
+  - id: starboard_light
+    color: green
+    arc_deg: 112.5
+    range_nm: 3.0
+    pos_m: [7.1, 9.7, 10.8]
+  - id: stern_light
+    color: white
+    arc_deg: 135.0
+    range_nm: 3.0
+    pos_m: [0.0, -31.8, 3.3]
 
 # --- 出力設定 -----------------------------------------------------------------
 output:

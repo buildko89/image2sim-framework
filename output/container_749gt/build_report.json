@@ -1,16 +1,39 @@
 {
   "subject": "container_749gt",
-  "blend_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\container_749gt.blend",
-  "glb_file": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\container_749gt.glb",
+  "blend_file": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\container_749gt.blend",
+  "glb_file": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\container_749gt.glb",
   "renders": {
-    "front": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\front.png",
-    "back": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\back.png",
-    "port": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\port.png",
-    "starboard": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\starboard.png",
-    "top": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\top.png",
-    "iso": "D:\\work_ship\\shipnavi\\image2sim-ship\\output\\container_749gt\\renders\\iso.png"
+    "front": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\front.png",
+    "back": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\back.png",
+    "port": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\port.png",
+    "starboard": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\starboard.png",
+    "top": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\top.png",
+    "iso": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\iso.png",
+    "hero": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\hero.png",
+    "hero_water": "D:\\work_ship\\images\\image2sim-framework\\output\\container_749gt\\renders\\hero_water.png"
   },
   "buoyancy_sites_count": 40,
-  "total_objects": 110,
-  "total_meshes": 58
+  "containers_count": 54,
+  "total_objects": 68,
+  "total_meshes": 17,
+  "total_faces": 6843,
+  "visual_bounds_m": {
+    "min": [
+      -7.21999979019165,
+      -47.40850067138672,
+      -3.8000001907348633
+    ],
+    "max": [
+      7.21999979019165,
+      49.50129699707031,
+      21.399999618530273
+    ]
+  },
+  "hull_form": {
+    "underwater_volume_m3": 3200.0000000010946,
+    "target_volume_m3": 3200.0,
+    "midship_superellipse_n": 9.734557793362512,
+    "fullness": 0.2822284993730148,
+    "transom_z_m": -0.21600000000000008
+  }
 }

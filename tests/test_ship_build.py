@@ -91,3 +91,22 @@ def test_vessel_deliverables_exist(subject, expected_rcs, has_ais, expected_lpp,
         img_path = renders_dir / f"{view}.png"
         assert img_path.is_file(), f"Render image missing: {img_path}"
         assert img_path.stat().st_size > 10_000, f"Render image size too small: {img_path}"
+
+
+@pytest.mark.parametrize("subject, expected_rcs, has_ais, expected_lpp, expected_beam", VESSEL_CASES)
+def test_visual_model_stays_within_the_ship(subject, expected_rcs, has_ais, expected_lpp, expected_beam):
+    """見た目のモデルが主要目の範囲に収まり（船外に浮いた部品が無い）、水線下の体積が排水容積に一致する"""
+    with (OUTPUT_DIR / subject / "build_report.json").open(encoding="utf-8") as f:
+        report = json.load(f)
+    with (OUTPUT_DIR / subject / "resolved_config.json").open(encoding="utf-8") as f:
+        dim = json.load(f)["dimensions"]
+    lo, hi = report["visual_bounds_m"]["min"], report["visual_bounds_m"]["max"]
+    loa = float(dim["length_oa_m"])
+    # 前後: 全長＋バルバスバウの突出（全長の 3 % まで）
+    assert hi[1] - lo[1] <= loa * 1.03, f"length {hi[1] - lo[1]:.1f} m vs LOA {loa} m"
+    # 左右: 船橋翼・救命艇の張り出しを 1 m まで許容
+    assert max(abs(lo[0]), abs(hi[0])) <= expected_beam / 2 + 1.0
+    # 上下: 竜骨（喫水）より下は舵の下端程度まで（漁船のテンプレートの舵は基線より 0.14 m 下に出る）
+    assert lo[2] >= -1.15 * float(dim["draft_m"])
+    hull = report["hull_form"]
+    assert abs(hull["underwater_volume_m3"] / hull["target_volume_m3"] - 1.0) < 0.02

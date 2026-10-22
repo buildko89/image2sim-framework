@@ -51,6 +51,12 @@ hull:
     tiers: 3
     container_color: assorted   # assorted | blue | green | red
 
+# --- 外観（一般的な内航コンテナ船の配色。実船の塗装の再現ではない）-------------
+paint:
+  hull_topside: [0.09, 0.17, 0.33]
+  deck: [0.30, 0.38, 0.32]
+  funnel_band: [0.08, 0.30, 0.60]
+
 # --- 上部構造物・船橋（船尾配置） ----------------------------------------------
 superstructure:
   enabled: true

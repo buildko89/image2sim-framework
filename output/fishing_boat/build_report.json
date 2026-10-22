@@ -8,9 +8,32 @@
     "port": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\port.png",
     "starboard": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\starboard.png",
     "top": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\top.png",
-    "iso": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\iso.png"
+    "iso": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\iso.png",
+    "hero": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\hero.png",
+    "hero_water": "D:\\work_ship\\images\\image2sim-framework\\output\\fishing_boat\\renders\\hero_water.png"
   },
   "buoyancy_sites_count": 40,
-  "total_objects": 63,
-  "total_meshes": 19
+  "containers_count": 0,
+  "total_objects": 59,
+  "total_meshes": 16,
+  "total_faces": 5035,
+  "visual_bounds_m": {
+    "min": [
+      -1.6299999952316284,
+      -5.800000190734863,
+      -1.2437103986740112
+    ],
+    "max": [
+      1.6299999952316284,
+      6.254979133605957,
+      4.699999809265137
+    ]
+  },
+  "hull_form": {
+    "underwater_volume_m3": 15.35753648103304,
+    "target_volume_m3": 15.121951219512194,
+    "midship_superellipse_n": 1.5606929901400264,
+    "fullness": 0.1,
+    "transom_z_m": -0.323
+  }
 }

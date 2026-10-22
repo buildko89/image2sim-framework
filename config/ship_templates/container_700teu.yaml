@@ -50,6 +50,14 @@ hull:
     tiers: 4
     container_color: assorted
 
+# --- 外観（一般的なフィーダーコンテナ船の配色。実船の塗装の再現ではない）-------
+paint:
+  hull_topside: [0.45, 0.10, 0.09]
+  boot_top: [0.05, 0.05, 0.06]
+  hull_bottom: [0.20, 0.20, 0.22]
+  deck: [0.33, 0.35, 0.36]
+  funnel_band: [0.80, 0.55, 0.10]
+
 # --- 上部構造物・船橋（船尾配置・大型） ----------------------------------------
 superstructure:
   enabled: true
@@ -148,6 +156,29 @@ mounts:
   - id: echo_sounder
     type: echo_sounder
     pos_m: [0.0, 45.0, -6.0]
+
+# --- 航海灯（COLREG。マスト頂部・船橋翼端・トランサム）---------------------------
+nav_lights:
+  - id: masthead_light
+    color: white
+    arc_deg: 225.0
+    range_nm: 6.0
+    pos_m: [0.0, -49.0, 28.1]
+  - id: port_light
+    color: red
+    arc_deg: 112.5
+    range_nm: 3.0
+    pos_m: [-10.6, -40.8, 18.4]
+  - id: starboard_light
+    color: green
+    arc_deg: 112.5
+    range_nm: 3.0
+    pos_m: [10.6, -40.8, 18.4]
+  - id: stern_light
+    color: white
+    arc_deg: 135.0
+    range_nm: 3.0
+    pos_m: [0.0, -65.2, 6.5]
 
 # --- 出力設定 -----------------------------------------------------------------
 output:

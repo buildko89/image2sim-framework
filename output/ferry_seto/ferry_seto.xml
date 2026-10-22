@@ -95,10 +95,10 @@
       <site class="mount_site" name="mount_echo_sounder" pos="20.0000 -0.0000 -3.1000"/>
 
       <!-- 航海灯 (NAV_LIGHTS) -->
-      <site class="light_site" name="navlight_masthead_light" pos="-36.0000 -0.0000 20.5000"/>
-      <site class="light_site" name="navlight_port_light" pos="-34.5000 7.1000 14.5000"/>
-      <site class="light_site" name="navlight_starboard_light" pos="-34.5000 -7.1000 14.5000"/>
-      <site class="light_site" name="navlight_stern_light" pos="-45.5000 -0.0000 5.5000"/>
+      <site class="light_site" name="navlight_masthead_light" pos="8.0000 -0.0000 17.4000"/>
+      <site class="light_site" name="navlight_port_light" pos="9.7000 7.1000 10.8000"/>
+      <site class="light_site" name="navlight_starboard_light" pos="9.7000 -7.1000 10.8000"/>
+      <site class="light_site" name="navlight_stern_light" pos="-31.8000 -0.0000 3.3000"/>
 
       <!-- 可動部: 舵 (Rudder) -->
       <body name="body_rudder_port_rudder" pos="-29.8000 3.2000 -1.6000">

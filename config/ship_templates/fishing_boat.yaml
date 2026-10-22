@@ -45,6 +45,16 @@ hull:
     net_winch: true
     fish_hold: true
 
+# --- 外観（一般的な小型漁船の配色。実船の塗装の再現ではない）-----------------
+paint:
+  hull_topside: [0.93, 0.93, 0.92]
+  boot_top: [0.70, 0.12, 0.10]
+  hull_bottom: [0.70, 0.12, 0.10]
+  boot_top_band_m: [-0.08, 0.10]
+  deck: [0.55, 0.60, 0.62]
+  superstructure: [0.94, 0.94, 0.93]
+  stripe: {z_m: [0.38, 0.50], color: [0.10, 0.30, 0.70]}
+
 # --- 上部構造物（小型操舵室 Wheelhouse） --------------------------------------
 superstructure:
   enabled: true
