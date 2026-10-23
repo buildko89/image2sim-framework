@@ -89,8 +89,8 @@
       <site class="mount_site" name="mount_lidar_bow" pos="44.5000 -0.0000 6.8000"/>
       <site class="mount_site" name="mount_lidar_port_wing" pos="-34.0000 7.1000 15.2000"/>
       <site class="mount_site" name="mount_lidar_stbd_wing" pos="-34.0000 -7.1000 15.2000"/>
-      <site class="mount_site" name="mount_camera_bow_center" pos="44.0000 -0.0000 7.2000"/>
-      <site class="mount_site" name="mount_camera_bridge_front" pos="-33.5000 -0.0000 15.5000"/>
+      <site class="mount_site" name="mount_camera_bow_center" pos="44.0000 -0.0000 8.7000"/>
+      <site class="mount_site" name="mount_camera_bridge_front" pos="-26.5500 -0.0000 15.5000"/>
       <site class="mount_site" name="mount_gnss_antenna" pos="-36.0000 -0.0000 21.0000"/>
       <site class="mount_site" name="mount_gyro_compass" pos="-35.0000 -0.0000 4.0000"/>
       <site class="mount_site" name="mount_echo_sounder" pos="32.0000 -0.0000 -3.8000"/>

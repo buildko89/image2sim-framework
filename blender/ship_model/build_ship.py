@@ -581,6 +581,10 @@ def build_mast(ship: Ship, mb: MeshBuilder, x: float, y: float, z_base: float, m
             mb.cylinder((mx, my, mz), 0.08, 0.12, "dark", seg=12)
         elif t == "camera_rgb":
             mb.box((mx, my, mz), (0.18, 0.25, 0.15), "dark")
+            # 支柱（post_m：筐体の下から甲板まで）。甲板より高く上げた船首カメラが浮かないように
+            post = float(m.get("post_m", 0.0))
+            if post > 0.0:
+                mb.cylinder((mx, my, mz - 0.075 - 0.5 * post), 0.05, post, "steel", seg=10)
         elif t == "passive_radar_reflector":
             mb.ellipsoid((mx, my, mz), (0.18, 0.18, 0.25), "steel", seg=4, rings=2)
 

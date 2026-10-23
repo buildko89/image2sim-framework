@@ -141,11 +141,12 @@ mounts:
     pos_m: [10.6, -46.0, 20.0]
   - id: camera_bow_center
     type: camera_rgb
-    pos_m: [0.0, 61.5, 10.0]
+    pos_m: [0.0, 61.5, 11.1]   # ブルワークの上端 9.56 m ＋ 1.5 m（K10）
+    post_m: 4.3                # 甲板（6.78 m）までの支柱
     fov_deg: 90.0
   - id: camera_bridge_front
     type: camera_rgb
-    pos_m: [0.0, -45.0, 20.5]
+    pos_m: [0.0, -37.97, 20.5]  # 操舵室の前面（-38.12 m）の 0.15 m 前（K10。-45.0 m は操舵室の箱の中だった）
     fov_deg: 110.0
   - id: gnss_antenna
     type: gnss_antenna
