@@ -151,3 +151,7 @@ output:
   hydro_json: hydro_mmg.json
   profile_json: ship_sync.profile.json
   report_markdown: BUILD_REPORT.md
+
+# 横揺れの復原（積付け状態の GM）。MJCF の重心の高さはここから決める（blend2mjcf_ship.py の center_of_gravity_z）
+stability:
+  gm_m: 0.6

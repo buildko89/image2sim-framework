@@ -60,6 +60,37 @@ def vec_str(v: List[float]) -> str:
     return f"{v[0]:.4f} {v[1]:.4f} {v[2]:.4f}"
 
 
+# 横揺れの復原の目安（積付け状態の GM [m]）。テンプレートに stability.gm_m が無いときの船種ごとの代表値
+DEFAULT_GM_M = {"container_749gt": 1.2, "container_700teu": 1.5, "ferry_seto": 2.0, "fishing_boat": 0.6}
+
+
+def center_of_gravity_z(cfg: Dict[str, Any], displacement_kg: float) -> Dict[str, float]:
+    """重心の高さ（水線からの z [m]、FLU）を、目標の GM から決める（hakoniwa-mujoco-ship の K12）。
+
+    物理（WaveBuoyancy）と同じ浮力点の配置から、水線面の 2 次モーメント I_T = Σ (2/3) b³ Δx（b はステーションの半幅）、
+    浮心の深さ KB = d (5/6 − Cb / (3 Cwp))（Morrish、Cwp ≈ (1 + 2 Cb) / 3）を求め、GM = KB + I_T / V − KG から KG を出す。
+    以前は −0.35 d（竜骨から 0.65 d）に固定で、749GT の GM が約 4 m・横揺れの固有周期が 4 s と、実船（GM 1〜1.5 m、8〜10 s）より硬すぎた。
+    """
+    dim = cfg["dimensions"]
+    Lpp, B, d = float(dim["length_pp_m"]), float(dim["beam_m"]), float(dim["draft_m"])
+    cb = float(dim.get("block_coefficient", 0.7))
+    rho = float(dim.get("water_density_kg_m3", 1025.0))
+    n_st = int(cfg.get("buoyancy", {}).get("stations_count", 20))
+    dx = Lpp / n_st
+    i_t = 0.0
+    for i in range(n_st):
+        xi = (-Lpp / 2.0 + (i + 0.5) * dx) / (Lpp / 2.0)
+        b_st = (B / 2.0) * max(0.15, (1.0 - abs(xi) ** 2.2) ** 0.5)
+        i_t += (2.0 / 3.0) * b_st ** 3 * dx
+    volume = displacement_kg / rho
+    cwp = (1.0 + 2.0 * cb) / 3.0
+    kb = d * (5.0 / 6.0 - cb / (3.0 * cwp))
+    gm = float(cfg.get("stability", {}).get("gm_m", DEFAULT_GM_M.get(cfg.get("template_id", ""), 1.0)))
+    bm = i_t / volume
+    kg = kb + bm - gm
+    return {"z_g": kg - d, "kg": kg, "kb": kb, "bm": bm, "gm": gm}
+
+
 def generate_mjcf(cfg: Dict[str, Any], hydro: Dict[str, Any]) -> str:
     subject = cfg.get("template_id", "vessel")
     dim = cfg["dimensions"]
@@ -80,6 +111,8 @@ def generate_mjcf(cfg: Dict[str, Any], hydro: Dict[str, Any]) -> str:
     Izz = float(hydro["mass_and_inertia"]["Izz_kgm2"])
     # Ixx (ロール慣性モーメント) ≈ mass * (0.38 * B)^2
     Ixx = mass_kg * ((0.38 * B) ** 2)
+    # 重心の高さ：目標の GM から（K12）
+    stab = center_of_gravity_z(cfg, displacement_kg)
     # Iyy (ピッチ慣性モーメント) ≈ mass * (0.25 * Lpp)^2
     Iyy = mass_kg * ((0.25 * Lpp) ** 2)
 
@@ -122,7 +155,8 @@ def generate_mjcf(cfg: Dict[str, Any], hydro: Dict[str, Any]) -> str:
         f'    <!-- 自船メインボディ (水線面 z=0, 船体中央 x=0, 竜骨 z=-d) -->',
         f'    <body name="vessel" pos="0 0 0">',
         f'      <freejoint name="vessel_free"/>',
-        f'      <inertial pos="0 0 {-d * 0.35:.3f}" mass="{mass_kg:.1f}" diaginertia="{Ixx:.1e} {Iyy:.1e} {Izz:.1e}"/>',
+        f'      <!-- 重心：KG {stab["kg"]:.2f} m（GM {stab["gm"]:.2f} m = KB {stab["kb"]:.2f} + BM {stab["bm"]:.2f} − KG） -->',
+        f'      <inertial pos="0 0 {stab["z_g"]:.3f}" mass="{mass_kg:.1f}" diaginertia="{Ixx:.1e} {Iyy:.1e} {Izz:.1e}"/>',
         f'',
         f'      <!-- 船体コライダ (geom_user[0] に RCS σ を埋め込み) -->',
         f'      <geom class="hull_geom" name="geom_hull_main" pos="0 0 {(D - 2.0*d)*0.5:.3f}" size="{Lpp*0.325:.3f} {B*0.475:.3f} {D*0.5:.3f}" user="{total_rcs * 0.45:.1f}"/>',

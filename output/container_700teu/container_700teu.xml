@@ -34,7 +34,8 @@
     <!-- 自船メインボディ (水線面 z=0, 船体中央 x=0, 竜骨 z=-d) -->
     <body name="vessel" pos="0 0 0">
       <freejoint name="vessel_free"/>
-      <inertial pos="0 0 -2.100" mass="11277222.5" diaginertia="7.2e+08 1.1e+10 1.1e+10"/>
+      <!-- 重心：KG 7.08 m（GM 1.50 m = KB 3.24 + BM 5.33 − KG） -->
+      <inertial pos="0 0 1.077" mass="11277222.5" diaginertia="7.2e+08 1.1e+10 1.1e+10"/>
 
       <!-- 船体コライダ (geom_user[0] に RCS σ を埋め込み) -->
       <geom class="hull_geom" name="geom_hull_main" pos="0 0 -0.750" size="40.300 9.975 5.250" user="3600.0"/>
