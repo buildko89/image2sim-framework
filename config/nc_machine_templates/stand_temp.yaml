@@ -1,0 +1,19 @@
+# ==============================================================================
+# 仮置き台（2個用）。方式検討（devai_automation/02 §2.12）の「扉脇の仮置き台」。
+#   Φ200 級のワークを 2 個（素材の待ち・加工済みの仮置き）。寸法は案。台車の加工機側の床に置く。
+# ==============================================================================
+template_id: stand_temp
+template_file: pallet_M.yaml
+name: "Temporary stand, 2 slots (dia 200)"
+
+provenance:
+  dimensions: "proposal (study of the exchange method for 16 kg works)"
+  grid: "proposal (2 x 1)"
+
+pallet:
+  width_m: 0.460
+  depth_m: 0.260
+  stand_h_m: 0.500
+  grid: [2, 1]
+  slot_dia_m: 0.200
+  margin_m: 0.020

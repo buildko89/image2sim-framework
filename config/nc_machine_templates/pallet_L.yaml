@@ -1,0 +1,17 @@
+# ==============================================================================
+# パレット台＋パレット（テンプレート L：Φ150〜200 用 12個 = 4 x 3）。パレット寸法・個数はカタログ値。
+#   現場セルの素材（鋼の円盤 Φ200 級）に相当。現場のテンプレートは八角形の窪み（ここでは円で近似）。
+#   座標：原点＝床面・パレットの中央。
+# ==============================================================================
+template_id: pallet_L
+template_file: pallet_M.yaml
+name: "Pallet 840 x 740, template L (dia 150-200, 12 pcs)"
+
+provenance:
+  dimensions: "catalog (pallet 840 x 740 mm, height <= 500 mm, 12 pcs for dia 150-200)"
+  grid: "photos (4 x 3, octagonal pockets)"
+
+pallet:
+  grid: [4, 3]
+  slot_dia_m: 0.200
+  margin_m: 0.015

@@ -1,0 +1,33 @@
+# ==============================================================================
+# 大型台車（協働ロボットを載せて加工機の前に置く）。寸法はカタログ値。
+#   座標（C）：原点＝床面・台車の中央。X 右、Y 奥、Z 上。ロボットは天板の robot_mount に載せる。
+#   pallet_anchors：パレット台を置く位置（C 座標、床面、yaw [deg]）。
+# ==============================================================================
+template_id: cart_large
+schema_version: '1.0'
+vehicle_type: nc_peripheral
+kind: cart
+name: "Robot cart, large (1000 x 800 x 505)"
+lod: 0
+
+provenance:
+  dimensions: "catalog (W x D x H = 1000 x 800 x 505 mm, 425 kg)"
+  pallet_anchors: "estimated (photos)"
+
+cart:
+  width_m: 1.000
+  depth_m: 0.800
+  height_m: 0.505
+  mass_kg: 425
+  robot_mount_m: [0.0, 0.10, 0.505]
+
+pallet_anchors:
+  front: {pos_m: [0.0, -0.80, 0.0], yaw_deg: 0}
+  left: {pos_m: [-0.95, 0.0, 0.0], yaw_deg: 90}
+  right: {pos_m: [0.95, 0.0, 0.0], yaw_deg: 90}
+  door_side: {pos_m: [0.78, 0.30, 0.0], yaw_deg: 0}   # 仮置き台（台車の右・加工機側。方式検討 02 §2.12）
+
+paint:
+  cart: [0.92, 0.92, 0.90]
+  top: [0.30, 0.31, 0.33]
+  light_bar: [0.95, 0.55, 0.10]

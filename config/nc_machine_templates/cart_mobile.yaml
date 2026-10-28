@@ -1,0 +1,27 @@
+# ==============================================================================
+# 移動式協働ロボットの架台（メーカーB）。架台・ストッカの寸法はカタログ値。
+#   架台 W810 x D1345 x H800 mm、ワークストッカ W792 x D848 mm、設置スペース 1010 x 1345 mm。
+#   ロボットは架台の加工機側の端に載せる（展示会の写真）。ストッカは架台の横に置く。
+#   座標（C）：原点＝床面・架台の中央。X 右、Y 加工機側、Z 上。
+# ==============================================================================
+template_id: cart_mobile
+template_file: cart_large.yaml
+name: "Mobile robot stand (810 x 1345 x 800)"
+
+provenance:
+  dimensions: "catalog (stand W810 x D1345 x H800 mm, stocker W792 x D848 mm)"
+  robot_mount: "estimated (photos)"
+  pallet_anchors: "estimated (photos; the expansion stocker is approximated by a pallet)"
+
+cart:
+  width_m: 0.810
+  depth_m: 1.345
+  height_m: 0.800
+  mass_kg: 300                  # 【推定】カタログに記載なし
+  robot_mount_m: [0.0, 0.40, 0.800]
+
+pallet_anchors:
+  front: null
+  door_side: null
+  left: {pos_m: [-0.85, -0.20, 0.0], yaw_deg: 90}
+  right: {pos_m: [0.85, -0.20, 0.0], yaw_deg: 90}

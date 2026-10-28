@@ -166,3 +166,6 @@ output/lunar_rover_parametric/
 output/rover_parametric/
 # Blender のバックアップ
 *.blend1
+
+# 加工機モデルの生成物（scripts/nc_machine/run_build.py で再生成。hakoniwa-ncmachine が取り込む）
+/output/nc_machine/

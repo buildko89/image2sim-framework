@@ -1,0 +1,82 @@
+# ==============================================================================
+# 横形ターニング系（CNC旋盤・複合加工機）の共通テンプレート
+#
+#   座標（M）：原点＝床面・扉開口の左右中央・前面カバーの面。X 右、Y 奥（機内）、Z 上。単位 m。
+#   寸法は写真（台車 1000x800x505・パレット 840x740 を物差し）からの推定。実測で置き換える。
+#   生成：python scripts/nc_machine/run_build.py turning_h_k1
+#   設計：work_cobot/devai_automation/02_加工機3Dモデルの設計.md
+# ==============================================================================
+template_id: turning_h_base
+schema_version: '1.0'
+vehicle_type: nc_machine
+kind: machine
+machine_class: turning_horizontal
+lod: 0                          # 0：外形・開口（可動部は固定）、1：可動部、2：見た目・カメラ
+
+provenance:
+  dimensions: "estimated (scaled from photos with cart 1000x800x505 / pallet 840x740)"
+  timings: "estimated (typical automatic door / hydraulic chuck)"
+
+envelope:
+  width_m: 2.6
+  depth_m: 1.9
+  height_m: 2.1
+  offset_x_m: 0.3               # 外形の左右中央の位置（扉開口の中央からの距離。+ は右）
+  wall_m: 0.04                  # カバーの厚さ
+  bed_top_m: 0.85               # 機内の床（切りくず受け）の上面の高さ
+
+# 一般的な配色（特定メーカーの塗装の再現ではない）
+paint:
+  cover: [0.85, 0.10, 0.10]
+  frame: [0.93, 0.93, 0.92]
+  bed: [0.25, 0.26, 0.28]
+  door: [0.90, 0.90, 0.88]
+  door_glass: [0.20, 0.24, 0.28]
+  chuck: [0.15, 0.15, 0.16]
+  jaw: [0.62, 0.64, 0.66]
+  turret: [0.40, 0.42, 0.45]
+  marker: [0.05, 0.05, 0.05]
+
+door:
+  opening_w_m: 0.80
+  opening_h_m: 0.85
+  sill_h_m: 0.95
+  direction: "+x"               # 開く向き
+  stroke_m: 0.90                # 開口幅＋扉の重なり（片側 0.05）以上（QA-4）
+  time_s: 2.5
+  thickness_m: 0.03
+
+spindles:
+  - id: spindle1
+    pos_m: [-0.30, 0.45, 1.10]  # チャック面の中心
+    axis: [1, 0, 0]             # チャック面から機内へ向かう向き
+    max_rpm: 5000
+    chuck:
+      jaws: 3
+      dia_m: 0.210
+      length_m: 0.090
+      stroke_dia_m: 0.0106
+      time_s: 0.8
+      force_n: 40000
+      jaw: {type: soft_step, h_m: 0.035, w_m: 0.025, l_m: 0.05}
+
+turret:
+  type: turret
+  home_m: [0.35, 0.55, 1.30]
+  half_size_m: [0.15, 0.15, 0.20]
+
+work_zone_m:                    # ロボットが入ると「機内にいる」とみなす箱（インタロック I1・I6）
+  min: [-0.45, 0.05, 0.95]
+  max: [0.45, 0.95, 1.80]
+
+markers:                        # 位置補正マーク（前面カバー）
+  - {id: 1, pos_m: [-0.55, 0.0, 1.20], size_m: 0.08}
+  - {id: 2, pos_m: [0.55, 0.0, 1.20], size_m: 0.08}
+
+robot_interface:
+  approach_m: [-0.10, -0.25, 1.10]   # 扉の手前（機外）
+  door_pass_m: [-0.10, 0.20, 1.10]   # 扉開口の通過点
+  load_offset_m: 0.010               # チャック面から軸方向に離れて待ってから押し当てる
+
+cycle:
+  default_machining_s: 60

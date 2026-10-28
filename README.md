@@ -233,6 +233,36 @@ Blender生成コードの構文確認：
 python -m compileall scripts\drone_model blender\drone_model
 ```
 
+## パラメトリック加工機生成（協働ロボットのマシンテンディング向け）
+
+船舶生成と同じ流れ（テンプレートYAML → Blender → GLB／MJCF／同期プロファイル → QA）で、
+NC 加工機（横形旋盤・複合加工機）・ロボット台車・パレットを生成する。生成物は
+hakoniwa-ncmachine（`tools/import_model.py`）が取り込み、hakoniwa-cobot の MuJoCo 世界に入れる。
+寸法はメーカーの公開仕様（外形・チャック径・ストローク）と写真からの推定値（扉開口・主軸位置）で、区分は `provenance` に記録する。実測値が手に入ったら YAML を差し替える。
+
+| テンプレートID | 内容 |
+|---|---|
+| `turning_h_k1` | 1サドルCNC旋盤（1主軸・3爪チャック・前面自動扉・タレット） |
+| `turning_h_k2` | 複合加工機（1主軸・B軸ミーリングヘッド・心押台。外形 4175 × 2700 × 2715 mm） |
+| `turning_h_k2s` | 複合加工機の第2主軸付き（`turning_h_k2` を継承し、心押台を第2主軸に置き換え） |
+| `cart_large` | ロボット台車（1000 × 800 × 505 mm） |
+| `cart_mobile` | 移動式ロボット架台（810 × 1345 × 800 mm） |
+| `pallet_M`・`pallet_L` | パレット台＋パレット（840 × 740 mm、Φ90〜150 用 20 個・Φ150〜200 用 12 個） |
+| `stand_temp` | 仮置き台（Φ200 級 2 個用） |
+
+```powershell
+python scripts\nc_machine\run_build.py all                  # Blender が無ければ GLB・レンダーを省いて続ける
+python scripts\nc_machine\run_build.py turning_h_k1 --require-blender
+```
+
+出力先は `output/nc_machine/<id>/`（Git 管理外）：`<id>.xml`（MJCF）、`<id>.glb`・`<id>.blend`・`renders/`（Blender 使用時）、
+`robot_interface.json`（装着位置・進入点）、`machine_sync.profile.json`、`resolved_config.json`、`qa_report.json`、`BUILD_REPORT.md`。
+形は `scripts/nc_machine/nc_geometry.py` の 1 か所で計算し、Blender と MJCF の両方が使う。
+
+```powershell
+pytest tests\test_nc_machine_templates.py -v
+```
+
 ## リポジトリ構成
 
 ```text

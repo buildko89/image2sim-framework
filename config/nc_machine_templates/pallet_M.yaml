@@ -1,0 +1,29 @@
+# ==============================================================================
+# パレット台＋パレット（テンプレート M：Φ90〜150 用 20個 = 5 x 4）。パレット寸法はカタログ値。
+#   座標：原点＝床面・パレットの中央。スロット slot_<行><列> はワークを置く窪みの底面の中心。
+# ==============================================================================
+template_id: pallet_M
+schema_version: '1.0'
+vehicle_type: nc_peripheral
+kind: pallet
+name: "Pallet 840 x 740, template M (dia 90-150, 20 pcs)"
+lod: 0
+
+provenance:
+  dimensions: "catalog (pallet 840 x 740 mm, height <= 500 mm, 20 pcs for dia 90-150)"
+  grid: "estimated (5 x 4)"
+
+pallet:
+  width_m: 0.840
+  depth_m: 0.740
+  plate_m: 0.020
+  stand_h_m: 0.450              # 床からパレット上面まで（カタログ上限 500mm）
+  template_m: 0.015             # テンプレート板の厚さ（窪みの深さ）
+  grid: [5, 4]                  # 列（X）× 行（Y）
+  slot_dia_m: 0.150
+  margin_m: 0.040
+
+paint:
+  stand: [0.35, 0.36, 0.38]
+  plate: [0.55, 0.57, 0.60]
+  template: [0.12, 0.12, 0.13]

@@ -1,0 +1,40 @@
+# ==============================================================================
+# K2S：複合加工機の第2主軸付き（K2 の心押台を第2主軸に置き換えた派生）
+#   公開仕様では第2主軸付きは S 仕様（ベッド長 1500 / 2500）。主軸間の受け渡し（反転：U4）の評価用（N7）。
+#   第2主軸の寸法・W 移動量は推定。
+# ==============================================================================
+template_id: turning_h_k2s
+template_file: turning_h_k2.yaml
+name: "Multi-tasking machine, 2 spindles + B-axis milling head (K2S)"
+
+provenance:
+  dimensions: "K2 + estimated second spindle"
+
+tailstock: null
+
+spindles:
+  - id: spindle1
+    pos_m: [-0.25, 0.55, 1.15]
+    axis: [1, 0, 0]
+    max_rpm: 4000
+    chuck:
+      jaws: 3
+      dia_m: 0.254
+      length_m: 0.110
+      stroke_dia_m: 0.012
+      time_s: 0.8
+      force_n: 60000
+      jaw: {type: soft_step, h_m: 0.040, w_m: 0.030, l_m: 0.06}
+  - id: spindle2
+    pos_m: [0.50, 0.55, 1.15]
+    axis: [-1, 0, 0]
+    max_rpm: 5000
+    w_stroke_m: 0.9
+    chuck:
+      jaws: 3
+      dia_m: 0.210
+      length_m: 0.090
+      stroke_dia_m: 0.0106
+      time_s: 0.8
+      force_n: 40000
+      jaw: {type: soft_step, h_m: 0.035, w_m: 0.025, l_m: 0.05}

@@ -1,0 +1,61 @@
+# ==============================================================================
+# K1：横形CNC旋盤（1サドル・1主軸・3爪チャック・前面自動扉・タレット）
+#   展示会の「1サドルCNC旋盤＋移動式協働ロボット」セル（メーカーB）に相当。
+#   公開仕様（v0.2）：最大加工径 Φ410、最大加工長さ 500 mm、主軸端 A2-6、45〜5000 min-1、
+#   主電動機 22/15 kW。外形は旧型の販売店掲載値（2200 x 1734 x 1745 mm）から推定。
+#   扉開口・主軸中心の高さ・位置は展示会の写真からの推定。
+#   設計：devai_automation/02_加工機3Dモデルの設計.md §2.5
+# ==============================================================================
+template_id: turning_h_k1
+template_file: turning_h_base.yaml
+name: "Horizontal CNC lathe, 1 saddle, 1 spindle (K1)"
+
+provenance:
+  dimensions: "public spec (max dia 410 / length 500, A2-6, 5000 min-1) + envelope from dealer data of the former model + photos"
+  timings: "estimated (typical automatic door / hydraulic chuck)"
+
+envelope:
+  width_m: 2.30
+  depth_m: 1.85
+  height_m: 1.95
+  offset_x_m: 0.20
+  bed_top_m: 0.90
+
+door:
+  opening_w_m: 0.75
+  opening_h_m: 0.70
+  sill_h_m: 1.00
+  stroke_m: 0.85
+  time_s: 2.5
+
+spindles:
+  - id: spindle1
+    pos_m: [-0.20, 0.50, 1.10]
+    axis: [1, 0, 0]
+    max_rpm: 5000
+    chuck:
+      jaws: 3
+      dia_m: 0.210              # 8 インチ（主軸端 A2-6 の標準的な組み合わせ）【推定】
+      length_m: 0.090
+      stroke_dia_m: 0.0106
+      time_s: 0.8
+      force_n: 40000
+      jaw: {type: soft_step, h_m: 0.035, w_m: 0.025, l_m: 0.05}
+
+turret:
+  type: turret
+  home_m: [0.35, 0.65, 1.30]
+  half_size_m: [0.15, 0.15, 0.20]
+
+work_zone_m:
+  min: [-0.40, 0.05, 0.90]
+  max: [0.40, 1.00, 1.70]
+
+markers:
+  - {id: 1, pos_m: [-0.50, 0.0, 1.20], size_m: 0.08}
+  - {id: 2, pos_m: [0.50, 0.0, 1.20], size_m: 0.08}
+
+robot_interface:
+  approach_m: [0.05, -0.30, 1.15]
+  door_pass_m: [0.05, 0.30, 1.12]
+  load_offset_m: 0.010

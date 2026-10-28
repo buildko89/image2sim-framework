@@ -1,0 +1,76 @@
+# ==============================================================================
+# K2：複合加工機（1主軸＋B軸ミーリングヘッド＋心押台、ベッド長 1000）
+#   現場セル（大型台車＋25kg級協働ロボット）の機械（メーカーA）に相当。
+#   現場の写真で、機内右側は第2主軸ではなく心押台であることを確認した（公開仕様でも第2主軸は S 仕様のみ）。
+#   公開仕様（v0.2）：外形 W x D x H = 4175 x 2700 x 2715 mm、13450 kg、チャック 10 インチ、最大加工径 Φ670、
+#   最大加工長さ 1011 mm、主軸 4000 min-1、ミル主軸 12000 min-1、B軸 -30〜+210°、X 695 / Y 300 / Z 1077 mm、
+#   心押台 MT No.5・最大推力 10 kN。扉開口・主軸の位置は写真（チャック Φ254 を物差し）からの推定。
+#   扉の閉じる時間は現場の動画から概算（約 4〜5 s）。
+#   第2主軸付き（主軸間の受け渡し＝反転 U4）は turning_h_k2s。
+# ==============================================================================
+template_id: turning_h_k2
+template_file: turning_h_base.yaml
+name: "Multi-tasking machine, 1 spindle + B-axis milling head + tailstock (K2)"
+machine_class: multitasking_horizontal
+
+provenance:
+  dimensions: "public spec (envelope 4175x2700x2715, 10in chuck, strokes) + photos (opening, spindle position)"
+  timings: "door: video (approx. 4-5 s); chuck: estimated"
+
+envelope:
+  width_m: 4.175
+  depth_m: 2.700
+  height_m: 2.715
+  offset_x_m: 0.60
+  bed_top_m: 0.80
+
+door:
+  opening_w_m: 1.05
+  opening_h_m: 1.30
+  sill_h_m: 0.90
+  stroke_m: 1.15
+  time_s: 4.5
+
+spindles:
+  - id: spindle1
+    pos_m: [-0.25, 0.55, 1.15]
+    axis: [1, 0, 0]
+    max_rpm: 4000
+    chuck:
+      jaws: 3
+      dia_m: 0.254              # 10 インチ【公開仕様】
+      length_m: 0.110
+      stroke_dia_m: 0.012
+      time_s: 0.8
+      force_n: 60000
+      jaw: {type: soft_step, h_m: 0.040, w_m: 0.030, l_m: 0.06}
+
+turret:
+  type: milling_head
+  b_axis: true
+  home_m: [0.20, 0.75, 1.95]
+  half_size_m: [0.20, 0.20, 0.25]
+
+tailstock:
+  pos_m: [0.75, 0.55, 1.15]     # 後退端のセンタ先端（最大加工長さ 1011 mm から、チャック面＋約 1.0 m）
+  axis: [-1, 0, 0]
+  quill_len_m: 0.12
+  quill_dia_m: 0.10
+  body_half_size_m: [0.15, 0.17, 0.20]
+  thrust_n: 10000
+
+work_zone_m:
+  min: [-0.60, 0.05, 0.80]
+  max: [0.60, 1.40, 2.30]
+
+markers:
+  - {id: 1, pos_m: [-0.65, 0.0, 1.40], size_m: 0.08}
+  - {id: 2, pos_m: [0.65, 0.0, 1.40], size_m: 0.08}
+
+robot_interface:
+  approach_m: [0.10, -0.35, 1.25]
+  door_pass_m: [0.10, 0.45, 1.20]
+  load_offset_m: 0.010
+
+cycle:
+  default_machining_s: 120
