@@ -43,7 +43,7 @@ spindles:
       stroke_dia_m: 0.012
       time_s: 0.8
       force_n: 60000
-      jaw: {type: soft_step, h_m: 0.040, w_m: 0.030, l_m: 0.06}
+      jaw: {type: soft_step, h_m: 0.040, w_m: 0.030, l_m: 0.06, grip_dia_m: 0.200, open_clearance_m: 0.004}   # 現場の素材 W-S3（Φ200）
 
 turret:
   type: milling_head
@@ -58,6 +58,8 @@ tailstock:
   quill_dia_m: 0.10
   body_half_size_m: [0.15, 0.17, 0.20]
   thrust_n: 10000
+  travel_m: 0.85                # 後退端から主軸へ進める量（チャック面まで約 1.0 m）
+  speed_m_s: 0.3
 
 work_zone_m:
   min: [-0.60, 0.05, 0.80]

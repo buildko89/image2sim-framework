@@ -134,20 +134,34 @@ def describe_machine(cfg: Dict[str, Any]) -> Dict[str, Any]:
     bodies: List[Dict[str, Any]] = [
         {"name": "machine_root", "parent": None, "pos": [0.0, 0.0, 0.0], "joint": None, "geoms": geoms}]
 
-    # 扉（LOD0 は開いた位置に固定）
+    lod = int(cfg.get("lod", 0))
+    actuators: List[Dict[str, Any]] = []      # LOD1 以上：MJCF の actuator（プラントが動かす）
+    plant: Dict[str, Any] = {"schema": "hakoniwa.ncmachine.plant/v1", "template_id": cfg["template_id"], "lod": lod,
+                             "spindles": [], "tailstock": None}
+
+    # 扉（LOD0 は開いた位置に固定。LOD1 は閉じた位置に置き、直動の関節で開く）
     dt = door.get("thickness_m", 0.03)
     sign = -1.0 if str(door.get("direction", "+x")).startswith("-") else 1.0
-    stroke = door["stroke_m"] if cfg.get("lod", 0) == 0 else 0.0
+    stroke = door["stroke_m"]
     dw, dh = ow / 2 + 0.05, oh / 2 + 0.05
-    door_pos = [sign * stroke, -dt / 2 - 0.005, sill + oh / 2]
-    bodies.append({"name": "door", "parent": "machine_root", "pos": door_pos, "joint": None, "geoms": [
+    door_pos = [sign * stroke if lod == 0 else 0.0, -dt / 2 - 0.005, sill + oh / 2]
+    door_joint = None
+    if lod >= 1:
+        door_joint = {"name": "door", "type": "slide", "axis": [sign, 0.0, 0.0], "range": [0.0, stroke],
+                      "armature": 1.0, "damping": 200.0}
+        actuators.append({"name": "door_act", "joint": "door", "kind": "position", "kp": 20000.0, "kv": 2000.0,
+                          "ctrlrange": [0.0, stroke], "forcerange": [-3000.0, 3000.0]})
+        plant["door"] = {"joint": "door", "actuator": "door_act", "geoms": ["door_panel"], "closed_q": 0.0,
+                         "open_q": stroke, "time_s": float(door.get("time_s", 3.0))}
+    bodies.append({"name": "door", "parent": "machine_root", "pos": door_pos, "joint": door_joint, "geoms": [
         {"name": "door_panel", "type": "box", "size": [dw, dt / 2, dh], "pos": [0.0, 0.0, 0.0], "quat": list(Q_ID),
          "material": "door", "collide": True},
         {"name": "door_window", "type": "box", "size": [dw * 0.7, dt / 2 + 0.002, dh * 0.55],
          "pos": [0.0, 0.0, dh * 0.15], "quat": list(Q_ID), "material": "door_glass", "collide": False},
     ]})
 
-    # 主軸台・主軸（チャック・爪）
+    # 主軸台・主軸（チャック・爪）。爪は生爪で、内面を grip_dia_m（加工するワークの径）に合わせて削った形。
+    #   開いたときの内面の半径 ＝ grip_dia_m / 2 ＋ open_clearance_m、閉じ切り ＝ そこから stroke_dia_m / 2 内側
     for sp in cfg["spindles"]:
         sid = sp["id"]
         face = [float(x) for x in sp["pos_m"]]
@@ -167,29 +181,54 @@ def describe_machine(cfg: Dict[str, Any]) -> Dict[str, Any]:
 
         jaw = ch["jaw"]
         jh, jw, jl = jaw["h_m"], jaw["w_m"], jaw.get("l_m", 0.05)
-        jr = r * 0.55
-        geoms_sp = [{"name": f"{sid}_chuck", "type": "cylinder", "size": [r, L / 2], "pos": scale(ax, -L / 2),
-                     "quat": z_to(ax), "material": "chuck", "collide": True}]
+        grip_r = jaw.get("grip_dia_m", 0.080) / 2
+        r_open = grip_r + jaw.get("open_clearance_m", 0.004)
+        stroke_r = ch["stroke_dia_m"] / 2
+        sp_joint = None
+        if lod >= 1:
+            sp_joint = {"name": sid, "type": "hinge", "axis": ax, "range": None, "armature": 0.5, "damping": 0.1}
+            vmax = float(sp.get("max_rpm", 4000)) * 2 * math.pi / 60
+            actuators.append({"name": f"{sid}_vel", "joint": sid, "kind": "velocity", "kv": 50.0,
+                              "ctrlrange": [-vmax, vmax], "forcerange": [-500.0, 500.0]})
+        bodies.append({"name": sid, "parent": "machine_root", "pos": face, "joint": sp_joint, "geoms": [
+            {"name": f"{sid}_chuck", "type": "cylinder", "size": [r, L / 2], "pos": scale(ax, -L / 2),
+             "quat": z_to(ax), "material": "chuck", "collide": True}]})
         ref = [0.0, 0.0, 1.0] if abs(ax[2]) < 0.9 else [0.0, 1.0, 0.0]
         e1 = norm(cross(ax, ref))
         e2 = cross(ax, e1)
+        jaws = []
         for k, deg in enumerate(JAW_ANGLES_DEG, 1):
             a = math.radians(deg)
             radial = add(scale(e1, math.cos(a)), scale(e2, math.sin(a)))
             tang = cross(ax, radial)
-            geoms_sp.append({"name": f"{sid}_jaw{k}", "type": "box", "size": [jh / 2, jl / 2, jw / 2],
-                             "pos": add(scale(ax, jh / 2), scale(radial, jr)),
-                             "quat": mat_to_quat([ax, radial, tang]), "material": "jaw", "collide": True})
-        bodies.append({"name": sid, "parent": "machine_root", "pos": face, "joint": None, "geoms": geoms_sp})
+            jname = f"{sid}_jaw{k}"
+            jaw_geom = {"name": jname, "type": "box", "size": [jh / 2, jl / 2, jw / 2], "pos": [0.0, 0.0, 0.0],
+                        "quat": mat_to_quat([ax, radial, tang]), "material": "jaw", "collide": True}
+            jpos = add(scale(ax, jh / 2), scale(radial, r_open + jl / 2))
+            jj = None
+            if lod >= 1:
+                jj = {"name": jname, "type": "slide", "axis": radial, "range": [-stroke_r, 0.0], "armature": 1.0,
+                      "damping": 10.0}
+                # 爪の慣性は armature（1 kg 相当）。刻み 1 ms で安定する硬さ・減衰（kv·dt/m < 1）
+                actuators.append({"name": f"{jname}_act", "joint": jname, "kind": "position", "kp": 200000.0,
+                                  "kv": 300.0, "ctrlrange": [-stroke_r, 0.0],
+                                  "forcerange": [-ch["force_n"] / 3, ch["force_n"] / 3]})
+                jaws.append({"body": jname, "joint": jname, "actuator": f"{jname}_act", "geom": jname})
+            bodies.append({"name": jname, "parent": sid, "pos": jpos, "joint": jj, "geoms": [jaw_geom]})
+        if lod >= 1:
+            plant["spindles"].append({
+                "id": sid, "body": sid, "joint": sid, "actuator": f"{sid}_vel", "axis": ax, "face_m": face,
+                "max_rpm": float(sp.get("max_rpm", 4000)), "jaws": jaws, "open_q": 0.0, "close_q": -stroke_r,
+                "grip_dia_m": 2 * grip_r, "force_n": float(ch["force_n"]), "time_s": float(ch.get("time_s", 0.8))})
 
-    # 刃物台・ミーリングヘッド（退避位置）
+    # 刃物台・ミーリングヘッド（退避位置。LOD1 でも固定：加工の動きは見た目だけなので後で足す）
     tur = cfg["turret"]
     bodies.append({"name": "turret", "parent": "machine_root", "pos": [float(x) for x in tur["home_m"]],
                    "joint": None, "geoms": [
                        {"name": "turret_body", "type": "box", "size": [float(x) for x in tur["half_size_m"]],
                         "pos": [0.0, 0.0, 0.0], "quat": list(Q_ID), "material": "turret", "collide": True}]})
 
-    # 心押台（任意。LOD0 は後退端に固定。pos_m はセンタ先端、axis はセンタの向き＝主軸側）
+    # 心押台（任意。pos_m は後退端のセンタ先端、axis はセンタの向き＝主軸側。LOD1 は axis の向きに travel_m 進む）
     ts = cfg.get("tailstock")
     if ts:
         tip = [float(x) for x in ts["pos_m"]]
@@ -197,7 +236,17 @@ def describe_machine(cfg: Dict[str, Any]) -> Dict[str, Any]:
         ql, qr = ts["quill_len_m"], ts["quill_dia_m"] / 2
         hb = [float(x) for x in ts["body_half_size_m"]]
         body_c = sub(tip, scale(ax, ql + hb[0]))
-        bodies.append({"name": "tailstock", "parent": "machine_root", "pos": tip, "joint": None, "geoms": [
+        ts_joint = None
+        if lod >= 1:
+            travel = float(ts.get("travel_m", 0.8))
+            ts_joint = {"name": "tailstock", "type": "slide", "axis": ax, "range": [0.0, travel], "armature": 5.0,
+                        "damping": 500.0}
+            thrust = float(ts.get("thrust_n", 10000))
+            actuators.append({"name": "tailstock_act", "joint": "tailstock", "kind": "position", "kp": 100000.0,
+                              "kv": 5000.0, "ctrlrange": [0.0, travel], "forcerange": [-thrust, thrust]})
+            plant["tailstock"] = {"joint": "tailstock", "actuator": "tailstock_act", "travel_m": travel,
+                                  "speed_m_s": float(ts.get("speed_m_s", 0.3))}
+        bodies.append({"name": "tailstock", "parent": "machine_root", "pos": tip, "joint": ts_joint, "geoms": [
             {"name": "tailstock_body", "type": "box", "size": hb, "pos": sub(body_c, tip), "quat": list(Q_ID),
              "material": "frame", "collide": True},
             {"name": "tailstock_quill", "type": "cylinder", "size": [qr, ql / 2], "pos": scale(ax, -ql / 2),
@@ -245,8 +294,9 @@ def describe_machine(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "markers": [{"id": m["id"], "pos_m": list(m["pos_m"])} for m in cfg.get("markers", [])],
         "work_zone_m": wz,
     }
+    plant["work_zone"] = {"site": "work_zone", "min": list(wz["min"]), "max": list(wz["max"])}
     return {"template_id": cfg["template_id"], "kind": "machine", "bodies": bodies, "sites": sites,
-            "materials": mats, "interface": interface}
+            "materials": mats, "interface": interface, "actuators": actuators, "plant": plant if lod >= 1 else None}
 
 
 # --- 台車 ------------------------------------------------------------------------

@@ -68,17 +68,24 @@ def qa_machine(cfg, desc, geoms) -> List[Dict[str, Any]]:
     door = cfg["door"]
     ow = door["opening_w_m"]
     dg = [g for g in geoms if g["name"] == "door_panel"][0]
-    dlo, dhi = dg["pos"][0] - dg["size"][0], dg["pos"][0] + dg["size"][0]
-    if cfg.get("lod", 0) == 0:
-        clear = dlo >= ow / 2 if dg["pos"][0] > 0 else dhi <= -ow / 2
-        out.append(check("QA-4", "扉を全開にしたとき開口をふさがない", clear,
-                         f"扉 X {dlo:.3f}〜{dhi:.3f} / 開口 X ±{ow / 2:.3f} [m]"))
+    # LOD1 の扉は閉じた位置にあるので、関節の範囲の端（全開）まで動かした位置で確かめる
+    shift = 0.0
+    door_body = [bd for bd in desc["bodies"] if bd["name"] == "door"][0]
+    if door_body["joint"]:
+        j = door_body["joint"]
+        shift = j["axis"][0] * j["range"][1]
+    cx = dg["pos"][0] + shift
+    dlo, dhi = cx - dg["size"][0], cx + dg["size"][0]
+    clear = dlo >= ow / 2 if cx > 0 else dhi <= -ow / 2
+    out.append(check("QA-4", "扉を全開にしたとき開口をふさがない", clear,
+                     f"扉 X {dlo:.3f}〜{dhi:.3f} / 開口 X ±{ow / 2:.3f} [m]（LOD{cfg.get('lod', 0)}）"))
 
     jaws = [g for g in geoms if "_jaw" in g["name"]]
+    spindle_of = lambda g: g["name"].split("_jaw")[0]  # noqa: E731（LOD1 は爪ごとにボディが分かれる）
     min_d = 1e9
     for i in range(len(jaws)):
         for j in range(i + 1, len(jaws)):
-            if jaws[i]["body"] != jaws[j]["body"]:
+            if spindle_of(jaws[i]) != spindle_of(jaws[j]):
                 continue
             d = sum((a - c) ** 2 for a, c in zip(jaws[i]["pos"], jaws[j]["pos"])) ** 0.5
             min_d = min(min_d, d - (jaws[i]["size"][2] + jaws[j]["size"][2]) - (jaws[i]["size"][1] + jaws[j]["size"][1]))

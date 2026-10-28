@@ -29,6 +29,8 @@ def fmt(v) -> str:
 def generate_mjcf(desc: Dict[str, Any]) -> str:
     root = ET.Element("mujoco", model=desc["template_id"])
     ET.SubElement(root, "compiler", angle="radian", autolimits="true")
+    # 単体で動かすとき（preview・試験）の刻み。hakoniwa-cobot のセルに取り込むときはセルの値が使われる
+    ET.SubElement(root, "option", timestep="0.001")
     default = ET.SubElement(root, "default")
     col = ET.SubElement(default, "default", {"class": "nc_collision"})
     ET.SubElement(col, "geom", contype="1", conaffinity="1", group="2")
@@ -52,7 +54,13 @@ def generate_mjcf(desc: Dict[str, Any]) -> str:
         elems[bd["name"]] = b
         if bd["joint"]:
             j = bd["joint"]
-            ET.SubElement(b, "joint", name=j["name"], type=j["type"], axis=fmt(j["axis"]), range=fmt(j["range"]))
+            attrs = {"name": j["name"], "type": j["type"], "axis": fmt(j["axis"])}
+            if j.get("range") is not None:
+                attrs["range"] = fmt(j["range"])
+            for key in ("armature", "damping"):
+                if j.get(key) is not None:
+                    attrs[key] = f"{float(j[key]):.6g}"
+            ET.SubElement(b, "joint", attrs)
         for g in bd["geoms"]:
             attrs = {"name": g["name"], "type": g["type"], "size": fmt(g["size"]), "pos": fmt(g["pos"]),
                      "material": g["material"], "class": "nc_collision" if g["collide"] else "nc_visual"}
@@ -63,6 +71,16 @@ def generate_mjcf(desc: Dict[str, Any]) -> str:
             attrs = {"name": s["name"], "type": s["type"], "pos": fmt(s["pos"]), "size": fmt(s["size"]),
                      "class": "nc_site"}
             ET.SubElement(b, "site", attrs)
+    acts = desc.get("actuators") or []
+    if acts:
+        # LOD1：プラントが目標を入れて動かす。position は kp・kv、velocity は kv。力の上限を付ける
+        act_el = ET.SubElement(root, "actuator")
+        for a in acts:
+            attrs = {"name": a["name"], "joint": a["joint"], "kv": f"{a['kv']:.6g}",
+                     "ctrlrange": fmt(a["ctrlrange"]), "forcerange": fmt(a["forcerange"])}
+            if a["kind"] == "position":
+                attrs["kp"] = f"{a['kp']:.6g}"
+            ET.SubElement(act_el, a["kind"], attrs)
     ET.indent(root)
     return ET.tostring(root, encoding="unicode") + "\n"
 
@@ -94,6 +112,10 @@ def write_all(cfg: Dict[str, Any], out_dir: Path) -> Dict[str, str]:
     paths["mjcf"].write_text(generate_mjcf(desc), encoding="utf-8")
     paths["profile"].write_text(json.dumps(generate_sync_profile(desc), indent=2, ensure_ascii=False), encoding="utf-8")
     paths["interface"].write_text(json.dumps(desc["interface"], indent=2, ensure_ascii=False), encoding="utf-8")
+    if desc.get("plant"):
+        # LOD1：加工機の物理モジュール（hakoniwa-ncmachine の plant/）が読む関節・アクチュエータの名前と動きの値
+        paths["plant"] = out_dir / "machine_plant.json"
+        paths["plant"].write_text(json.dumps(desc["plant"], indent=2, ensure_ascii=False), encoding="utf-8")
     return {k: str(v) for k, v in paths.items()}
 
 

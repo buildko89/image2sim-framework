@@ -57,20 +57,65 @@ def test_k1_geometry():
     names = [b["name"] for b in desc["bodies"]]
     assert names[0] == "machine_root"
     assert {"door", "spindle1", "headstock_spindle1", "turret"} <= set(names)
-    jaws = [g for b in desc["bodies"] if b["name"] == "spindle1" for g in b["geoms"] if "_jaw" in g["name"]]
+    jaws = [b for b in desc["bodies"] if b["parent"] == "spindle1" and "_jaw" in b["name"]]
     assert len(jaws) == 3
     load = desc["interface"]["spindles"]["spindle1"]["load_m"]
     assert load == pytest.approx([-0.19, 0.50, 1.10])
 
 
 def test_jaws_are_on_chuck_face_and_symmetric():
-    desc = ncg.describe(resolved("turning_h_k1"))
-    sp = [b for b in desc["bodies"] if b["name"] == "spindle1"][0]
-    jaws = [g for g in sp["geoms"] if "_jaw" in g["name"]]
-    for g in jaws:
-        assert g["pos"][0] == pytest.approx(g["size"][0])          # 面から +X に半分だけ出る
-    radii = [(g["pos"][1] ** 2 + g["pos"][2] ** 2) ** 0.5 for g in jaws]
-    assert max(radii) - min(radii) < 1e-9
+    """爪は主軸の子のボディ。面から +X に半分だけ出て、内面の半径＝生爪の径/2＋すき間で 120° おき。"""
+    cfg = resolved("turning_h_k1")
+    jaw = cfg["spindles"][0]["chuck"]["jaw"]
+    desc = ncg.describe(cfg)
+    jaws = [b for b in desc["bodies"] if b["parent"] == "spindle1" and "_jaw" in b["name"]]
+    for b in jaws:
+        g = b["geoms"][0]
+        assert b["pos"][0] == pytest.approx(g["size"][0])
+        inner = (b["pos"][1] ** 2 + b["pos"][2] ** 2) ** 0.5 - g["size"][1]
+        assert inner == pytest.approx(jaw["grip_dia_m"] / 2 + jaw["open_clearance_m"])
+
+
+def test_lod1_joints_actuators_and_plant_interface():
+    """N2：LOD1 は扉・主軸・爪・心押台に関節とアクチュエータを持ち、プラント用の名前一覧を出す。"""
+    cfg = resolved("turning_h_k2")
+    assert cfg["lod"] == 1
+    desc = ncg.describe(cfg)
+    joints = {b["joint"]["name"]: b["joint"] for b in desc["bodies"] if b["joint"]}
+    assert set(joints) == {"door", "spindle1", "spindle1_jaw1", "spindle1_jaw2", "spindle1_jaw3", "tailstock"}
+    stroke_r = cfg["spindles"][0]["chuck"]["stroke_dia_m"] / 2
+    assert joints["spindle1_jaw1"]["range"] == pytest.approx([-stroke_r, 0.0])
+    assert joints["door"]["range"] == pytest.approx([0.0, cfg["door"]["stroke_m"]])
+    acts = {a["name"]: a for a in desc["actuators"]}
+    assert acts["spindle1_vel"]["kind"] == "velocity" and acts["door_act"]["kind"] == "position"
+    assert acts["spindle1_jaw1_act"]["forcerange"][1] == pytest.approx(cfg["spindles"][0]["chuck"]["force_n"] / 3)
+    pl = desc["plant"]
+    assert pl["door"]["open_q"] == cfg["door"]["stroke_m"] and pl["door"]["time_s"] == cfg["door"]["time_s"]
+    sp = pl["spindles"][0]
+    assert sp["grip_dia_m"] == pytest.approx(0.200) and len(sp["jaws"]) == 3 and sp["close_q"] == -stroke_r
+    assert pl["tailstock"]["travel_m"] == cfg["tailstock"]["travel_m"]
+    # LOD0 にすると関節・アクチュエータ・プラント情報は無い（扉は開いた位置）
+    cfg0 = dict(cfg, lod=0)
+    d0 = ncg.describe(cfg0)
+    assert not [b for b in d0["bodies"] if b["joint"]] and not d0["actuators"] and d0["plant"] is None
+
+
+def test_mujoco_lod1_is_stable_and_moves(tmp_path):
+    mujoco = pytest.importorskip("mujoco")
+    import numpy as np
+    forge.forge("turning_h_k2", skip_blender=True, out_root=tmp_path)
+    m = mujoco.MjModel.from_xml_path(str(tmp_path / "turning_h_k2" / "turning_h_k2.xml"))
+    d = mujoco.MjData(m)
+    for _ in range(2000):                      # 指令なしで 2 s：その場にとどまる
+        mujoco.mj_step(m, d)
+    assert np.max(np.abs(d.qpos)) < 1e-4
+    jaw = m.actuator("spindle1_jaw1_act").id
+    d.ctrl[jaw] = m.actuator_ctrlrange[jaw, 0]
+    d.ctrl[m.actuator("door_act").id] = m.actuator_ctrlrange[m.actuator("door_act").id, 1]
+    for _ in range(2000):
+        mujoco.mj_step(m, d)
+    assert d.qpos[m.jnt_qposadr[m.joint("spindle1_jaw1").id]] < 0.9 * m.actuator_ctrlrange[jaw, 0]
+    assert d.qpos[m.jnt_qposadr[m.joint("door").id]] > 0.95 * m.jnt_range[m.joint("door").id, 1]
 
 
 def test_pallet_slots():

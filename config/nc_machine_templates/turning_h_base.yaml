@@ -11,7 +11,7 @@ schema_version: '1.0'
 vehicle_type: nc_machine
 kind: machine
 machine_class: turning_horizontal
-lod: 0                          # 0：外形・開口（可動部は固定）、1：可動部、2：見た目・カメラ
+lod: 1                          # 0：外形・開口（可動部は固定）、1：可動部（扉・主軸・爪・心押台の関節。N2）、2：見た目・カメラ
 
 provenance:
   dimensions: "estimated (scaled from photos with cart 1000x800x505 / pallet 840x740)"
@@ -58,7 +58,7 @@ spindles:
       stroke_dia_m: 0.0106
       time_s: 0.8
       force_n: 40000
-      jaw: {type: soft_step, h_m: 0.035, w_m: 0.025, l_m: 0.05}
+      jaw: {type: soft_step, h_m: 0.035, w_m: 0.025, l_m: 0.05, grip_dia_m: 0.080, open_clearance_m: 0.004}   # 生爪の内径＝ワーク径
 
 turret:
   type: turret

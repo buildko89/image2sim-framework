@@ -40,7 +40,7 @@ spindles:
       stroke_dia_m: 0.0106
       time_s: 0.8
       force_n: 40000
-      jaw: {type: soft_step, h_m: 0.035, w_m: 0.025, l_m: 0.05}
+      jaw: {type: soft_step, h_m: 0.035, w_m: 0.025, l_m: 0.05, grip_dia_m: 0.080, open_clearance_m: 0.004}   # 試験ワーク W-A2（Φ80）
 
 turret:
   type: turret
