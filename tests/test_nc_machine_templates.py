@@ -152,6 +152,18 @@ def test_qa_detects_door_blocking_opening(tmp_path):
     assert [c for c in rep["checks"] if c["id"] == "QA-4"][0]["result"] == "fail"
 
 
+def test_qa_detects_door_protruding_from_machine_envelope():
+    cfg = resolved("turning_h_k2")
+    desc = ncg.describe(cfg)
+    door = next(body for body in desc["bodies"] if body["name"] == "door")
+    checks = qa_nc.qa_machine(cfg, desc, ncg.world_geoms(desc))
+    assert next(check for check in checks if check["id"] == "QA-7")["result"] == "pass"
+
+    door["pos"][1] = -0.02
+    checks = qa_nc.qa_machine(cfg, desc, ncg.world_geoms(desc))
+    assert next(check for check in checks if check["id"] == "QA-7")["result"] == "fail"
+
+
 def test_mujoco_loads_if_available(tmp_path):
     mujoco = pytest.importorskip("mujoco")
     forge.forge("turning_h_k1", skip_blender=True, out_root=tmp_path)

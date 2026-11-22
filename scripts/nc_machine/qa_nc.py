@@ -80,6 +80,28 @@ def qa_machine(cfg, desc, geoms) -> List[Dict[str, Any]]:
     out.append(check("QA-4", "扉を全開にしたとき開口をふさがない", clear,
                      f"扉 X {dlo:.3f}〜{dhi:.3f} / 開口 X ±{ow / 2:.3f} [m]（LOD{cfg.get('lod', 0)}）"))
 
+    door_geoms = [g for g in geoms if g["body"] == "door"]
+    door_lo, door_hi = bounds(door_geoms)
+    door_shift = 0.0
+    if door_body["joint"]:
+        joint = door_body["joint"]
+        door_shift = joint["axis"][0] * joint["range"][1]
+    swept_x = (min(door_lo[0], door_lo[0] + door_shift), max(door_hi[0], door_hi[0] + door_shift))
+    contained = (
+        swept_x[0] >= b["xmin"] - TOL_DIM
+        and swept_x[1] <= b["xmax"] + TOL_DIM
+        and door_lo[1] >= b["ymin"] - TOL_DIM
+        and door_hi[1] <= b["ymax"] + TOL_DIM
+        and door_lo[2] >= b["zmin"] - TOL_DIM
+        and door_hi[2] <= b["zmax"] + TOL_DIM
+    )
+    out.append(check("QA-7", "扉が全開まで機械外形内に収まる", contained,
+                     f"扉の移動範囲 X {swept_x[0]:.3f}〜{swept_x[1]:.3f}, "
+                     f"Y {door_lo[1]:.3f}〜{door_hi[1]:.3f}, "
+                     f"Z {door_lo[2]:.3f}〜{door_hi[2]:.3f} / "
+                     f"機械外形 X {b['xmin']:.3f}〜{b['xmax']:.3f}, "
+                     f"Y {b['ymin']:.3f}〜{b['ymax']:.3f}, Z {b['zmin']:.3f}〜{b['zmax']:.3f} [m]"))
+
     jaws = [g for g in geoms if "_jaw" in g["name"]]
     spindle_of = lambda g: g["name"].split("_jaw")[0]  # noqa: E731（LOD1 は爪ごとにボディが分かれる）
     min_d = 1e9

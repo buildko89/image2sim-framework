@@ -71,6 +71,14 @@ def generate_mjcf(desc: Dict[str, Any]) -> str:
             attrs = {"name": s["name"], "type": s["type"], "pos": fmt(s["pos"]), "size": fmt(s["size"]),
                      "class": "nc_site"}
             ET.SubElement(b, "site", attrs)
+    # 扉は機械の外形の内側（前面の枠の厚みの中）をレール（直動の関節）で動く。親の machine_root は世界に固定なので
+    # MuJoCo の親子の接触の除外が効かず、枠と扉が重なって動けなくなる → 扉とその親の接触を明示的に外す
+    excludes = [(bd["parent"], bd["name"]) for bd in desc["bodies"]
+                if bd["parent"] and bd["joint"] and bd["joint"]["name"] == "door"]
+    if excludes:
+        contact = ET.SubElement(root, "contact")
+        for b1, b2 in excludes:
+            ET.SubElement(contact, "exclude", body1=b1, body2=b2)
     acts = desc.get("actuators") or []
     if acts:
         # LOD1：プラントが目標を入れて動かす。position は kp・kv、velocity は kv。力の上限を付ける

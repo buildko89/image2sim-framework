@@ -144,7 +144,7 @@ def describe_machine(cfg: Dict[str, Any]) -> Dict[str, Any]:
     sign = -1.0 if str(door.get("direction", "+x")).startswith("-") else 1.0
     stroke = door["stroke_m"]
     dw, dh = ow / 2 + 0.05, oh / 2 + 0.05
-    door_pos = [sign * stroke if lod == 0 else 0.0, -dt / 2 - 0.005, sill + oh / 2]
+    door_pos = [sign * stroke if lod == 0 else 0.0, dt / 2 + 0.002, sill + oh / 2]
     door_joint = None
     if lod >= 1:
         door_joint = {"name": "door", "type": "slide", "axis": [sign, 0.0, 0.0], "range": [0.0, stroke],
