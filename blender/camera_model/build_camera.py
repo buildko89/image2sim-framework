@@ -176,6 +176,8 @@ def main() -> int:
         export_materials=True,
         generate_preview_surface=True,
         convert_orientation=False,   # Isaac Sim と同じ Z 上・m のまま
+        convert_world_material=False,  # 背景（world）を DomeLight として書き出さない（利用側のセルの照明を乱す）
+        export_lights=False,
         export_uvmaps=True,
         export_normals=True,
         root_prim_path="/" + cfg["root_prim"] + "_Visual",

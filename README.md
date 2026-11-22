@@ -284,7 +284,7 @@ python scripts\camera_model\run_build.py irvision_2d --publish <フォルダ>   
 USD の中身：`/<root>/Visual`（見た目）、`/<root>/Collision`（外形の箱・質量）、`/<root>/OpticalFrame/Camera`
 （UsdGeom.Camera。焦点距離・撮像の大きさは mm。属性 `irvision:*` に解像度・形式・内部パラメータ）、
 `/<root>/OpticalFrame/LED`（赤色の DiskLight＋ShapingAPI）。本体の座標は原点＝光学中心、+x＝光軸、+z＝上。
-QA（22 項目）は外形・衝突・質量・カメラの向きと画角・LED を設定 JSON と照合する（Blender 同梱の pxr と Isaac Sim 5.0 の pxr の両方で合格を確認）。
+QA（23 項目）は外形・衝突・質量・カメラの向きと画角・LED を設定 JSON と照合する（Blender 同梱の pxr と Isaac Sim 5.0 の pxr の両方で合格を確認）。
 
 ```powershell
 pytest tests\test_camera_templates.py -v

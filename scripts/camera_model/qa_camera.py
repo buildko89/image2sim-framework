@@ -10,6 +10,7 @@
     Q4 カメラの向き: 見る向き = +x、画像の上 = +z、画像の右 = -y（光学中心 = 原点）
     Q5 カメラの光学: 焦点距離・撮像の大きさ・横と縦の画角がセンサーの設定と一致
     Q6 LED: 色・光る向き（+x）・円錐の角度（LED ありの場合）
+    Q7 照明: LED 以外の光源が無い（Blender の背景が DomeLight として紛れ込まない）
 結果: qa_report.json（同じフォルダ）。終了コード 0 = 全合格。
 """
 from __future__ import annotations
@@ -133,6 +134,10 @@ def run(cfg: dict, usd_path: Path) -> dict:
         check("Q6", "LED cone angle [deg]", abs(cone - cfg["usd"]["led_light"]["cone_angle_deg"]) < 1e-6, cone,
               cfg["usd"]["led_light"]["cone_angle_deg"])
 
+    lights = [str(p.GetPath()) for p in stage.Traverse() if p.HasAPI(UsdLux.LightAPI) or "Light" in p.GetTypeName()]
+    want_lights = [] if o["led_color"] == "none" else [f"/{root_name}/OpticalFrame/LED"]
+    check("Q7", "no lights other than the LED (no dome light from Blender's world)", lights == want_lights, lights,
+          want_lights)
     ok = all(c["ok"] for c in checks)
     return {"template_id": cfg["template_id"], "usd": str(usd_path), "usd_version": list(Usd.GetVersion()),
             "passed": ok, "n_checks": len(checks), "n_failed": sum(not c["ok"] for c in checks), "checks": checks}
