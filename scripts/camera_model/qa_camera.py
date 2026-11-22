@@ -65,13 +65,9 @@ def run(cfg: dict, usd_path: Path) -> dict:
     body_min = list(env["min"])
     body_max = list(env["max"])
     vis_min, vis_max = list(vis.GetMin()), list(vis.GetMax())
-    con = next(p for p in cfg["parts"] if p["name"] == "connector")
-    lab = next(p for p in cfg["parts"] if p["name"] == "label")
-    want_vis_min = [body_min[0], body_min[1], con["center"][2] - con["half_length"]]
-    want_vis_max = [body_max[0], lab["center"][1] + lab["half"][1], body_max[2]]
-    check("Q2", "visual bounds (body + label + connector)", _close_vec(vis_min, want_vis_min, TOL_M)
-          and _close_vec(vis_max, want_vis_max, TOL_M),
-          [vis_min, vis_max], [want_vis_min, want_vis_max])
+    want_vis_min, want_vis_max = cfg["envelope_all"]["min"], cfg["envelope_all"]["max"]
+    check("Q2", "visual bounds (all parts)", _close_vec(vis_min, want_vis_min, TOL_M)
+          and _close_vec(vis_max, want_vis_max, TOL_M), [vis_min, vis_max], [want_vis_min, want_vis_max])
     check("Q2", "body size = housing 131.8 x 80 x 74 mm", _close_vec(env["size"], [L, W, H], TOL_M), env["size"],
           [L, W, H])
     check("Q2", "front face at the optical centre (x max = 0)", abs(body_max[0]) <= TOL_M, body_max[0], 0.0)
@@ -100,7 +96,8 @@ def run(cfg: dict, usd_path: Path) -> dict:
     check("Q4", "camera looks +x", _close_vec(fwd, (1, 0, 0), 1e-6), list(fwd), [1, 0, 0])
     check("Q4", "image up = +z", _close_vec(up, (0, 0, 1), 1e-6), list(up), [0, 0, 1])
     check("Q4", "image right = -y", _close_vec(right, (0, -1, 0), 1e-6), list(right), [0, -1, 0])
-    check("Q4", "optical centre at origin", _close_vec(org, (0, 0, 0), 1e-9), list(org), [0, 0, 0])
+    oc = cfg["optics"].get("optical_center_m") or [0.0, 0.0, 0.0]
+    check("Q4", "optical centre (origin, or the left imager for RealSense)", _close_vec(org, oc, 1e-9), list(org), oc)
 
     o = cfg["optics"]
     f = cam.GetFocalLengthAttr().Get()
@@ -134,6 +131,19 @@ def run(cfg: dict, usd_path: Path) -> dict:
         check("Q6", "LED cone angle [deg]", abs(cone - cfg["usd"]["led_light"]["cone_angle_deg"]) < 1e-6, cone,
               cfg["usd"]["led_light"]["cone_angle_deg"])
 
+    ds = o.get("depth_sensor")
+    if ds:
+        tp = stage.GetPrimAtPath(f"/{root_name}/TemplateRenderProducts/Camera_render_product")
+        api = tp.GetMetadata("apiSchemas") if tp else None
+        has_api = bool(api) and "OmniSensorDepthSensorSingleViewAPI" in list(api.explicitItems) + list(api.prependedItems)
+        tgt = tp.GetRelationship("camera").GetTargets() if tp else []
+        check("Q8", "depth sensor template (RenderProduct + OmniSensorDepthSensorSingleViewAPI -> Camera)",
+              has_api and len(tgt) == 1 and tgt[0] == cam_prim.GetPath(), [has_api, [str(x) for x in tgt]],
+              [True, [str(cam_prim.GetPath())]])
+        bl = tp.GetAttribute("omni:rtx:post:depthSensor:baselineMM").Get() if tp else None
+        md = tp.GetAttribute("omni:rtx:post:depthSensor:minDistance").Get() if tp else None
+        check("Q8", "depth sensor baseline / min distance", bl is not None and abs(bl - ds["baseline_mm"]) < 1e-4
+              and md is not None and abs(md - ds["min_distance_m"]) < 1e-6, [bl, md], [ds["baseline_mm"], ds["min_distance_m"]])
     lights = [str(p.GetPath()) for p in stage.Traverse() if p.HasAPI(UsdLux.LightAPI) or "Light" in p.GetTypeName()]
     want_lights = [] if o["led_color"] == "none" else [f"/{root_name}/OpticalFrame/LED"]
     check("Q7", "no lights other than the LED (no dome light from Blender's world)", lights == want_lights, lights,

@@ -46,7 +46,54 @@ def sensor_config_path(template: Dict[str, Any], override: Optional[str] = None)
     return p
 
 
+REALSENSE_FOCAL_MM = 1.93  # USD のカメラの焦点距離（画角は撮像の大きさとの比で決まるので値そのものは仮）
+
+
+def optics_from_realsense(sensor: Dict[str, Any]) -> Dict[str, Any]:
+    """hakoniwa-mujoco-sensor の config/realsense/<model>_wrist_model.json（realsense_model）から光学と深度センサーの値を作る。"""
+    rm = sensor["realsense_model"]
+    d = rm["depth"]
+    w, h = int(d["width"]), int(d["height"])
+    hfov = math.radians(d["hfov_deg"])
+    vfov = 2 * math.atan(math.tan(hfov / 2) * h / w)
+    sw = 2 * REALSENSE_FOCAL_MM * math.tan(hfov / 2)
+    fx = w / (2 * math.tan(hfov / 2))
+    if abs(fx - d["fx_px"]) > 1e-6:
+        raise ValueError(f"sensor config is inconsistent: fx_px {d['fx_px']} != {fx}")
+    return {
+        "kind": "realsense",
+        "model": sensor["model"],
+        "focal_length_mm": REALSENSE_FOCAL_MM,
+        "sensor_size_mm": [sw, sw * h / w],
+        "image_size": [w, h],
+        "image_format": "R8G8B8+DEPTH",
+        "horizontal_fov_rad": hfov,
+        "vertical_fov_rad": vfov,
+        "intrinsics": {"fx": fx, "fy": fx, "cx": w / 2, "cy": h / 2},
+        "clip_m": [0.01, 3.0],
+        "update_rate_hz": 30.0,
+        "frame_id": f"{sensor['model'].lower()}_optical",
+        "camera_name": sensor.get("mjcf_binding", {}).get("camera_name", ""),
+        "led_color": "none",
+        "led_rgb": [0.0, 0.0, 0.0],
+        "optical_center_m": [0.0, rm["imagers"]["left_offset_mm"] / 1000, 0.0],
+        "depth_sensor": {
+            "baseline_mm": rm["imagers"]["baseline_mm"],
+            "focal_length_pixel": fx,
+            "sensor_size_pixel": w,
+            "max_disparity_pixel": d["max_disparity_px"],
+            "min_distance_m": d["min_z_m"],
+            "max_distance_m": d["max_z_m"],
+            "noise_sigma_px": d["subpixel_rms_px"],
+            "noise_mean_px": 0.0,
+            "confidence_threshold": 0.95,
+        },
+    }
+
+
 def optics_from_sensor(sensor: Dict[str, Any]) -> Dict[str, Any]:
+    if "realsense_model" in sensor:
+        return optics_from_realsense(sensor)
     spec, irv = sensor["spec"], sensor["irvision"]
     w, h = spec["image"]["width"], spec["image"]["height"]
     sw, sh = irv["sensor_size_mm"]
@@ -69,7 +116,20 @@ def optics_from_sensor(sensor: Dict[str, Any]) -> Dict[str, Any]:
         "camera_name": sensor.get("mjcf_binding", {}).get("camera_name", ""),
         "led_color": irv["led"]["color"],
         "led_rgb": irv["led"]["rgb"],
+        "kind": "irvision",
+        "optical_center_m": [0.0, 0.0, 0.0],
+        "depth_sensor": None,
     }
+
+
+def housing_and_mass(sensor: Dict[str, Any]):
+    """外形（width = 左右 y、height = 上下 z、length = 光軸 x の向き）[mm] と質量 [kg]。"""
+    if "realsense_model" in sensor:
+        rm = sensor["realsense_model"]
+        h = rm["housing_mm"]
+        return {"width": h["width"], "height": h["height"], "length": h["depth"]}, rm["mass_kg"]
+    irv = sensor["irvision"]
+    return irv["housing_mm"], irv["mass_kg"]
 
 
 def _box(name: str, role: str, x0: float, x1: float, hy: float, hz: float, cy: float = 0.0, cz: float = 0.0,
@@ -85,7 +145,20 @@ def _cyl_x(name: str, role: str, x0: float, x1: float, radius: float, cy: float 
             "radius": radius, "half_length": (x1 - x0) / 2, **extra}
 
 
-def build_parts(housing_mm: Dict[str, float], visual: Dict[str, Any]) -> List[Dict[str, Any]]:
+def build_parts_realsense(housing_mm: Dict[str, float], visual: Dict[str, Any], baseline_mm: float) -> List[Dict[str, Any]]:
+    """RealSense（D405 など）：本体の箱、前面のガラス、左右のレンズ。"""
+    L, W, H = housing_mm["length"] / 1000, housing_mm["width"] / 1000, housing_mm["height"] / 1000
+    g = visual["glass_m"]
+    parts = [_box("housing", "housing", -L, -g, W / 2, H / 2, bevel=visual["bevel_m"]),
+             _box("glass", "window", -g, 0.0, W / 2 - visual["glass_inset_m"], H / 2 - visual["glass_inset_m"])]
+    for name, y in (("lens_left", baseline_mm / 2000), ("lens_right", -baseline_mm / 2000)):
+        parts.append(_cyl_x(name, "lens", -0.0002, 0.0, visual["lens_radius_m"], cy=y))
+    return parts
+
+
+def build_parts(housing_mm: Dict[str, float], visual: Dict[str, Any], baseline_mm: float = 0.0) -> List[Dict[str, Any]]:
+    if visual.get("kind") == "realsense":
+        return build_parts_realsense(housing_mm, visual, baseline_mm)
     L, W, H = housing_mm["length"] / 1000, housing_mm["width"] / 1000, housing_mm["height"] / 1000
     fl = visual["front_layer_m"]
     parts: List[Dict[str, Any]] = [
@@ -147,25 +220,29 @@ def resolve(template_id: str, sensor_config: Optional[str] = None) -> Dict[str, 
     tpl = load_template(template_id)
     spath = sensor_config_path(tpl, sensor_config)
     sensor = json.loads(spath.read_text(encoding="utf-8"))
-    irv = sensor["irvision"]
-    housing = irv["housing_mm"]
-    parts = build_parts(housing, tpl["visual"])
+    housing, mass = housing_and_mass(sensor)
+    optics = optics_from_sensor(sensor)
+    baseline = (optics.get("depth_sensor") or {}).get("baseline_mm", 0.0)
+    parts = build_parts(housing, tpl["visual"], baseline)
     body = envelope(parts, {"housing", "lens", "window", "led"})
+    whole = envelope(parts)
     return {
         "template_id": template_id,
         "display_name": tpl["display_name"],
         "root_prim": tpl["root_prim"],
-        "model": irv["model"],
+        "model": (sensor.get("irvision") or {}).get("model") or f"Intel RealSense {sensor.get('model', '')}",
         "sensor_config": str(spath),
-        "sensor_mjcf": str(spath.with_name(irv["mjcf"])) if irv.get("mjcf") else "",
+        "sensor_mjcf": str(spath.with_name(sensor.get("mjcf") or (sensor.get("irvision") or {}).get("mjcf", "")))
+        if (sensor.get("mjcf") or (sensor.get("irvision") or {}).get("mjcf")) else "",
         "housing_mm": housing,
-        "mass_kg": irv["mass_kg"],
-        "optics": optics_from_sensor(sensor),
+        "mass_kg": mass,
+        "optics": optics,
         "visual": tpl["visual"],
         "usd": tpl["usd"],
         "provenance": tpl["provenance"],
         "parts": parts,
         "envelope_body": body,
+        "envelope_all": whole,
         "frame": {"origin": "front window centre = optical centre", "x": "optical axis (forward)",
                   "y": "left", "z": "up", "unit": "m"},
     }

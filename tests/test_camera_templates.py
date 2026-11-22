@@ -92,3 +92,51 @@ def test_inconsistent_sensor_config_is_rejected(tmp_path):
 def test_missing_sensor_config_is_reported(tmp_path):
     with pytest.raises(FileNotFoundError):
         cg.resolve("irvision_2d", str(tmp_path / "nope.json"))
+
+
+# --- RealSense D405（手首用）：hakoniwa-mujoco-sensor の config/realsense/d405_wrist_model.json から ---------------
+D405_JSON = {
+    "model": "D405",
+    "realsense_model": {
+        "housing_mm": {"width": 42.0, "height": 42.0, "depth": 23.0}, "mass_kg": 0.06,
+        "imagers": {"baseline_mm": 18.0, "left_offset_mm": 9.0},
+        "depth": {"width": 1280, "height": 720, "hfov_deg": 87.0, "vfov_deg_catalogue": 58.0,
+                  "fx_px": 1280 / (2 * math.tan(math.radians(43.5))), "min_z_m": 0.07, "max_z_m": 0.5,
+                  "max_disparity_px": 1280 / (2 * math.tan(math.radians(43.5))) * 0.018 / 0.07,
+                  "subpixel_rms_px": 0.08, "active_projector": False},
+    },
+    "mjcf": "d405_model.xml", "mjcf_binding": {"camera_name": "d405_left"},
+}
+
+
+@pytest.fixture()
+def d405_json(tmp_path) -> str:
+    sibling = REPO.parent / "hakoniwa-mujoco-sensor" / "config" / "realsense" / "d405_wrist_model.json"
+    if sibling.is_file():
+        return str(sibling)
+    p = tmp_path / "d405_wrist_model.json"
+    p.write_text(json.dumps(D405_JSON), encoding="utf-8")
+    return str(p)
+
+
+def test_realsense_template_found():
+    assert "realsense_d405" in cg.list_templates()
+
+
+def test_d405_optics_and_depth_sensor(d405_json):
+    cfg = cg.resolve("realsense_d405", d405_json)
+    o = cfg["optics"]
+    assert o["kind"] == "realsense" and o["image_size"] == [1280, 720]
+    assert math.degrees(o["horizontal_fov_rad"]) == pytest.approx(87.0)
+    assert o["optical_center_m"] == pytest.approx([0.0, 0.009, 0.0])      # 左の撮像素子
+    ds = o["depth_sensor"]
+    assert ds["baseline_mm"] == 18.0 and ds["min_distance_m"] == 0.07
+    assert ds["max_disparity_pixel"] == pytest.approx(ds["focal_length_pixel"] * 0.018 / 0.07)
+    assert o["led_color"] == "none"
+
+
+def test_d405_parts(d405_json):
+    cfg = cg.resolve("realsense_d405", d405_json)
+    assert cfg["envelope_body"]["size"] == pytest.approx([0.023, 0.042, 0.042], abs=1e-9)
+    lenses = [p for p in cfg["parts"] if p["role"] == "lens"]
+    assert sorted(p["center"][1] for p in lenses) == pytest.approx([-0.009, 0.009])

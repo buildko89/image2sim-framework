@@ -1,0 +1,37 @@
+# Intel RealSense D405（近距離のステレオ深度カメラ。ロボットの手首用）
+#
+# 外形・撮像の位置・光学・深度センサーの値の正本は hakoniwa-mujoco-sensor の
+# config/realsense/d405_wrist_model.json（realsense_model）。ここでは見た目の細部と USD の項目だけを持つ。
+# 座標: 原点 = 前面の中心、+x = 光軸、+y = 左、+z = 上。深度・RGB の原点（OpticalFrame）は左の撮像素子（y = +9 mm）。
+template_id: realsense_d405
+display_name: "Intel RealSense D405（手首用・近距離ステレオ深度）"
+root_prim: RealSenseD405
+
+sensor_config: hakoniwa-mujoco-sensor/config/realsense/d405_wrist_model.json
+
+provenance:
+  official: [housing_mm, baseline_mm, depth_fov, min_z, image_size]
+  estimated: [mass_kg, usd_focal_length_mm]
+  photo_approx: [bevel, glass, lens]
+  note: >-
+    外形 42 × 42 × 23 mm・基線 18 mm・最短 7 cm・深度 87° は RealSense の公開資料（hakoniwa-mujoco-sensor の機種表）。
+    USD のカメラの焦点距離 1.93 mm は仮（画角は撮像の大きさとの比で合わせる）。
+
+visual:
+  kind: realsense
+  bevel_m: 0.002
+  glass_m: 0.001
+  glass_inset_m: 0.002
+  lens_radius_m: 0.0035
+  colors:
+    housing: [0.62, 0.64, 0.66]
+    window: [0.05, 0.05, 0.06]
+    lens: [0.15, 0.18, 0.25]
+    label: [0.75, 0.75, 0.72]
+    connector: [0.3, 0.3, 0.3]
+
+usd:
+  led_light: {type: disk, radius_m: 0.0, intensity: 0.0, exposure: 0.0, cone_angle_deg: 0.0, cone_softness: 0.0}
+  camera:
+    focus_distance_m: 0.2
+  collision: box
