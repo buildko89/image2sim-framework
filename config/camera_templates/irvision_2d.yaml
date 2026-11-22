@@ -1,0 +1,51 @@
+# FANUC iRVision 2D カメラ（ロボット手首の 2D ビジョンセンサー。グレースケール・8 mm・赤色 LED）
+#
+# 光学・外形・質量の正本は hakoniwa-mujoco-sensor の設定 JSON（sensor_config）。ここでは読むだけで書き換えない。
+# このテンプレートは「見た目の細部」と「USD に書く項目」を持つ。区分は provenance に記録する。
+#
+# 座標（本体の座標。hakoniwa-mujoco-sensor の MJCF と同じ）:
+#   原点 = 前面の窓の中心（光学中心）、+x = 光軸の向き、+y = 左、+z = 上。単位は m。
+template_id: irvision_2d
+display_name: "FANUC iRVision 2D（グレースケール・8 mm・赤色 LED）"
+root_prim: IRVision2D
+
+# 兄弟フォルダの hakoniwa-mujoco-sensor からの相対（このリポジトリの親フォルダ基準）。--sensor-config で上書きできる
+sensor_config: hakoniwa-mujoco-sensor/config/irvision/irvision_2d_gray_8mm.json
+
+provenance:
+  official: [housing_mm, mass_kg, image_size, focal_length_mm, led_color]
+  estimated: [pixel_pitch_um, sensor_size_mm, update_rate]
+  photo_approx: [front_layer, lens, led_layout, label, connector, bevel]
+  note: >-
+    外形 80 × 131.8 × 74 mm・0.6 kg は FANUC 公式。前面の窓・レンズ・LED の並び・銘板・コネクタの位置は、
+    work_cobot/Camera の写真（IMG_0498〜0500）と動画からの近似。
+
+visual:
+  bevel_m: 0.003                  # 本体の角の丸み
+  front_layer_m: 0.002            # 前面の窓・レンズ・LED の層の厚み（本体はこの分だけ後ろから始まる）
+  window: {inset_m: 0.004, thickness_m: 0.0005}          # 窓は前面より上下左右 4 mm 内側
+  lens: {radius_m: 0.012, barrel_radius_m: 0.015}
+  led_layout:                     # 窓の内側に、レンズを囲む四角の輪で並ぶ赤色 LED
+    per_side: 5
+    ring_half_m: [0.027, 0.024]   # 輪の半幅（y, z）
+    size_m: 0.004
+  label: {face: "+y", size_m: [0.070, 0.040], center_x_m: -0.075}   # 側面の銘板（写真 IMG_0500）
+  connector: {face: "-z", radius_m: 0.008, length_m: 0.015, center_x_m: -0.025}  # ケーブル（写真 IMG_0499）
+  colors:
+    housing: [0.08, 0.08, 0.09]
+    window: [0.15, 0.20, 0.25]
+    lens: [0.02, 0.02, 0.02]
+    label: [0.75, 0.75, 0.72]
+    connector: [0.55, 0.50, 0.20]
+
+usd:
+  led_light:
+    type: disk                   # UsdLux.DiskLight（-Z に光る）を +x へ向ける
+    radius_m: 0.02
+    intensity: 30000.0
+    exposure: 0.0
+    cone_angle_deg: 35.0
+    cone_softness: 0.2
+  camera:
+    focus_distance_m: 0.3        # 被写界深度は使わない（fStop 0）
+  collision: box                 # 外形の箱 1 つ

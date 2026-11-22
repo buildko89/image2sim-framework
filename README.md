@@ -263,6 +263,33 @@ python scripts\nc_machine\run_build.py turning_h_k1 --require-blender
 pytest tests\test_nc_machine_templates.py -v
 ```
 
+## パラメトリックカメラ生成（ロボット手首のビジョンカメラ → Isaac Sim 用 USD）
+
+Isaac Sim のアセットに無いカメラを、hakoniwa-mujoco-sensor の設定 JSON（光学・外形・質量の正本）と
+テンプレート YAML（見た目の細部）から生成する。流れは加工機と同じ（テンプレート → Blender → GLB／USD → QA）。
+
+| テンプレートID | 内容 |
+|---|---|
+| `irvision_2d` | FANUC iRVision 2D（グレースケール 1280×1024・8 mm・赤色 LED、外形 80×131.8×74 mm、0.6 kg）。正本は `hakoniwa-mujoco-sensor/config/irvision/irvision_2d_gray_8mm.json` |
+
+```powershell
+python scripts\camera_model\run_build.py irvision_2d                         # 兄弟フォルダの hakoniwa-mujoco-sensor を読む
+python scripts\camera_model\run_build.py irvision_2d --sensor-config <json>  # 設定 JSON を指定する
+python scripts\camera_model\run_build.py irvision_2d --publish <フォルダ>    # QA に合格したら USD 一式をコピーする
+```
+
+出力先は `output/camera_model/<id>/`（Git 管理外）：`<id>.usda`（Isaac Sim 用。Z 上・m）、`<id>_visual.usdc`（見た目）、
+`<id>.glb`・`<id>.blend`・`renders/`、`resolved_config.json`、`qa_report.json`、`BUILD_REPORT.md`。
+
+USD の中身：`/<root>/Visual`（見た目）、`/<root>/Collision`（外形の箱・質量）、`/<root>/OpticalFrame/Camera`
+（UsdGeom.Camera。焦点距離・撮像の大きさは mm。属性 `irvision:*` に解像度・形式・内部パラメータ）、
+`/<root>/OpticalFrame/LED`（赤色の DiskLight＋ShapingAPI）。本体の座標は原点＝光学中心、+x＝光軸、+z＝上。
+QA（22 項目）は外形・衝突・質量・カメラの向きと画角・LED を設定 JSON と照合する（Blender 同梱の pxr と Isaac Sim 5.0 の pxr の両方で合格を確認）。
+
+```powershell
+pytest tests\test_camera_templates.py -v
+```
+
 ## リポジトリ構成
 
 ```text

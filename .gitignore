@@ -169,3 +169,6 @@ output/rover_parametric/
 
 # 加工機モデルの生成物（scripts/nc_machine/run_build.py で再生成。hakoniwa-ncmachine が取り込む）
 /output/nc_machine/
+
+# カメラモデルの生成物（scripts/camera_model/run_build.py で再生成。--publish で利用側へコピーする）
+/output/camera_model/
